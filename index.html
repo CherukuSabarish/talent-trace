@@ -40,6 +40,14 @@
           Crustdata — the API endpoints (/api/crustdata-search, /api/crustdata-enrich),
           the CRUSTDATA_API_KEY env var, and api.crustdata.com references are left
           untouched on purpose so the live Vercel deployment keeps working.
+  ✅ v9.1 — Akamai rebrand: nav bar + accent palette recolored to Akamai navy/blue,
+          Akamai wordmark added to top nav (no more "AI-Powered"/version pill).
+          Contact enrichment removed entirely (per-candidate "Reveal Contact Info"
+          and bulk "Deep-enrich all", plus their /api/crustdata-enrich calls) — the
+          TalentData tab is search-only now. Result cards + candidate modal redone
+          in a LinkedIn-style layout (avatar, headline, location, pill "View Profile"
+          button). api/crustdata-enrich.js is now unused dead code on the server —
+          left in place rather than deleted since nothing in this file calls it.
 
   ── UPGRADE RULES ──────────────────────────────────────────────────────────────
   NEVER edit this file directly for upgrades.
@@ -123,13 +131,7 @@ body{
 .tab:hover{background:rgba(255,255,255,0.07);color:#fff;}
 .tab.active{background:rgba(255,255,255,0.09);color:#fff;}
 .topnav-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.navpill{
-  display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;
-  padding:4px 10px;border-radius:20px;letter-spacing:0.2px;white-space:nowrap;
-}
-.navpill.ai{background:rgba(217,115,13,0.2);color:#f2ab6d;border:1px solid rgba(217,115,13,0.4);}
-.topnav-version{font-family:var(--mono);font-size:10px;color:var(--nav-muted);white-space:nowrap;}
-.akamai-logo{height:20px;width:auto;flex-shrink:0;opacity:0.92;}
+.akamai-logo{height:38px;width:auto;flex-shrink:0;}
 
 /* ── MAIN / PANELS ── */
 .main{min-height:calc(100vh - var(--nav-h));}
@@ -311,47 +313,42 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 .interview-q:last-child{border-bottom:none;}
 .interview-q strong{color:var(--accent);font-size:10px;text-transform:uppercase;
   letter-spacing:1px;display:block;margin-bottom:3px;}
-.profile-cards{display:flex;flex-direction:column;gap:12px;}
+/* ── PROFILE CARDS (LinkedIn-style search result rows) ── */
+.profile-cards{display:flex;flex-direction:column;gap:10px;}
 .profile-card{
-  display:flex;gap:12px;padding:16px 18px;border:1px solid var(--border);
-  border-radius:16px;align-items:flex-start;background:var(--surface);
-  box-shadow:0 1px 2px rgba(20,20,30,0.05), 0 2px 8px rgba(20,20,30,0.06);
+  display:flex;gap:14px;padding:18px 20px;border:1px solid var(--border);
+  border-radius:10px;align-items:flex-start;background:var(--surface);
+  box-shadow:0 1px 2px rgba(20,20,30,0.05);
   cursor:pointer;
-  transition:box-shadow 0.15s,border-color 0.15s,transform 0.15s;
+  transition:box-shadow 0.15s,border-color 0.15s;
 }
 .profile-card:hover{
-  border-color:var(--border2);transform:translateY(-2px);
-  box-shadow:0 4px 10px rgba(20,20,30,0.07), 0 8px 20px rgba(20,20,30,0.09);
+  border-color:var(--accent);
+  box-shadow:0 4px 14px rgba(20,20,30,0.08);
 }
-.profile-card:active{transform:translateY(0);box-shadow:0 1px 2px rgba(20,20,30,0.06);}
+.profile-card:active{box-shadow:0 1px 2px rgba(20,20,30,0.06);}
+.profile-avatar{
+  width:56px;height:56px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;
+  font-weight:700;font-size:18px;display:grid;place-items:center;
+  box-shadow:0 2px 6px rgba(0,164,235,0.3);
+}
 .profile-card-main{flex:1;min-width:0;}
-.profile-card-top{display:flex;align-items:flex-start;gap:8px;}
-.profile-name{font-weight:700;font-size:13.5px;color:var(--text);}
-.profile-meta{font-size:11.5px;color:var(--muted);margin-top:2px;}
-.profile-fields{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
-  gap:4px 14px;margin-top:9px;
-}
-.profile-field{font-size:11.5px;color:var(--text);}
-.profile-field span{color:var(--muted);}
-.profile-skills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.profile-card-top{display:flex;align-items:flex-start;gap:10px;}
+.profile-name{font-weight:700;font-size:16px;color:var(--text);letter-spacing:-0.1px;}
+.profile-headline{font-size:13px;color:var(--text);opacity:0.72;margin-top:3px;line-height:1.45;}
+.profile-meta{font-size:12.5px;color:var(--muted);margin-top:4px;}
+.profile-location{font-size:12px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:4px;}
+.profile-skills{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
 .skill-tag{font-size:10px;padding:2px 7px;border-radius:4px;
   background:var(--accent-glow);border:1px solid rgba(0,164,235,0.2);color:var(--accent);}
-/* Bold solid status pills — same visual language as an ATS pipeline stage tag */
-.status-pill{
-  display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;
-  text-transform:uppercase;letter-spacing:0.4px;padding:3px 8px;border-radius:4px;color:#fff;
-}
-.status-pill.contact{background:var(--green);}
-.status-pill.nocontact{background:var(--surface3);color:var(--muted);text-transform:none;font-weight:600;letter-spacing:0;}
 .profile-linkedin-btn{
-  flex-shrink:0;display:inline-flex;align-items:center;gap:4px;
-  font-size:11px;font-weight:700;padding:6px 11px;border-radius:6px;
-  background:#0a66c2;color:#fff;text-decoration:none;white-space:nowrap;
-  box-shadow:0 1px 2px rgba(10,102,194,0.35);
-  transition:background 0.12s;
+  flex-shrink:0;display:inline-flex;align-items:center;gap:5px;
+  font-size:12.5px;font-weight:600;padding:7px 16px;border-radius:20px;
+  background:#fff;color:#0a66c2;border:1.5px solid #0a66c2;text-decoration:none;white-space:nowrap;
+  transition:background 0.12s,color 0.12s;
 }
-.profile-linkedin-btn:hover{background:#0958a8;}
+.profile-linkedin-btn:hover{background:#0a66c2;color:#fff;}
 .jd-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
 .jd-tab{font-size:12px;padding:5px 13px;border-radius:14px;cursor:pointer;
   border:1px solid var(--border2);color:var(--muted);background:var(--surface);
@@ -361,25 +358,19 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 /* ── CANDIDATE DETAIL MODAL ── */
 .cand-modal-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:22px;}
 .cand-avatar-lg{
-  width:50px;height:50px;border-radius:50%;background:var(--accent);color:#fff;
-  font-weight:700;font-size:18px;display:grid;place-items:center;flex-shrink:0;
+  width:64px;height:64px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;
+  font-weight:700;font-size:22px;display:grid;place-items:center;
   box-shadow:0 2px 6px rgba(0,164,235,0.35);
 }
-.cand-modal-name{font-size:17px;font-weight:700;color:var(--text);letter-spacing:-0.2px;}
-.cand-modal-role{font-size:12.5px;color:var(--muted);margin-top:2px;}
+.cand-modal-name{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-0.2px;}
+.cand-modal-role{font-size:13px;color:var(--muted);margin-top:3px;}
+.cand-modal-location{font-size:12px;color:var(--muted);margin-top:6px;}
 .cand-section{margin-bottom:18px;}
 .cand-section-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:8px;}
 .cand-field{font-size:13px;color:var(--text);margin-bottom:6px;line-height:1.5;}
 .cand-field:last-child{margin-bottom:0;}
 .cand-field span{color:var(--muted);}
-.cand-contact-locked{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
-  padding:13px 14px;background:var(--surface2);border:1px dashed var(--border2);border-radius:8px;
-}
-.cand-contact-revealed{
-  padding:13px 14px;background:var(--green-glow);
-  border:1px solid rgba(47,158,99,0.3);border-radius:8px;
-}
 
 /* ── PAGE HEADER (Notion-style page identity block, sits above the first card) ── */
 .page-header{margin-bottom:30px;max-width:640px;}
@@ -422,8 +413,6 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
     </div>
 
     <div class="topnav-right">
-      <span class="navpill ai">✦ AI-Powered</span>
-      <span class="topnav-version">v9</span>
       <svg class="akamai-logo" viewBox="324 265 1242 530" xmlns="http://www.w3.org/2000/svg" aria-label="Akamai" role="img">
         <g fill="#fff">
           <path d="M592.85,764.11c-100.8-30.77-174.12-123.92-174.12-234.05s74.88-205.29,177.4-235.02c10.48-3.06,7.73-9.86-4.91-9.86-136.28,0-246.8,109.69-246.8,244.89s110.51,244.86,246.8,244.86c12.63,0,13.14-7.3,1.63-10.81Z"/>
@@ -944,13 +933,6 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
       <div class="card-title">Candidates</div>
       <span style="margin-left:auto;font-size:10px;color:var(--muted);" id="cd-count">0 candidates</span>
     </div>
-    <div class="btn-row" style="margin-bottom:10px;">
-      <button class="btn btn-ai btn-sm" onclick="deepEnrichAllTalentData()" id="cd-enrich-all-btn">
-        <span id="cd-enrich-all-text">🔎 Deep-enrich all (find emails/phones)</span>
-        <div class="spinner" id="cd-enrich-all-spinner"></div>
-      </button>
-    </div>
-    <div class="status" id="cd-enrich-all-status" style="margin-bottom:10px;"></div>
     <div id="cd-results">
       <div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">Search above to see candidates here.</div>
     </div>
@@ -1320,7 +1302,6 @@ function talentDataPersonToProfile(person) {
     jobTitle: currentRole.title || '',
     company: currentRole.company || currentRole.company_name || '',
     location: (bp.location && (bp.location.raw || bp.location)) || '',
-    email: '', phone: '',
     url,
     snippet: bp.headline || '',
     scrapedAt: new Date().toISOString()
@@ -1328,10 +1309,7 @@ function talentDataPersonToProfile(person) {
 }
 
 // ── CANDIDATE DETAIL MODAL ──
-// Opens on a candidate-card click (see renderTalentDataResults). Replaces the old
-// bulk "Enrich LinkedIn results" button — enrichment is now a per-candidate action
-// triggered from inside this modal ("Reveal Contact Info"), same /api/crustdata-enrich
-// call as before, just scoped to a single profile URL instead of a batch.
+// Opens on a candidate-card click (see renderTalentDataResults).
 let cdModalIndex = -1;
 
 function openCandidateModal(i) {
@@ -1356,7 +1334,6 @@ function renderCandidateModal() {
 
   const initials = (p.name || '?').split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
   const isLinkedIn = p.url && p.url.toLowerCase().includes('linkedin.com/in/');
-  const hasContact = !!(p.email || p.phone);
 
   modal.innerHTML = `
     <div class="modal-head">
@@ -1368,216 +1345,16 @@ function renderCandidateModal() {
       <div style="flex:1;min-width:0;">
         <div class="cand-modal-name">${esc(p.name || 'Unknown')}</div>
         <div class="cand-modal-role">${esc([p.jobTitle, p.company].filter(Boolean).join(' at ')) || 'Role unknown'}</div>
+        ${p.location ? `<div class="cand-modal-location">📍 ${esc(p.location)}</div>` : ''}
       </div>
-      ${p.url ? `<a class="profile-linkedin-btn" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">${isLinkedIn ? '🔗 LinkedIn' : '↗ Profile'}</a>` : ''}
+      ${p.url ? `<a class="profile-linkedin-btn" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">${isLinkedIn ? 'View Profile' : '↗ Profile'}</a>` : ''}
     </div>
 
-    <div class="cand-section">
-      <div class="cand-section-label">Summary</div>
-      <div class="cand-field">${p.snippet ? esc(p.snippet) : '<span style="color:var(--muted);">No headline captured for this candidate yet — try enriching below.</span>'}</div>
+    <div class="cand-section" style="margin-bottom:0;">
+      <div class="cand-section-label">About</div>
+      <div class="cand-field">${p.snippet ? esc(p.snippet) : '<span style="color:var(--muted);">No headline captured for this candidate yet.</span>'}</div>
     </div>
-
-    <div class="cand-section">
-      <div class="cand-section-label">Details</div>
-      <div class="cand-field"><span>Location: </span>${p.location ? esc(p.location) : '—'}</div>
-      <div class="cand-field"><span>Current Company: </span>${p.company ? esc(p.company) : '—'}</div>
-    </div>
-
-    <div class="cand-section" style="margin-bottom:6px;">
-      <div class="cand-section-label">Contact Info</div>
-      ${hasContact ? `
-        <div class="cand-contact-revealed">
-          ${p.email ? `<div class="cand-field">✉ ${esc(p.email)}</div>` : ''}
-          ${p.phone ? `<div class="cand-field">☎ ${esc(p.phone)}</div>` : ''}
-        </div>
-      ` : `
-        <div class="cand-contact-locked">
-          <span style="font-size:12px;color:var(--muted);">Email &amp; phone haven't been revealed yet.</span>
-          <button class="btn btn-ai btn-sm" onclick="enrichCandidateByIndex(${cdModalIndex})" id="cand-enrich-btn" ${isLinkedIn ? '' : 'disabled title="Needs a LinkedIn profile URL to enrich"'}>
-            <span id="cand-enrich-text">🔎 Reveal Contact Info</span>
-            <div class="spinner" id="cand-enrich-spinner"></div>
-          </button>
-        </div>
-      `}
-    </div>
-    <div class="status" id="cand-modal-status"></div>
   `;
-}
-
-async function enrichCandidateByIndex(i) {
-  const p = cdResults[i];
-  if (!p || !p.url || !p.url.toLowerCase().includes('linkedin.com/in/')) {
-    showStatus('cand-modal-status', 'warn', '⚠ Needs a LinkedIn profile URL to enrich.');
-    return;
-  }
-
-  const btn = document.getElementById('cand-enrich-btn');
-  const sp  = document.getElementById('cand-enrich-spinner');
-  if (btn) btn.disabled = true;
-  if (sp) sp.classList.add('on');
-  showStatus('cand-modal-status', 'info', '⏳ Enriching from TalentData...');
-
-  try {
-    const res = await fetch('/api/crustdata-enrich', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ urls: [p.url] })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
-
-    const matchKey      = normalizeCdUrl(p.url);
-    const enrichEntry    = (data.enrich  || []).find(e => normalizeCdUrl(e.matched_on) === matchKey);
-    const contactEntry   = (data.contact || []).find(e => normalizeCdUrl(e.matched_on) === matchKey);
-    const match          = enrichEntry  && enrichEntry.matches  && enrichEntry.matches[0];
-    const contactMatch   = contactEntry && contactEntry.matches && contactEntry.matches[0];
-
-    // The contact-enrich call can fail outright (permission/plan/rate-limit issue on
-    // the API key) separately from the profile-enrich call succeeding — that's not the
-    // same thing as "this person just has no contact info on file", so surface it as
-    // an error instead of a false "no direct contact found" success message.
-    if (data.contactError) {
-      showStatus('cand-modal-status', 'error', '⚠ Contact lookup failed: ' + data.contactError);
-      if (btn) btn.disabled = false;
-      if (sp) sp.classList.remove('on');
-      return;
-    }
-
-    if (!match && !contactMatch) {
-      showStatus('cand-modal-status', 'warn',
-        data.enrichError ? ('⚠ Profile enrich failed: ' + data.enrichError) : '⚠ No additional TalentData match for this profile.');
-      if (btn) btn.disabled = false;
-      if (sp) sp.classList.remove('on');
-      return;
-    }
-
-    if (match && match.person_data) {
-      const pd = match.person_data;
-      const currentTitle = pd.experience && pd.experience.employment_details &&
-        pd.experience.employment_details.current && pd.experience.employment_details.current[0] &&
-        pd.experience.employment_details.current[0].title;
-      if (currentTitle) p.jobTitle = currentTitle;
-      if (pd.basic_profile && pd.basic_profile.headline) p.snippet = pd.basic_profile.headline;
-      if (pd.basic_profile && pd.basic_profile.location && pd.basic_profile.location.raw) {
-        p.location = pd.basic_profile.location.raw;
-      }
-    }
-    if (contactMatch && contactMatch.person_data && contactMatch.person_data.contact) {
-      const c = contactMatch.person_data.contact;
-      const bizEmail  = c.business_emails && c.business_emails[0] && c.business_emails[0].email;
-      const persEmail = c.personal_emails && c.personal_emails[0] && c.personal_emails[0].email;
-      p.email = bizEmail || persEmail || p.email || '';
-      p.phone = (c.phone_numbers && c.phone_numbers[0]) || p.phone || '';
-    }
-
-    persistCdResults();
-    renderTalentDataResults();
-    renderCandidateModal();
-    showStatus('cand-modal-status', 'success', (p.email || p.phone) ? '✓ Contact info revealed.' : '✓ Enriched — no direct contact found.');
-  } catch(err) {
-    console.error('TalentData single enrich error:', err);
-    showStatus('cand-modal-status', 'error', '⚠ ' + (err.message || 'Enrich failed.'));
-    if (btn) btn.disabled = false;
-    if (sp) sp.classList.remove('on');
-  }
-}
-
-// Bulk deep-enrich — enriches every eligible search result (or, if everyone already
-// has contact info, re-enriches all after confirmation) in batches, instead of the
-// one-candidate-at-a-time flow in the modal above. Batches at 20 to stay under
-// Crustdata's 25-URL-per-call /person/enrich and /person/contact/enrich limit (see
-// api/crustdata-enrich.js).
-async function deepEnrichAllTalentData() {
-  const isLinkedIn = (p) => p.url && p.url.toLowerCase().includes('linkedin.com/in/');
-  let targets = cdResults.filter((p) => isLinkedIn(p) && !p.email && !p.phone);
-
-  if (!targets.length) {
-    const withUrl = cdResults.filter(isLinkedIn);
-    if (!withUrl.length) {
-      showStatus('cd-enrich-all-status', 'warn', '⚠ No candidates with a LinkedIn profile URL to enrich.');
-      return;
-    }
-    if (!confirm(`Everyone with a LinkedIn URL already has contact info. Re-run for all ${withUrl.length} (uses more TalentData credits)?`)) return;
-    targets = withUrl;
-  }
-
-  const btn = document.getElementById('cd-enrich-all-btn');
-  const txt = document.getElementById('cd-enrich-all-text');
-  const sp  = document.getElementById('cd-enrich-all-spinner');
-  btn.disabled = true; sp.classList.add('on');
-
-  const BATCH = 20;
-  let attempted = 0, found = 0, lastError = '';
-
-  try {
-    for (let i = 0; i < targets.length; i += BATCH) {
-      const batch = targets.slice(i, i + BATCH);
-      txt.textContent = `⏳ Deep-enriching ${Math.min(i + BATCH, targets.length)}/${targets.length}...`;
-      showStatus('cd-enrich-all-status', 'info', `⏳ Enriching ${attempted}–${Math.min(i + BATCH, targets.length)} of ${targets.length}...`);
-
-      const res = await fetch('/api/crustdata-enrich', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ urls: batch.map((p) => p.url) })
-      });
-      const data = await res.json();
-      attempted += batch.length;
-
-      if (!res.ok) { lastError = errText(data.error) || ('HTTP ' + res.status); continue; }
-      if (data.contactError) lastError = data.contactError;
-      else if (data.enrichError) lastError = data.enrichError;
-
-      batch.forEach((p) => {
-        const hadContactBefore = !!(p.email || p.phone);
-        const matchKey      = normalizeCdUrl(p.url);
-        const enrichEntry   = (data.enrich  || []).find((e) => normalizeCdUrl(e.matched_on) === matchKey);
-        const contactEntry  = (data.contact || []).find((e) => normalizeCdUrl(e.matched_on) === matchKey);
-        const match         = enrichEntry  && enrichEntry.matches  && enrichEntry.matches[0];
-        const contactMatch  = contactEntry && contactEntry.matches && contactEntry.matches[0];
-
-        if (match && match.person_data) {
-          const pd = match.person_data;
-          const currentTitle = pd.experience && pd.experience.employment_details &&
-            pd.experience.employment_details.current && pd.experience.employment_details.current[0] &&
-            pd.experience.employment_details.current[0].title;
-          if (currentTitle) p.jobTitle = currentTitle;
-          if (pd.basic_profile && pd.basic_profile.headline) p.snippet = pd.basic_profile.headline;
-          if (pd.basic_profile && pd.basic_profile.location && pd.basic_profile.location.raw) {
-            p.location = pd.basic_profile.location.raw;
-          }
-        }
-        if (contactMatch && contactMatch.person_data && contactMatch.person_data.contact) {
-          const c = contactMatch.person_data.contact;
-          const bizEmail  = c.business_emails && c.business_emails[0] && c.business_emails[0].email;
-          const persEmail = c.personal_emails && c.personal_emails[0] && c.personal_emails[0].email;
-          p.email = bizEmail || persEmail || p.email || '';
-          p.phone = (c.phone_numbers && c.phone_numbers[0]) || p.phone || '';
-        }
-
-        if (!hadContactBefore && (p.email || p.phone)) found++;
-      });
-
-      persistCdResults();
-      renderTalentDataResults();
-    }
-
-    if (!found) {
-      showStatus('cd-enrich-all-status', 'warn',
-        lastError ? ('⚠ No contact info found: ' + lastError) : '⚠ Deep-enrich ran but found no verified contact info.');
-    } else {
-      showStatus('cd-enrich-all-status', 'success',
-        `✓ Deep-enriched ${attempted} candidate(s) — ${found} new contact(s) found${lastError ? ' (some batches errored: ' + lastError + ')' : ''}.`);
-    }
-  } catch (err) {
-    console.error('TalentData bulk enrich error:', err);
-    showStatus('cd-enrich-all-status', 'error', '⚠ ' + (err.message || 'Deep-enrich failed.'));
-  } finally {
-    btn.disabled = false; txt.textContent = '🔎 Deep-enrich all (find emails/phones)'; sp.classList.remove('on');
-  }
-}
-
-function normalizeCdUrl(url) {
-  return (url || '').toString().split('?')[0].split('#')[0].replace(/\/$/, '').toLowerCase();
 }
 
 function clearTalentDataResults() {
@@ -1622,23 +1399,21 @@ function renderTalentDataResults() {
     const haystack = ((p.jobTitle || '') + ' ' + (p.snippet || '') + ' ' + (p.company || '')).toLowerCase();
     const niceMatches = niceList.filter(k => k && haystack.includes(k.toLowerCase()));
     const isLinkedIn = p.url && p.url.toLowerCase().includes('linkedin.com/in/');
+    const initials = (p.name || '?').split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+    const roleLine = [p.jobTitle, p.company].filter(Boolean).join(' at ');
     return `
     <div class="profile-card" onclick="openCandidateModal(${i})">
+      <div class="profile-avatar">${esc(initials || '?')}</div>
       <div class="profile-card-main">
         <div class="profile-card-top">
           <div style="flex:1;min-width:0;">
             <div class="profile-name">${esc(p.name || 'Unknown')}</div>
-            <div class="profile-meta">${esc([p.jobTitle, p.company].filter(Boolean).join(' · ')) || 'Title unknown'}</div>
+            <div class="profile-headline">${esc(p.snippet) || esc(roleLine) || 'Role unknown'}</div>
+            ${p.snippet && roleLine ? `<div class="profile-meta">${esc(roleLine)}</div>` : ''}
+            ${p.location ? `<div class="profile-location">📍 ${esc(p.location)}</div>` : ''}
           </div>
-          ${p.url ? `<a class="profile-linkedin-btn" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">${isLinkedIn ? '🔗 LinkedIn' : '↗ Profile'}</a>` : ''}
+          ${p.url ? `<a class="profile-linkedin-btn" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">${isLinkedIn ? 'View Profile' : '↗ Profile'}</a>` : ''}
         </div>
-        ${(p.email || p.phone) ? `<div style="margin-top:9px;"><span class="status-pill contact">✓ Contact Found</span></div>` : ''}
-        <div class="profile-fields">
-          ${p.location ? `<div class="profile-field"><span>Location: </span>${esc(p.location)}</div>` : ''}
-          ${p.email ? `<div class="profile-field"><span>Email: </span>${esc(p.email)}</div>` : ''}
-          ${p.phone ? `<div class="profile-field"><span>Phone: </span>${esc(p.phone)}</div>` : ''}
-        </div>
-        ${p.snippet ? `<div class="profile-meta" style="margin-top:6px;">${esc(p.snippet)}</div>` : ''}
         ${niceMatches.length ? `<div class="profile-skills">
           ${niceMatches.map(m => `<span class="skill-tag" style="background:var(--ai-glow);border-color:rgba(217,115,13,0.3);color:var(--ai);">✨ ${esc(m)}</span>`).join('')}
         </div>` : ''}
