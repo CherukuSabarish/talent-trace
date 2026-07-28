@@ -334,6 +334,29 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
   border:1px solid var(--border2);color:var(--muted);background:var(--surface);
   font-weight:600;transition:all 0.12s;}
 .jd-tab.active{background:var(--ai-glow);border-color:rgba(217,115,13,0.4);color:var(--ai);}
+
+/* ── PAGE HEADER (Notion-style page identity block, sits above the first card) ── */
+.page-header{margin-bottom:30px;max-width:640px;}
+.page-icon{
+  width:38px;height:38px;border-radius:9px;background:var(--surface3);
+  display:grid;place-items:center;font-size:19px;margin-bottom:12px;
+  border:1px solid var(--border);
+}
+.page-title{font-size:25px;font-weight:700;color:var(--text);letter-spacing:-0.4px;margin-bottom:6px;line-height:1.25;}
+.page-desc{font-size:13.5px;color:var(--muted);line-height:1.6;}
+.page-badge{
+  display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;
+  padding:3px 9px;border-radius:20px;margin-top:14px;
+}
+.page-badge.ai{background:var(--ai-glow);color:var(--ai);border:1px solid rgba(217,115,13,0.3);}
+.page-badge.live{background:var(--accent-glow);color:var(--accent2);border:1px solid rgba(35,131,226,0.3);}
+
+/* ── SECTION HINT (short helper line under a card-head, before the fields) ── */
+.section-hint{font-size:11.5px;color:var(--muted);line-height:1.5;margin:-10px 0 16px;}
+
+/* ── SIDEBAR FOOTER ── */
+.sidebar-footer{margin-top:auto;padding:10px 8px 2px;border-top:1px solid var(--border);}
+.sidebar-version{font-family:var(--mono);font-size:9.5px;color:var(--muted);padding:4px 8px;letter-spacing:0.3px;}
 </style>
 </head>
 <body>
@@ -342,15 +365,21 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 <div class="sidebar">
   <div class="brand">
     <div class="brand-icon">🎯</div>
-    <div class="brand-name">Talent<span>Trace</span></div>
+    <div>
+      <div class="brand-name">Talent<span>Trace</span></div>
+      <div style="font-size:10px;color:var(--muted);margin-top:-1px;">Recruiting workspace</div>
+    </div>
   </div>
-  <div class="nav-pill">✦ AI Powered · v4b</div>
 
-  <div class="sidebar-label">Workspace</div>
+  <div class="sidebar-label">Sourcing Tools</div>
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('builder',this)">⚙️ Query Builder</button>
+    <button class="tab active" onclick="switchTab('builder',this)">⚙️ Boolean Builder</button>
     <button class="tab" onclick="switchTab('jd',this)">🧠 JD Analyzer <span style="font-size:9px;background:var(--ai-glow);color:var(--ai);border:1px solid rgba(217,115,13,0.3);border-radius:4px;padding:1px 6px;margin-left:auto;">AI</span></button>
-    <button class="tab" onclick="switchTab('crustdata',this)">🛰️ TalentData <span style="font-size:9px;background:var(--accent-glow);color:var(--accent2);border:1px solid rgba(35,131,226,0.3);border-radius:4px;padding:1px 6px;margin-left:auto;">NEW</span></button>
+    <button class="tab" onclick="switchTab('crustdata',this)">🛰️ TalentData Search <span style="font-size:9px;background:var(--accent-glow);color:var(--accent2);border:1px solid rgba(35,131,226,0.3);border-radius:4px;padding:1px 6px;margin-left:auto;">LIVE</span></button>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-version">✦ TalentTrace v9</div>
   </div>
 </div>
 
@@ -361,10 +390,17 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 ══════════════════════════════ -->
 <div class="panel active" id="panel-builder" style="display:block;">
 
+  <div class="page-header">
+    <div class="page-icon">⚙️</div>
+    <div class="page-title">Boolean Builder</div>
+    <div class="page-desc">Build a sourcing query once and get search strings for LinkedIn, Google X-Ray, StackOverflow and GitHub at the same time — tuned for tech, sales, veteran and campus hiring in India.</div>
+  </div>
+
   <div class="grid-2">
     <!-- Role Config -->
     <div class="card">
-      <div class="card-head"><div class="card-dot"></div><div class="card-title">Roles</div></div>
+      <div class="card-head"><div class="card-dot"></div><div class="card-title">Role</div></div>
+      <div class="section-hint">Pick a category to load ready-made role templates, then narrow by location and experience.</div>
 
       <label>Role Category</label>
       <select id="category" onchange="populateRoles()">
@@ -395,6 +431,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
     <!-- Talent Filters -->
     <div class="card">
       <div class="card-head"><div class="card-dot"></div><div class="card-title">Talent Filters</div></div>
+      <div class="section-hint">Layer in company background and education signals to sharpen who shows up in results.</div>
 
       <label>Company Cluster</label>
       <select id="cluster">
@@ -621,10 +658,17 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 ══════════════════════════════ -->
 <div class="panel" id="panel-jd" style="display:none;">
 
+  <div class="page-header">
+    <div class="page-icon">🧠</div>
+    <div class="page-title">JD Analyzer</div>
+    <div class="page-desc">Paste a job description and Claude turns it into a full sourcing kit — boolean strings, companies likely to have this talent, screening questions, and what to look for on a profile.</div>
+    <div class="page-badge ai">✦ AI-powered</div>
+  </div>
+
   <div class="card" style="margin-bottom:16px;">
     <div class="card-head">
       <div class="card-dot" style="background:var(--ai);box-shadow:0 0 6px var(--ai);"></div>
-      <div class="card-title" style="color:var(--ai);">🧠 JD Analyzer — AI Powered</div>
+      <div class="card-title" style="color:var(--ai);">Job Description</div>
       <span style="margin-left:auto;font-size:10px;color:var(--muted);">Paste any JD · AI does the rest</span>
     </div>
     <textarea class="jd-textarea" id="jd-input"
@@ -773,10 +817,17 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
 ══════════════════════════════ -->
 <div class="panel" id="panel-crustdata" style="display:none;">
 
+  <div class="page-header">
+    <div class="page-icon">🛰️</div>
+    <div class="page-title">TalentData Search</div>
+    <div class="page-desc">Search live candidate data directly and get verified emails and phone numbers, without leaving this workspace or opening a browser extension.</div>
+    <div class="page-badge live">● Live data</div>
+  </div>
+
   <div class="card" style="margin-bottom:16px;">
     <div class="card-head">
       <div class="card-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2);"></div>
-      <div class="card-title" style="color:var(--accent2);">🛰️ TalentData — Direct People Search</div>
+      <div class="card-title" style="color:var(--accent2);">Search</div>
       <span style="margin-left:auto;font-size:10px;color:var(--muted);">Live employment data · email · phone</span>
     </div>
     <div class="grid-2" style="gap:12px;">
@@ -810,7 +861,7 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
   <div class="card" style="margin-bottom:16px;">
     <div class="card-head">
       <div class="card-dot" style="background:var(--warn);box-shadow:0 0 6px var(--warn);"></div>
-      <div class="card-title" style="color:var(--warn);">🎯 Search Criteria</div>
+      <div class="card-title" style="color:var(--warn);">Refine Candidates</div>
       <span style="margin-left:auto;font-size:10px;color:var(--muted);">Refines the search &amp; highlights matches in results</span>
     </div>
     <div class="grid-2" style="gap:12px;">
@@ -835,8 +886,8 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
   <div class="card" style="margin-bottom:16px;">
     <div class="card-head">
       <div class="card-dot"></div>
-      <div class="card-title">Results</div>
-      <span style="margin-left:auto;font-size:10px;color:var(--muted);" id="cd-count">0 profiles</span>
+      <div class="card-title">Candidates</div>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted);" id="cd-count">0 candidates</span>
     </div>
     <div id="cd-results">
       <div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">Search above to see candidates here.</div>
@@ -846,9 +897,10 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
   <div class="card">
     <div class="card-head">
       <div class="card-dot" style="background:var(--warn);box-shadow:0 0 6px var(--warn);"></div>
-      <div class="card-title" style="color:var(--warn);">📊 Export to Google Sheet</div>
+      <div class="card-title" style="color:var(--warn);">Send to Google Sheet</div>
       <span style="margin-left:auto;font-size:10px;color:var(--muted);">Same Apps Script webhook as the extension</span>
     </div>
+    <div class="section-hint">Export everything currently in Candidates to a tab in your tracking sheet, tagged with a role and experience range.</div>
     <label>Google Sheet Apps Script URL</label>
     <div style="display:flex;gap:8px;margin-bottom:14px;">
       <input id="cd-webhook" placeholder="Paste Apps Script Web App URL..." style="margin-bottom:0;">
@@ -1300,7 +1352,7 @@ function renderTalentDataResults() {
   const expBtn = document.getElementById('cd-export-btn');
   const n = cdResults.length;
 
-  count.textContent = n + ' profile' + (n !== 1 ? 's' : '');
+  count.textContent = n + ' candidate' + (n !== 1 ? 's' : '');
   expBtn.disabled = n === 0;
 
   if (!n) {
