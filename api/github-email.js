@@ -4,15 +4,25 @@
 // "Keep my email addresses private" (in which case commits carry a @users.noreply.github.com
 // address, which we filter out as useless for outreach).
 //
-// Strategy, cheapest call first:
+// Strategy, cheapest call first, stopping as soon as a usable address turns up:
 //   1. GET /users/{login}/events/public — recent PushEvents embed commit author emails
-//      inline, so one call often answers it outright.
-//   2. Fallback: GET /users/{login}/repos (newest pushed first), then for a few of them
-//      GET /repos/{login}/{repo}/commits?author={login} and read commit.author.email.
+//      inline, so one call often answers it outright. Only covers ~90 days of activity.
+//   2. GET /search/commits?q=author:{login} — searches commits across ALL public repos
+//      they've contributed to, not just their own, so it catches people whose own repos
+//      are empty or fork-only. This is the highest-yield step.
+//   3. GET /users/{login}/repos then /repos/{login}/{repo}/commits?author={login} —
+//      last resort for accounts the commit index hasn't picked up.
+//
+// Why some people still come back empty: GitHub's "Keep my email addresses private"
+// setting rewrites the commit author to <id>+<login>@users.noreply.github.com. That is
+// what is actually stored in the commit, so there is no real address to recover — the
+// API is not hiding it from us, it was never recorded. We report that case distinctly
+// (masked: true) rather than pretending we simply failed to look hard enough.
 //
 // Same server-side-token model as github-search.js: GITHUB_TOKEN, never sent to the browser.
 //
 // Docs: https://docs.github.com/en/rest/activity/events#list-public-events-for-a-user
+//       https://docs.github.com/en/rest/search/search#search-commits
 //       https://docs.github.com/en/rest/commits/commits#list-commits
 
 const GITHUB_API = 'https://api.github.com';
@@ -57,8 +67,13 @@ export default async function handler(req, res) {
 
   // Collected as name -> email so we can show who the commits were authored as.
   const found = new Map();
+  // Tracks whether we saw commits at all but every one was privacy-masked — that's a
+  // meaningfully different answer from "this person has no visible commits".
+  let sawMasked = false;
   const addHit = (email, name) => {
-    if (isUsableEmail(email) && !found.has(email.toLowerCase())) {
+    if (!email || typeof email !== 'string') return;
+    if (!isUsableEmail(email)) { if (email.includes('@')) sawMasked = true; return; }
+    if (!found.has(email.toLowerCase())) {
       found.set(email.toLowerCase(), { email, name: name || '' });
     }
   };
@@ -81,16 +96,37 @@ export default async function handler(req, res) {
       return;
     }
 
-    // ── 2. Fallback: probe recent repos' commit history ──
+    // ── 2. Commit search across every public repo they've contributed to ──
+    // Much broader than their own repos: catches contributors to other people's
+    // projects, which is most working engineers.
+    if (!found.size) {
+      try {
+        const csRes = await fetch(
+          GITHUB_API + '/search/commits?q=' + encodeURIComponent('author:' + login) +
+          '&sort=author-date&order=desc&per_page=50',
+          { headers }
+        );
+        if (csRes.ok) {
+          const cs = await csRes.json().catch(() => ({}));
+          (Array.isArray(cs.items) ? cs.items : []).forEach(item => {
+            if (item.commit && item.commit.author) addHit(item.commit.author.email, item.commit.author.name);
+          });
+        }
+      } catch (e) { /* fall through to repo probing */ }
+    }
+
+    // ── 3. Fallback: probe recent repos' commit history ──
     if (!found.size) {
       const repoRes = await fetch(
-        GITHUB_API + '/users/' + encodeURIComponent(login) + '/repos?sort=pushed&per_page=' + MAX_REPOS_TO_PROBE,
+        GITHUB_API + '/users/' + encodeURIComponent(login) + '/repos?sort=pushed&per_page=30',
         { headers }
       );
       if (repoRes.ok) {
         const repos = await repoRes.json().catch(() => []);
-        const names = (Array.isArray(repos) ? repos : [])
-          .filter(r => !r.fork)                        // forks are usually other people's commits
+        // Prefer their own repos, but fall back to forks — plenty of accounts have
+        // nothing but forks, and their commits inside those still carry an email.
+        const list = Array.isArray(repos) ? repos : [];
+        const names = [...list.filter(r => !r.fork), ...list.filter(r => r.fork)]
           .slice(0, MAX_REPOS_TO_PROBE)
           .map(r => r.name);
 
@@ -112,7 +148,13 @@ export default async function handler(req, res) {
       }
     }
 
-    res.status(200).json({ login, emails: Array.from(found.values()) });
+    res.status(200).json({
+      login,
+      emails: Array.from(found.values()),
+      // true = we found their commits, but GitHub's privacy setting replaced the real
+      // address with a noreply placeholder. No amount of extra searching recovers it.
+      masked: !found.size && sawMasked
+    });
   } catch (err) {
     res.status(502).json({ error: 'Could not reach GitHub: ' + err.message });
   }
