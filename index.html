@@ -59,10 +59,10 @@
   --surface: #ffffff;
   --surface2: #f7f6f5;
   --surface3: #efeeec;
-  --accent: #2383e2;
-  --accent2: #0b6e99;
-  --accent-bright: #5b9eff;
-  --accent-glow: rgba(35,131,226,0.12);
+  --accent: #00a4eb;
+  --accent2: #002f6c;
+  --accent-bright: #4dc4ff;
+  --accent-glow: rgba(0,164,235,0.12);
   --ai: #d9730d;
   --ai-glow: rgba(217,115,13,0.12);
   --warn: #dfab01;
@@ -75,7 +75,7 @@
   --border2: #dcdcda;
   --r: 8px;
   --nav-h: 56px;
-  --nav-bg: #14142b;
+  --nav-bg: #002f6c;
   --nav-muted: #9797ab;
   --shadow-card: 0 1px 2px rgba(20,20,30,0.04), 0 1px 6px rgba(20,20,30,0.05);
   --shadow-card-hover: 0 2px 4px rgba(20,20,30,0.05), 0 4px 14px rgba(20,20,30,0.08);
@@ -129,6 +129,7 @@ body{
 }
 .navpill.ai{background:rgba(217,115,13,0.2);color:#f2ab6d;border:1px solid rgba(217,115,13,0.4);}
 .topnav-version{font-family:var(--mono);font-size:10px;color:var(--nav-muted);white-space:nowrap;}
+.akamai-logo{height:20px;width:auto;flex-shrink:0;opacity:0.92;}
 
 /* ── MAIN / PANELS ── */
 .main{min-height:calc(100vh - var(--nav-h));}
@@ -186,8 +187,8 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
   font-family:var(--font);font-size:13px;font-weight:600;
   transition:all 0.12s;white-space:nowrap;
 }
-.btn-primary{background:var(--accent);color:#ffffff;box-shadow:0 1px 2px rgba(35,131,226,0.3);}
-.btn-primary:hover{background:#1a73d4;box-shadow:0 2px 6px rgba(35,131,226,0.35);}
+.btn-primary{background:var(--accent);color:#ffffff;box-shadow:0 1px 2px rgba(0,164,235,0.3);}
+.btn-primary:hover{background:#0089c9;box-shadow:0 2px 6px rgba(0,164,235,0.35);}
 .btn-linkedin{background:#0a66c2;color:white;}
 .btn-linkedin:hover{background:#0958a8;}
 .btn-ghost{background:var(--surface);color:var(--text);border:1px solid var(--border2);}
@@ -210,7 +211,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 
 /* ── STATUS ── */
 .status{padding:8px 12px;border-radius:5px;font-size:12px;font-weight:500;margin-top:8px;display:none;align-items:center;gap:6px;line-height:1.5;}
-.status.info{background:rgba(35,131,226,0.07);color:var(--accent2);border:1px solid rgba(35,131,226,0.18);display:flex;}
+.status.info{background:rgba(0,164,235,0.07);color:var(--accent2);border:1px solid rgba(0,164,235,0.18);display:flex;}
 .status.success{background:rgba(68,131,97,0.08);color:var(--green);border:1px solid rgba(68,131,97,0.2);display:flex;}
 .status.error{background:rgba(224,62,62,0.07);color:var(--danger);border:1px solid rgba(224,62,62,0.18);display:flex;}
 .status.warn{background:rgba(223,171,1,0.1);color:#95720a;border:1px solid rgba(223,171,1,0.25);display:flex;}
@@ -335,7 +336,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 .profile-field span{color:var(--muted);}
 .profile-skills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
 .skill-tag{font-size:10px;padding:2px 7px;border-radius:4px;
-  background:var(--accent-glow);border:1px solid rgba(35,131,226,0.2);color:var(--accent);}
+  background:var(--accent-glow);border:1px solid rgba(0,164,235,0.2);color:var(--accent);}
 /* Bold solid status pills — same visual language as an ATS pipeline stage tag */
 .status-pill{
   display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;
@@ -362,7 +363,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 .cand-avatar-lg{
   width:50px;height:50px;border-radius:50%;background:var(--accent);color:#fff;
   font-weight:700;font-size:18px;display:grid;place-items:center;flex-shrink:0;
-  box-shadow:0 2px 6px rgba(35,131,226,0.35);
+  box-shadow:0 2px 6px rgba(0,164,235,0.35);
 }
 .cand-modal-name{font-size:17px;font-weight:700;color:var(--text);letter-spacing:-0.2px;}
 .cand-modal-role{font-size:12.5px;color:var(--muted);margin-top:2px;}
@@ -394,7 +395,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
   padding:3px 9px;border-radius:20px;margin-top:14px;
 }
 .page-badge.ai{background:var(--ai-glow);color:var(--ai);border:1px solid rgba(217,115,13,0.3);}
-.page-badge.live{background:var(--accent-glow);color:var(--accent2);border:1px solid rgba(35,131,226,0.3);}
+.page-badge.live{background:var(--accent-glow);color:var(--accent2);border:1px solid rgba(0,164,235,0.3);}
 
 /* ── SECTION HINT (short helper line under a card-head, before the fields) ── */
 .section-hint{font-size:11.5px;color:var(--muted);line-height:1.5;margin:-10px 0 16px;}
@@ -423,6 +424,20 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
     <div class="topnav-right">
       <span class="navpill ai">✦ AI-Powered</span>
       <span class="topnav-version">v9</span>
+      <svg class="akamai-logo" viewBox="324 265 1242 530" xmlns="http://www.w3.org/2000/svg" aria-label="Akamai" role="img">
+        <g fill="#fff">
+          <path d="M592.85,764.11c-100.8-30.77-174.12-123.92-174.12-234.05s74.88-205.29,177.4-235.02c10.48-3.06,7.73-9.86-4.91-9.86-136.28,0-246.8,109.69-246.8,244.89s110.51,244.86,246.8,244.86c12.63,0,13.14-7.3,1.63-10.81Z"/>
+          <path d="M465.48,587.42c-.68-6.58-1.01-13.23-1.01-19.94,0-107.36,87.05-194.39,194.43-194.39,101.52,0,132,45.31,135.78,42.35,4.12-3.26-36.84-93.07-156.05-93.07-107.39,0-194.44,87.03-194.44,194.39,0,24.84,4.65,48.52,13.13,70.31,3.58,9.14,9.08,9.22,8.17.35Z"/>
+          <path d="M546.92,447.31c50.53-22.03,114.01-22.7,176.42-.89,41.91,14.62,66.2,35.5,68.19,34.64,3.31-1.43-24.38-45.28-74.36-64.24-60.51-22.93-125.69-10.93-173.18,26.32-5.22,4.11-3.25,6.87,2.93,4.17Z"/>
+          <path d="M1546.23,538.76c0,14.11-11.44,25.52-25.51,25.52s-25.52-11.41-25.52-25.52,11.42-25.49,25.52-25.49,25.51,11.42,25.51,25.49Z"/>
+          <path d="M710.44,643.53h-49.24l42.38-85.89h.49l6.37,85.89h0ZM712.82,682.16l3.01,34.07h53.95l-18.16-198.26h-80.34l-101.57,198.26h54.96l17.05-34.07h71.11Z"/>
+          <polygon points="845 629.54 852.9 629.54 891.51 577.43 941.5 577.43 888.16 644.07 920.88 716.23 867.8 716.23 846.48 659.89 838.53 659.89 826.53 716.23 781.12 716.23 823.22 517.97 868.71 517.97 845 629.54 845 629.54"/>
+          <path d="M999.69,658.87c14.82,0,24.6,1.02,22.14,12.67-3.12,14.53-9.4,16.95-28.43,16.95-6.93,0-19.8,0-16.63-15.07,2.71-12.75,11.76-14.54,22.91-14.54h0ZM1012.36,716.23h45.45l18.42-86.69c10.1-47.88-8.21-53.69-54.69-53.69-32.46,0-63.87-.28-73.07,42.83h45.5c2.58-12.46,10.28-15.04,21.68-15.04,19.78,0,18.91,8.21,16.11,21.09l-4.62,21.99h-2.11c-1.72-15.87-21.61-15.64-34.52-15.64-32.82,0-52.37,10.32-59.51,43.67-7.49,35.37,9.36,43.06,41.06,43.06,15.9,0,37.15-3.14,44.66-22.26h1.56l-5.92,20.68h0Z"/>
+          <path d="M1149.57,577.43l-4.16,19.56h1.86c9.02-16.39,26.97-21.14,42.55-21.14,19.58,0,38.9,3.41,36.21,27.24h2.12c6.66-19.79,26.94-27.24,44.39-27.24,32.03,0,45.59,13.23,38.75,45.53l-20.23,94.86h-45.42l17.1-80.38c2.23-14.48,4.82-25.1-12.92-25.1s-23.62,11.8-26.77,26.67l-16.78,78.81h-45.45l17.87-84.06c2.19-12.71,3.23-21.42-12.63-21.42-18.77,0-24.34,10.05-27.8,26.67l-16.82,78.81h-45.47l29.57-138.8h44.06Z"/>
+          <path d="M1382.84,658.87c14.72,0,24.57,1.02,22.13,12.67-3.06,14.53-9.38,16.95-28.47,16.95-6.88,0-19.82,0-16.62-15.07,2.72-12.75,11.8-14.54,22.95-14.54h0ZM1395.43,716.23h45.45l18.44-86.69c10.15-47.88-8.11-53.69-54.6-53.69-32.59,0-64.04-.28-73.11,42.83h45.49c2.58-12.46,10.36-15.04,21.6-15.04,19.88,0,18.89,8.21,16.28,21.09l-4.74,21.99h-2.12c-1.7-15.87-21.56-15.64-34.47-15.64-32.79,0-52.43,10.32-59.5,43.67-7.5,35.37,9.34,43.06,41.06,43.06,15.88,0,37.14-3.14,44.68-22.26h1.56l-5.99,20.68h0Z"/>
+          <path d="M1506.4,716.23h-45.39l29.41-138.8h45.5l-29.53,138.8h0Z"/>
+        </g>
+      </svg>
     </div>
   </div>
 </div>
@@ -929,6 +944,13 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
       <div class="card-title">Candidates</div>
       <span style="margin-left:auto;font-size:10px;color:var(--muted);" id="cd-count">0 candidates</span>
     </div>
+    <div class="btn-row" style="margin-bottom:10px;">
+      <button class="btn btn-ai btn-sm" onclick="deepEnrichAllTalentData()" id="cd-enrich-all-btn">
+        <span id="cd-enrich-all-text">🔎 Deep-enrich all (find emails/phones)</span>
+        <div class="spinner" id="cd-enrich-all-spinner"></div>
+      </button>
+    </div>
+    <div class="status" id="cd-enrich-all-status" style="margin-bottom:10px;"></div>
     <div id="cd-results">
       <div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">Search above to see candidates here.</div>
     </div>
@@ -1410,8 +1432,20 @@ async function enrichCandidateByIndex(i) {
     const match          = enrichEntry  && enrichEntry.matches  && enrichEntry.matches[0];
     const contactMatch   = contactEntry && contactEntry.matches && contactEntry.matches[0];
 
+    // The contact-enrich call can fail outright (permission/plan/rate-limit issue on
+    // the API key) separately from the profile-enrich call succeeding — that's not the
+    // same thing as "this person just has no contact info on file", so surface it as
+    // an error instead of a false "no direct contact found" success message.
+    if (data.contactError) {
+      showStatus('cand-modal-status', 'error', '⚠ Contact lookup failed: ' + data.contactError);
+      if (btn) btn.disabled = false;
+      if (sp) sp.classList.remove('on');
+      return;
+    }
+
     if (!match && !contactMatch) {
-      showStatus('cand-modal-status', 'warn', '⚠ No additional TalentData match for this profile.');
+      showStatus('cand-modal-status', 'warn',
+        data.enrichError ? ('⚠ Profile enrich failed: ' + data.enrichError) : '⚠ No additional TalentData match for this profile.');
       if (btn) btn.disabled = false;
       if (sp) sp.classList.remove('on');
       return;
@@ -1445,6 +1479,100 @@ async function enrichCandidateByIndex(i) {
     showStatus('cand-modal-status', 'error', '⚠ ' + (err.message || 'Enrich failed.'));
     if (btn) btn.disabled = false;
     if (sp) sp.classList.remove('on');
+  }
+}
+
+// Bulk deep-enrich — enriches every eligible search result (or, if everyone already
+// has contact info, re-enriches all after confirmation) in batches, instead of the
+// one-candidate-at-a-time flow in the modal above. Batches at 20 to stay under
+// Crustdata's 25-URL-per-call /person/enrich and /person/contact/enrich limit (see
+// api/crustdata-enrich.js).
+async function deepEnrichAllTalentData() {
+  const isLinkedIn = (p) => p.url && p.url.toLowerCase().includes('linkedin.com/in/');
+  let targets = cdResults.filter((p) => isLinkedIn(p) && !p.email && !p.phone);
+
+  if (!targets.length) {
+    const withUrl = cdResults.filter(isLinkedIn);
+    if (!withUrl.length) {
+      showStatus('cd-enrich-all-status', 'warn', '⚠ No candidates with a LinkedIn profile URL to enrich.');
+      return;
+    }
+    if (!confirm(`Everyone with a LinkedIn URL already has contact info. Re-run for all ${withUrl.length} (uses more TalentData credits)?`)) return;
+    targets = withUrl;
+  }
+
+  const btn = document.getElementById('cd-enrich-all-btn');
+  const txt = document.getElementById('cd-enrich-all-text');
+  const sp  = document.getElementById('cd-enrich-all-spinner');
+  btn.disabled = true; sp.classList.add('on');
+
+  const BATCH = 20;
+  let attempted = 0, found = 0, lastError = '';
+
+  try {
+    for (let i = 0; i < targets.length; i += BATCH) {
+      const batch = targets.slice(i, i + BATCH);
+      txt.textContent = `⏳ Deep-enriching ${Math.min(i + BATCH, targets.length)}/${targets.length}...`;
+      showStatus('cd-enrich-all-status', 'info', `⏳ Enriching ${attempted}–${Math.min(i + BATCH, targets.length)} of ${targets.length}...`);
+
+      const res = await fetch('/api/crustdata-enrich', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ urls: batch.map((p) => p.url) })
+      });
+      const data = await res.json();
+      attempted += batch.length;
+
+      if (!res.ok) { lastError = errText(data.error) || ('HTTP ' + res.status); continue; }
+      if (data.contactError) lastError = data.contactError;
+      else if (data.enrichError) lastError = data.enrichError;
+
+      batch.forEach((p) => {
+        const hadContactBefore = !!(p.email || p.phone);
+        const matchKey      = normalizeCdUrl(p.url);
+        const enrichEntry   = (data.enrich  || []).find((e) => normalizeCdUrl(e.matched_on) === matchKey);
+        const contactEntry  = (data.contact || []).find((e) => normalizeCdUrl(e.matched_on) === matchKey);
+        const match         = enrichEntry  && enrichEntry.matches  && enrichEntry.matches[0];
+        const contactMatch  = contactEntry && contactEntry.matches && contactEntry.matches[0];
+
+        if (match && match.person_data) {
+          const pd = match.person_data;
+          const currentTitle = pd.experience && pd.experience.employment_details &&
+            pd.experience.employment_details.current && pd.experience.employment_details.current[0] &&
+            pd.experience.employment_details.current[0].title;
+          if (currentTitle) p.jobTitle = currentTitle;
+          if (pd.basic_profile && pd.basic_profile.headline) p.snippet = pd.basic_profile.headline;
+          if (pd.basic_profile && pd.basic_profile.location && pd.basic_profile.location.raw) {
+            p.location = pd.basic_profile.location.raw;
+          }
+        }
+        if (contactMatch && contactMatch.person_data && contactMatch.person_data.contact) {
+          const c = contactMatch.person_data.contact;
+          const bizEmail  = c.business_emails && c.business_emails[0] && c.business_emails[0].email;
+          const persEmail = c.personal_emails && c.personal_emails[0] && c.personal_emails[0].email;
+          p.email = bizEmail || persEmail || p.email || '';
+          p.phone = (c.phone_numbers && c.phone_numbers[0]) || p.phone || '';
+        }
+
+        if (!hadContactBefore && (p.email || p.phone)) found++;
+      });
+
+      persistCdResults();
+      renderTalentDataResults();
+    }
+
+    if (!found) {
+      showStatus('cd-enrich-all-status', 'warn',
+        lastError ? ('⚠ No contact info found: ' + lastError) : '⚠ Deep-enrich ran but found no verified contact info.');
+    } else {
+      showStatus('cd-enrich-all-status', 'success',
+        `✓ Deep-enriched ${attempted} candidate(s) — ${found} new contact(s) found${lastError ? ' (some batches errored: ' + lastError + ')' : ''}.`);
+    }
+  } catch (err) {
+    console.error('TalentData bulk enrich error:', err);
+    showStatus('cd-enrich-all-status', 'error', '⚠ ' + (err.message || 'Deep-enrich failed.'));
+  } finally {
+    btn.disabled = false; txt.textContent = '🔎 Deep-enrich all (find emails/phones)'; sp.classList.remove('on');
   }
 }
 
