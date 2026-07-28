@@ -929,7 +929,7 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
   <div class="page-header">
     <div class="page-icon">🛰️</div>
     <div class="page-title">TalentData Search</div>
-    <div class="page-desc">Search live candidate data directly and get verified emails and phone numbers, without leaving this workspace or opening a browser extension.</div>
+    <div class="page-desc">Search live candidate data directly, without leaving this workspace or opening a browser extension.</div>
     <div class="page-badge live">● Live data</div>
   </div>
 
@@ -937,7 +937,7 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
     <div class="card-head">
       <div class="card-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2);"></div>
       <div class="card-title" style="color:var(--accent2);">Search</div>
-      <span style="margin-left:auto;font-size:10px;color:var(--muted);">Live employment data · email · phone</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted);">Live employment data</span>
     </div>
     <div class="grid-2" style="gap:12px;">
       <div>
@@ -1051,7 +1051,7 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
         <input id="gh-keywords" placeholder="e.g. SRE, machine learning, kubernetes">
       </div>
       <div>
-        <label>Languages <span style="color:var(--muted);text-transform:none;font-weight:400;">(comma separated — must have all)</span></label>
+        <label>Languages <span style="color:var(--muted);text-transform:none;font-weight:400;">(comma separated — must have all · programming languages only, put tools like AWS in Keywords)</span></label>
         <input id="gh-language" placeholder="e.g. Go, Python">
       </div>
     </div>
@@ -1627,7 +1627,15 @@ function loadGitHubSettings() {
   } catch(e) { /* ignore corrupt storage */ }
 }
 
-async function searchGitHub() {
+// Pagination state for the "Load More" button — the query that produced the current
+// page, and which page of it we're on. Reset on every fresh search.
+let ghPage = 1;
+let ghHasMore = false;
+
+function loadMoreGitHub() { searchGitHub(ghPage + 1); }
+
+async function searchGitHub(page) {
+  const isMore = !!page && page > 1;
   const keywords     = document.getElementById('gh-keywords').value.trim();
   const language     = document.getElementById('gh-language').value.trim();
   const location     = document.getElementById('gh-location').value.trim();
@@ -1685,6 +1693,45 @@ async function searchGitHub() {
   }
 }
 
+// Digs a candidate's email out of their public commit history (see api/github-email.js).
+// Results are cached onto the candidate object so a repeat click costs nothing.
+async function findGitHubEmail(i) {
+  const p = ghResults[i];
+  if (!p) return;
+
+  const btn = document.getElementById('gh-email-btn-' + i);
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Searching...'; }
+
+  try {
+    const res = await fetch('/api/github-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login: p.login })
+    });
+    let data = {};
+    try { data = await res.json(); } catch (e) {
+      if (res.status === 404) throw new Error('/api/github-email not found — redeploy the app so the new function exists.');
+      throw new Error('Server returned a non-JSON response (HTTP ' + res.status + ').');
+    }
+    if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
+
+    p.commitEmails = data.emails || [];
+    p.emailSearched = true;
+    localStorage.setItem('tt_gh_results', JSON.stringify(ghResults));
+    renderGitHubResults();
+
+    if (p.commitEmails.length) {
+      showStatus('gh-search-status', 'success', `✓ Found ${p.commitEmails.length} email${p.commitEmails.length > 1 ? 's' : ''} for @${p.login}`);
+    } else {
+      showStatus('gh-search-status', 'info', `No public email for @${p.login} — their commits are likely privacy-masked by GitHub.`);
+    }
+  } catch (err) {
+    console.error('GitHub email lookup error:', err);
+    showStatus('gh-search-status', 'error', '⚠ ' + (err.message || 'Email lookup failed.'));
+    if (btn) { btn.disabled = false; btn.textContent = '✉️ Find Email'; }
+  }
+}
+
 function clearGitHubResults() {
   if (!ghResults.length) return;
   if (!confirm('Clear all ' + ghResults.length + ' GitHub results?')) return;
@@ -1705,15 +1752,22 @@ function renderGitHubResults() {
     return;
   }
 
-  const cards = ghResults.map(p => {
+  const cards = ghResults.map((p, i) => {
     const displayName = p.name || p.login;
     const roleLine = [p.company ? p.company.replace(/^@/, '') : '', p.location].filter(Boolean).join(' · ');
+    // Public profile email plus anything dug out of commit history, deduped.
+    const allEmails = [];
+    if (p.email) allEmails.push(p.email);
+    (p.commitEmails || []).forEach(e => {
+      if (!allEmails.some(x => x.toLowerCase() === e.email.toLowerCase())) allEmails.push(e.email);
+    });
     const stats = [
       p.followers != null ? `👥 ${p.followers} followers` : '',
       p.publicRepos != null ? `📦 ${p.publicRepos} repos` : '',
-      p.hireable ? '✅ Hireable' : '',
-      p.email ? `✉️ ${esc(p.email)}` : ''
+      p.hireable ? '✅ Hireable' : ''
     ].filter(Boolean);
+    allEmails.forEach(e => stats.push(`✉️ ${esc(e)}`));
+    if (p.emailSearched && !allEmails.length) stats.push('✉️ No public email found');
     return `
     <div class="profile-card">
       ${p.avatar
@@ -1726,7 +1780,10 @@ function renderGitHubResults() {
             <div class="profile-headline">${esc(p.bio) || 'No bio'}</div>
             ${roleLine ? `<div class="profile-meta">${esc(roleLine)}</div>` : ''}
           </div>
-          <a class="profile-linkedin-btn" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">↗ GitHub</a>
+          <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+            <a class="profile-linkedin-btn" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">↗ GitHub</a>
+            ${allEmails.length ? '' : `<button class="btn btn-ghost btn-sm" id="gh-email-btn-${i}" onclick="findGitHubEmail(${i})" style="white-space:nowrap;">${p.emailSearched ? '↻ Retry email' : '✉️ Find Email'}</button>`}
+          </div>
         </div>
         ${stats.length ? `<div class="profile-skills">
           ${stats.map(s => `<span class="skill-tag">${s}</span>`).join('')}
@@ -1736,7 +1793,9 @@ function renderGitHubResults() {
   `;
   });
 
-  wrap.innerHTML = '<div class="profile-cards">' + cards.join('') + '</div>';
+  // Newest search's results first — same as the TalentData tab, so fresh hits
+  // aren't buried under previously accumulated ones.
+  wrap.innerHTML = '<div class="profile-cards">' + cards.slice().reverse().join('') + '</div>';
 }
 
 loadGitHubSettings();
