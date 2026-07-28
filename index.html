@@ -465,6 +465,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
       <button class="tab active" onclick="switchTab('builder',this)">⚙️ Boolean Builder</button>
       <button class="tab" onclick="switchTab('jd',this)">🧠 JD Analyzer</button>
       <button class="tab" onclick="switchTab('crustdata',this)">🛰️ TalentData Search</button>
+      <button class="tab" onclick="switchTab('github',this)">🐙 GitHub Search</button>
     </div>
 
     <div class="topnav-right">
@@ -1024,6 +1025,75 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
 
 </div><!-- /panel-crustdata -->
 
+<div class="panel" id="panel-github" style="display:none;">
+
+  <div class="page-header">
+    <div class="page-icon">🐙</div>
+    <div class="page-title">GitHub Search</div>
+    <div class="page-desc">Find engineers directly on GitHub by language, location and activity — sorted by followers, with bio, company and public email when available.</div>
+    <div class="page-badge live">● Live data</div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-head">
+      <div class="card-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2);"></div>
+      <div class="card-title" style="color:var(--accent2);">Search</div>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted);">GitHub Users API · sorted by followers</span>
+    </div>
+    <div class="grid-2" style="gap:12px;">
+      <div>
+        <label>Keywords <span style="color:var(--muted);text-transform:none;font-weight:400;">(matches name &amp; bio)</span></label>
+        <input id="gh-keywords" placeholder="e.g. SRE, machine learning, kubernetes">
+      </div>
+      <div>
+        <label>Languages <span style="color:var(--muted);text-transform:none;font-weight:400;">(comma separated — must have all)</span></label>
+        <input id="gh-language" placeholder="e.g. Go, Python">
+      </div>
+    </div>
+    <div class="grid-2" style="gap:12px;">
+      <div>
+        <label>Location <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional)</span></label>
+        <input id="gh-location" placeholder="e.g. Bangalore">
+      </div>
+      <div>
+        <label>Result Limit <span style="color:var(--muted);text-transform:none;font-weight:400;">(max 30 per search)</span></label>
+        <input id="gh-limit" type="number" min="1" max="30" value="20" style="max-width:140px;">
+      </div>
+    </div>
+    <div class="grid-2" style="gap:12px;">
+      <div>
+        <label>Min Followers <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional — signal of visibility)</span></label>
+        <input id="gh-min-followers" type="number" min="0" placeholder="e.g. 50">
+      </div>
+      <div>
+        <label>Min Public Repos <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional — signal of activity)</span></label>
+        <input id="gh-min-repos" type="number" min="0" placeholder="e.g. 10">
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="searchGitHub()" id="gh-search-btn">
+      <span id="gh-search-text">🐙 Search GitHub</span>
+      <div class="spinner" id="gh-search-spinner"></div>
+    </button>
+    <button class="btn btn-danger" onclick="clearGitHubResults()">🗑 Clear</button>
+  </div>
+  <div class="status" id="gh-search-status" style="margin-bottom:16px;"></div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-dot"></div>
+      <div class="card-title">Candidates</div>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted);" id="gh-count">0 candidates</span>
+    </div>
+    <div id="gh-results">
+      <div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">Search above to see candidates here.</div>
+    </div>
+  </div>
+
+</div><!-- /panel-github -->
+
 </div><!-- /main -->
 
 <!-- ══════════════════════════════
@@ -1532,6 +1602,133 @@ async function exportTalentDataToSheet() {
 }
 
 loadTalentDataSettings();
+
+// ══════════════════════════════════════════════
+// GITHUB SEARCH — direct candidate search on GitHub
+// Calls this app's own /api/github-search (Vercel serverless function) — same
+// server-side-key model as TalentData above: the token is GITHUB_TOKEN in Vercel
+// env vars and never reaches the browser.
+// ══════════════════════════════════════════════
+let ghResults = [];
+
+function loadGitHubSettings() {
+  ['gh-keywords','gh-language','gh-location','gh-min-followers','gh-min-repos'].forEach(id => {
+    const v = localStorage.getItem('tt_' + id);
+    if (v) document.getElementById(id).value = v;
+  });
+  try {
+    const saved = JSON.parse(localStorage.getItem('tt_gh_results') || '[]');
+    if (saved.length) { ghResults = saved; renderGitHubResults(); }
+  } catch(e) { /* ignore corrupt storage */ }
+}
+
+async function searchGitHub() {
+  const keywords     = document.getElementById('gh-keywords').value.trim();
+  const language     = document.getElementById('gh-language').value.trim();
+  const location     = document.getElementById('gh-location').value.trim();
+  const minFollowers = document.getElementById('gh-min-followers').value.trim();
+  const minRepos     = document.getElementById('gh-min-repos').value.trim();
+  let limit = parseInt(document.getElementById('gh-limit').value, 10);
+  if (!limit || limit < 1) limit = 20;
+  limit = Math.min(limit, 30);
+  document.getElementById('gh-limit').value = limit;
+
+  if (!keywords && !language && !location) {
+    showStatus('gh-search-status', 'error', '⚠ Enter at least keywords, a language, or a location.');
+    return;
+  }
+
+  // Persist inputs per-browser, same pattern as the TalentData tab.
+  ['gh-keywords','gh-language','gh-location','gh-min-followers','gh-min-repos'].forEach(id => {
+    localStorage.setItem('tt_' + id, document.getElementById(id).value.trim());
+  });
+
+  const btn = document.getElementById('gh-search-btn');
+  const sp  = document.getElementById('gh-search-spinner');
+  btn.disabled = true; sp.classList.add('on');
+  showStatus('gh-search-status', 'info', '⏳ Searching GitHub...');
+
+  try {
+    const res = await fetch('/api/github-search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keywords, language, location, minFollowers, minRepos, limit })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
+
+    const found = data.profiles || [];
+    const existing = new Set(ghResults.map(p => p.url));
+    const newOnes = found.filter(p => p.url && !existing.has(p.url));
+    ghResults = [...ghResults, ...newOnes];
+    localStorage.setItem('tt_gh_results', JSON.stringify(ghResults));
+    renderGitHubResults();
+
+    showStatus('gh-search-status', 'success',
+      `✓ ${found.length} shown of ${data.totalCount ?? '?'} matching · ${newOnes.length} new · ${ghResults.length} total`);
+  } catch(err) {
+    console.error('GitHub search error:', err);
+    showStatus('gh-search-status', 'error', '⚠ ' + (err.message || 'GitHub search failed.'));
+  } finally {
+    btn.disabled = false; sp.classList.remove('on');
+  }
+}
+
+function clearGitHubResults() {
+  if (!ghResults.length) return;
+  if (!confirm('Clear all ' + ghResults.length + ' GitHub results?')) return;
+  ghResults = [];
+  localStorage.setItem('tt_gh_results', '[]');
+  renderGitHubResults();
+  hideStatus('gh-search-status');
+}
+
+function renderGitHubResults() {
+  const wrap  = document.getElementById('gh-results');
+  const count = document.getElementById('gh-count');
+  const n = ghResults.length;
+  count.textContent = n + ' candidate' + (n !== 1 ? 's' : '');
+
+  if (!n) {
+    wrap.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">Search above to see candidates here.</div>';
+    return;
+  }
+
+  const cards = ghResults.map(p => {
+    const displayName = p.name || p.login;
+    const roleLine = [p.company ? p.company.replace(/^@/, '') : '', p.location].filter(Boolean).join(' · ');
+    const stats = [
+      p.followers != null ? `👥 ${p.followers} followers` : '',
+      p.publicRepos != null ? `📦 ${p.publicRepos} repos` : '',
+      p.hireable ? '✅ Hireable' : '',
+      p.email ? `✉️ ${esc(p.email)}` : ''
+    ].filter(Boolean);
+    return `
+    <div class="profile-card">
+      ${p.avatar
+        ? `<img class="profile-avatar" src="${esc(p.avatar)}" alt="" style="object-fit:cover;">`
+        : `<div class="profile-avatar">${esc((displayName || '?')[0].toUpperCase())}</div>`}
+      <div class="profile-card-main">
+        <div class="profile-card-top">
+          <div style="flex:1;min-width:0;">
+            <div class="profile-name">${esc(displayName)} <span style="color:var(--muted);font-weight:400;">@${esc(p.login)}</span></div>
+            <div class="profile-headline">${esc(p.bio) || 'No bio'}</div>
+            ${roleLine ? `<div class="profile-meta">${esc(roleLine)}</div>` : ''}
+          </div>
+          <a class="profile-linkedin-btn" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">↗ GitHub</a>
+        </div>
+        ${stats.length ? `<div class="profile-skills">
+          ${stats.map(s => `<span class="skill-tag">${s}</span>`).join('')}
+        </div>` : ''}
+      </div>
+    </div>
+  `;
+  });
+
+  wrap.innerHTML = '<div class="profile-cards">' + cards.join('') + '</div>';
+}
+
+loadGitHubSettings();
 
 // ══════════════════════════════════════════════
 // CUSTOM ROLES — localStorage
