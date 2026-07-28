@@ -298,20 +298,37 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 .interview-q:last-child{border-bottom:none;}
 .interview-q strong{color:var(--accent);font-size:10px;text-transform:uppercase;
   letter-spacing:1px;display:block;margin-bottom:3px;}
-.profile-row{
-  display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);
-  align-items:flex-start;
+.profile-cards{display:flex;flex-direction:column;gap:10px;}
+.profile-card{
+  display:flex;gap:12px;padding:14px;border:1px solid var(--border);
+  border-radius:var(--r);align-items:flex-start;background:var(--surface2);
+  transition:border-color 0.15s,background 0.15s;
 }
-.profile-row:last-child{border-bottom:none;}
+.profile-card:hover{border-color:var(--border2);background:var(--surface);}
 .profile-avatar{
-  width:34px;height:34px;border-radius:50%;background:var(--surface3);
-  display:grid;place-items:center;font-size:14px;flex-shrink:0;border:1px solid var(--border);
+  width:36px;height:36px;border-radius:50%;background:var(--surface3);
+  display:grid;place-items:center;font-size:15px;flex-shrink:0;border:1px solid var(--border);
 }
-.profile-name{font-weight:600;font-size:13px;color:var(--text);}
+.profile-card-main{flex:1;min-width:0;}
+.profile-card-top{display:flex;align-items:flex-start;gap:8px;}
+.profile-name{font-weight:600;font-size:13.5px;color:var(--text);}
 .profile-meta{font-size:11.5px;color:var(--muted);margin-top:2px;}
-.profile-skills{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.profile-fields{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:4px 14px;margin-top:9px;
+}
+.profile-field{font-size:11.5px;color:var(--text);}
+.profile-field span{color:var(--muted);}
+.profile-skills{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
 .skill-tag{font-size:10px;padding:2px 7px;border-radius:4px;
   background:var(--accent-glow);border:1px solid rgba(35,131,226,0.2);color:var(--accent);}
+.profile-linkedin-btn{
+  flex-shrink:0;display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:600;padding:5px 10px;border-radius:5px;
+  background:#0a66c2;color:#fff;text-decoration:none;white-space:nowrap;
+  transition:background 0.12s;
+}
+.profile-linkedin-btn:hover{background:#0958a8;}
 .jd-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
 .jd-tab{font-size:12px;padding:5px 13px;border-radius:14px;cursor:pointer;
   border:1px solid var(--border2);color:var(--muted);background:var(--surface);
@@ -1165,7 +1182,12 @@ function talentDataPersonToProfile(person) {
   const currentRole = (person.experience && person.experience.employment_details &&
     person.experience.employment_details.current && person.experience.employment_details.current[0]) || {};
   const pn = person.professional_network || {};
-  const url = pn.linkedin_profile_url || pn.profile_url || bp.linkedin_url ||
+  const sh = person.social_handles || {};
+  const pnIdentifier = sh.professional_network_identifier || {};
+  // Crustdata's v2 (2025-11-01) response nests the LinkedIn URL here — verified
+  // against the API's own schema docs. Older fallbacks kept in case a differently
+  // shaped response ever comes back from a legacy endpoint.
+  const url = pnIdentifier.profile_url || pn.linkedin_profile_url || pn.profile_url || bp.linkedin_url ||
     person.professional_network_profile_url ||
     (person.crustdata_person_id ? `https://api.crustdata.com/person/${person.crustdata_person_id}` : '');
 
@@ -1294,24 +1316,35 @@ function renderTalentDataResults() {
     ? niceEl.value.split(',').map(s => s.trim()).filter(Boolean)
     : [];
 
-  wrap.innerHTML = cdResults.slice().reverse().map(p => {
+  wrap.innerHTML = '<div class="profile-cards">' + cdResults.slice().reverse().map(p => {
     const haystack = ((p.jobTitle || '') + ' ' + (p.snippet || '') + ' ' + (p.company || '')).toLowerCase();
     const niceMatches = niceList.filter(k => k && haystack.includes(k.toLowerCase()));
+    const isLinkedIn = p.url && p.url.toLowerCase().includes('linkedin.com/in/');
     return `
-    <div class="profile-row">
+    <div class="profile-card">
       <div class="profile-avatar">🛰️</div>
-      <div style="flex:1;min-width:0;">
-        <div class="profile-name">${esc(p.name || 'Unknown')}</div>
-        <div class="profile-meta">${esc([p.jobTitle, p.company, p.location].filter(Boolean).join(' · ') || p.url)}</div>
-        ${(p.email || p.phone || niceMatches.length) ? `<div class="profile-skills">
-          ${p.email ? `<span class="skill-tag">✉ ${esc(p.email)}</span>` : ''}
-          ${p.phone ? `<span class="skill-tag">☎ ${esc(p.phone)}</span>` : ''}
+      <div class="profile-card-main">
+        <div class="profile-card-top">
+          <div style="flex:1;min-width:0;">
+            <div class="profile-name">${esc(p.name || 'Unknown')}</div>
+            <div class="profile-meta">${esc(p.jobTitle || '') || 'Title unknown'}</div>
+          </div>
+          ${p.url ? `<a class="profile-linkedin-btn" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">${isLinkedIn ? '🔗 LinkedIn' : '↗ Profile'}</a>` : ''}
+        </div>
+        <div class="profile-fields">
+          ${p.company ? `<div class="profile-field"><span>Company: </span>${esc(p.company)}</div>` : ''}
+          ${p.location ? `<div class="profile-field"><span>Location: </span>${esc(p.location)}</div>` : ''}
+          ${p.email ? `<div class="profile-field"><span>Email: </span>${esc(p.email)}</div>` : ''}
+          ${p.phone ? `<div class="profile-field"><span>Phone: </span>${esc(p.phone)}</div>` : ''}
+        </div>
+        ${p.snippet ? `<div class="profile-meta" style="margin-top:6px;">${esc(p.snippet)}</div>` : ''}
+        ${niceMatches.length ? `<div class="profile-skills">
           ${niceMatches.map(m => `<span class="skill-tag" style="background:var(--ai-glow);border-color:rgba(217,115,13,0.3);color:var(--ai);">✨ ${esc(m)}</span>`).join('')}
         </div>` : ''}
       </div>
     </div>
   `;
-  }).join('');
+  }).join('') + '</div>';
 }
 
 async function exportTalentDataToSheet() {
