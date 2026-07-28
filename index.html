@@ -1062,6 +1062,16 @@ function switchTab(name, el) {
 // ══════════════════════════════════════════════
 let cdResults = [];
 
+// API error payloads are sometimes a string, sometimes a structured object (Crustdata
+// itself is inconsistent here) — never assume it's a string, or status messages end up
+// literally showing "[object Object]".
+function errText(err) {
+  if (!err) return '';
+  if (typeof err === 'string') return err;
+  if (err.message) return String(err.message);
+  try { return JSON.stringify(err); } catch (e) { return String(err); }
+}
+
 function loadTalentDataSettings() {
   const webhook   = localStorage.getItem('tt_cd_webhook');
   const role      = localStorage.getItem('tt_cd_role');
@@ -1130,7 +1140,7 @@ async function searchTalentData() {
       })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+    if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
 
     const found = (data.profiles || []).map(talentDataPersonToProfile);
     const existingUrls = new Set(cdResults.map(p => p.url));
@@ -1199,7 +1209,7 @@ async function enrichTalentDataResults() {
         body: JSON.stringify({ urls })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+      if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
 
       batch.forEach(p => {
         const matchKey = normalizeCdUrl(p.url);
