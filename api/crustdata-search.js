@@ -31,15 +31,24 @@ export default async function handler(req, res) {
 
   // Build filter conditions array.
   //
-  // IMPORTANT — validated against Crustdata's actual error responses (do not "clean up"
-  // these without re-testing against a live call):
+  // IMPORTANT — field names and operators below are validated against Crustdata's
+  // actual /person/search (v2025-11-01) schema and error responses. Do not "clean up"
+  // or "simplify" these without re-testing against a live call — several of these
+  // exact names were only discovered by triggering Crustdata's "Unsupported filter
+  // field" error and reading its returned list of valid fields:
   //   - filters.type must be one of: =, !=, <, =<, >, =>, in, not_in, (.), (!), [.],
   //     geo_distance, geo_exclude, has_all — 'contains'/'gte'/'lte'/'equals' are NOT
   //     valid and will 400. Use '[.]' for substring/text matching, '=>' for >=, '=<'
   //     for <=, and '=' for exact match.
-  //   - 'location.raw' is not a valid top-level field — Crustdata's "Unsupported
-  //     filter field" response confirms the real field is nested under
-  //     'professional_network.location.raw'.
+  //   - Location is 'basic_profile.location' (a free-text field) — NOT 'location.raw'
+  //     or 'professional_network.location.raw' (both rejected as unsupported).
+  //   - Current company is 'experience.employment_details.current.company_name' — NOT
+  //     '...current.company' (rejected as unsupported).
+  //   - Skills is 'skills.professional_network_skills' — NOT bare 'skills' (rejected).
+  //   - Years of experience is the TOP-LEVEL field 'years_of_experience_raw' — NOT
+  //     nested under 'experience.total_years_of_experience'.
+  //   - Seniority is nested: 'experience.employment_details.current.seniority_level' —
+  //     NOT a top-level 'seniority_level' field.
   //   - The filters payload must always be wrapped as { op, conditions: [...] }, even
   //     for a single condition — a bare condition object 400s with
   //     "Missing required field: filters.op". This applies to OR-groups too.
@@ -55,7 +64,7 @@ export default async function handler(req, res) {
   // Location
   if (location && String(location).trim()) {
     conditions.push({
-      field: 'professional_network.location.raw',
+      field: 'basic_profile.location',
       type: '[.]',
       value: String(location).trim()
     });
@@ -65,11 +74,11 @@ export default async function handler(req, res) {
   if (currentCompany && String(currentCompany).trim()) {
     const companyList = String(currentCompany).split(',').map(s => s.trim()).filter(Boolean);
     if (companyList.length === 1) {
-      conditions.push({ field: 'experience.employment_details.current.company', type: '[.]', value: companyList[0] });
+      conditions.push({ field: 'experience.employment_details.current.company_name', type: '[.]', value: companyList[0] });
     } else if (companyList.length > 1) {
       conditions.push({
         op: 'or',
-        conditions: companyList.map(c => ({ field: 'experience.employment_details.current.company', type: '[.]', value: c }))
+        conditions: companyList.map(c => ({ field: 'experience.employment_details.current.company_name', type: '[.]', value: c }))
       });
     }
   }
@@ -78,28 +87,28 @@ export default async function handler(req, res) {
   if (mustSkills && String(mustSkills).trim()) {
     const skillsList = String(mustSkills).split(',').map(s => s.trim()).filter(Boolean);
     if (skillsList.length === 1) {
-      conditions.push({ field: 'skills', type: '[.]', value: skillsList[0] });
+      conditions.push({ field: 'skills.professional_network_skills', type: '[.]', value: skillsList[0] });
     } else if (skillsList.length > 1) {
       conditions.push({
         op: 'or',
-        conditions: skillsList.map(s => ({ field: 'skills', type: '[.]', value: s }))
+        conditions: skillsList.map(s => ({ field: 'skills.professional_network_skills', type: '[.]', value: s }))
       });
     }
   }
 
-  // Experience range (years)
+  // Experience range (years) — top-level field, not nested under experience.*
   const minExpNum = parseInt(minExp, 10);
   const maxExpNum = parseInt(maxExp, 10);
   if (!isNaN(minExpNum) && minExpNum > 0) {
-    conditions.push({ field: 'experience.total_years_of_experience', type: '=>', value: minExpNum });
+    conditions.push({ field: 'years_of_experience_raw', type: '=>', value: minExpNum });
   }
   if (!isNaN(maxExpNum) && maxExpNum > 0) {
-    conditions.push({ field: 'experience.total_years_of_experience', type: '=<', value: maxExpNum });
+    conditions.push({ field: 'years_of_experience_raw', type: '=<', value: maxExpNum });
   }
 
-  // Seniority level — Crustdata field name inferred; adjust if it 400s
+  // Seniority level — nested under current employment, not a top-level field
   if (seniority && String(seniority).trim()) {
-    conditions.push({ field: 'seniority_level', type: '=', value: String(seniority).trim() });
+    conditions.push({ field: 'experience.employment_details.current.seniority_level', type: '=', value: String(seniority).trim() });
   }
 
   const filters = { op: 'and', conditions };
