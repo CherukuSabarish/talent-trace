@@ -54,26 +54,31 @@
 <title>TalentTrace</title>
 <style>
 :root {
-  /* Notion-style light palette */
-  --bg: #ffffff;
-  --sidebar-bg: #fbfbfa;
+  /* Light product palette — gray canvas, white elevated surfaces */
+  --bg: #f6f7f8;
   --surface: #ffffff;
   --surface2: #f7f6f5;
   --surface3: #efeeec;
   --accent: #2383e2;
   --accent2: #0b6e99;
+  --accent-bright: #5b9eff;
   --accent-glow: rgba(35,131,226,0.12);
   --ai: #d9730d;
   --ai-glow: rgba(217,115,13,0.12);
   --warn: #dfab01;
   --danger: #e03e3e;
-  --green: #448361;
+  --green: #2f9e63;
+  --green-glow: rgba(47,158,99,0.12);
   --text: #37352f;
   --muted: #8a8a86;
   --border: #e9e9e7;
   --border2: #dcdcda;
-  --r: 6px;
-  --sidebar-w: 244px;
+  --r: 8px;
+  --nav-h: 56px;
+  --nav-bg: #14142b;
+  --nav-muted: #9797ab;
+  --shadow-card: 0 1px 2px rgba(20,20,30,0.04), 0 1px 6px rgba(20,20,30,0.05);
+  --shadow-card-hover: 0 2px 4px rgba(20,20,30,0.05), 0 4px 14px rgba(20,20,30,0.08);
   --font: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,"Helvetica Neue",Arial,sans-serif;
   --mono: ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
 }
@@ -84,63 +89,70 @@ body{
   color:var(--text);
   font-family:var(--font);
   min-height:100vh;
-  padding-bottom:80px;
+  padding-top:var(--nav-h);
+  padding-bottom:60px;
   -webkit-font-smoothing:antialiased;
 }
 
-/* ── SIDEBAR ── */
-.sidebar{
-  position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);
-  background:var(--sidebar-bg);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;padding:14px 8px;z-index:200;
-  overflow-y:auto;
+/* ── TOP NAV ── */
+.topnav{
+  position:fixed;top:0;left:0;right:0;height:var(--nav-h);
+  background:var(--nav-bg);z-index:200;
+  display:flex;align-items:center;
+  border-bottom:1px solid rgba(255,255,255,0.07);
 }
-.brand{display:flex;align-items:center;gap:8px;padding:6px 8px 4px;}
-.brand-icon{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;font-size:15px;background:var(--surface3);}
-.brand-name{font-weight:700;font-size:14px;letter-spacing:-0.2px;color:var(--text);}
-.brand-name span{color:var(--accent);}
-.nav-pill{
-  font-family:var(--mono);font-size:9.5px;margin:2px 8px 16px;
-  padding:3px 8px;background:var(--ai-glow);
-  border:1px solid rgba(217,115,13,0.25);color:var(--ai);
-  border-radius:4px;letter-spacing:0.3px;display:inline-block;width:fit-content;
+.topnav-inner{
+  width:100%;max-width:1360px;margin:0 auto;padding:0 28px;
+  display:flex;align-items:center;gap:26px;
 }
-.sidebar-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;padding:10px 12px 6px;}
+.brand{display:flex;align-items:center;gap:9px;flex-shrink:0;}
+.brand-icon{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:14px;background:var(--accent);}
+.brand-name{font-weight:700;font-size:14px;letter-spacing:-0.2px;color:#fff;}
+.brand-name span{color:var(--accent-bright);}
+.topnav-sub{font-size:10px;color:var(--nav-muted);margin-top:-1px;}
 
-/* ── TABS (sidebar nav items) ── */
-.tabs{display:flex;flex-direction:column;gap:1px;}
+/* ── TABS (top nav items) ── */
+.tabs{display:flex;align-items:center;gap:2px;overflow-x:auto;}
 .tab{
-  font-family:var(--font);font-size:13.5px;font-weight:500;
-  padding:7px 10px;border-radius:5px;
-  border:none;cursor:pointer;color:var(--text);opacity:0.75;background:transparent;
-  transition:background 0.12s;display:flex;align-items:center;gap:8px;
-  text-align:left;width:100%;white-space:nowrap;
+  font-family:var(--font);font-size:13px;font-weight:600;
+  padding:8px 13px;border-radius:6px;
+  border:none;cursor:pointer;color:var(--nav-muted);background:transparent;
+  transition:background 0.12s,color 0.12s;display:flex;align-items:center;gap:7px;
+  text-align:left;white-space:nowrap;
 }
-.tab:hover{background:var(--surface3);opacity:1;}
-.tab.active{background:var(--surface3);opacity:1;font-weight:600;}
+.tab:hover{background:rgba(255,255,255,0.07);color:#fff;}
+.tab.active{background:rgba(255,255,255,0.09);color:#fff;}
+.topnav-right{margin-left:auto;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.navpill{
+  display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;
+  padding:4px 10px;border-radius:20px;letter-spacing:0.2px;white-space:nowrap;
+}
+.navpill.ai{background:rgba(217,115,13,0.2);color:#f2ab6d;border:1px solid rgba(217,115,13,0.4);}
+.topnav-version{font-family:var(--mono);font-size:10px;color:var(--nav-muted);white-space:nowrap;}
 
 /* ── MAIN / PANELS ── */
-.main{margin-left:var(--sidebar-w);min-height:100vh;}
-.panel{display:none;padding:40px 48px;max-width:1120px;animation:fadeUp 0.2s ease;}
+.main{min-height:calc(100vh - var(--nav-h));}
+.panel{display:none;padding:36px 48px 60px;max-width:1120px;margin:0 auto;animation:fadeUp 0.2s ease;}
 .panel.active{display:block;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
 
 /* ── LAYOUT ── */
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
 @media(max-width:860px){
-  .sidebar{position:relative;width:100%;height:auto;flex-direction:row;align-items:center;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border);}
-  .main{margin-left:0;}
+  .topnav-inner{padding:0 16px;gap:16px;}
+  .brand-name,.topnav-sub{display:none;}
   .grid-2{grid-template-columns:1fr;}
   .panel{padding-left:18px;padding-right:18px;}
-  .tabs{flex-direction:row;}
 }
 
 /* ── CARDS ── */
 .card{
   background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r);padding:20px;transition:border-color 0.15s;
+  border-radius:var(--r);padding:20px;
+  box-shadow:var(--shadow-card);
+  transition:box-shadow 0.15s,border-color 0.15s;
 }
-.card:hover{border-color:var(--border2);}
+.card:hover{border-color:var(--border2);box-shadow:var(--shadow-card-hover);}
 .card-head{display:flex;align-items:center;gap:8px;margin-bottom:18px;}
 .card-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;}
 .card-title{font-size:11px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:1px;}
@@ -174,13 +186,13 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
   font-family:var(--font);font-size:13px;font-weight:600;
   transition:all 0.12s;white-space:nowrap;
 }
-.btn-primary{background:var(--accent);color:#ffffff;}
-.btn-primary:hover{background:#1a73d4;}
+.btn-primary{background:var(--accent);color:#ffffff;box-shadow:0 1px 2px rgba(35,131,226,0.3);}
+.btn-primary:hover{background:#1a73d4;box-shadow:0 2px 6px rgba(35,131,226,0.35);}
 .btn-linkedin{background:#0a66c2;color:white;}
 .btn-linkedin:hover{background:#0958a8;}
 .btn-ghost{background:var(--surface);color:var(--text);border:1px solid var(--border2);}
 .btn-ghost:hover{background:var(--surface3);border-color:var(--muted);}
-.btn-ai{background:var(--ai);color:white;}
+.btn-ai{background:var(--ai);color:white;box-shadow:0 1px 2px rgba(217,115,13,0.3);}
 .btn-ai:hover{background:#bf640c;}
 .btn-danger{background:transparent;color:var(--danger);border:1px solid rgba(224,62,62,0.3);}
 .btn-danger:hover{background:rgba(224,62,62,0.08);border-color:var(--danger);}
@@ -300,18 +312,15 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
   letter-spacing:1px;display:block;margin-bottom:3px;}
 .profile-cards{display:flex;flex-direction:column;gap:10px;}
 .profile-card{
-  display:flex;gap:12px;padding:14px;border:1px solid var(--border);
-  border-radius:var(--r);align-items:flex-start;background:var(--surface2);
-  transition:border-color 0.15s,background 0.15s;
+  display:flex;gap:12px;padding:15px 16px;border:1px solid var(--border);
+  border-radius:var(--r);align-items:flex-start;background:var(--surface);
+  box-shadow:var(--shadow-card);
+  transition:box-shadow 0.15s,border-color 0.15s;
 }
-.profile-card:hover{border-color:var(--border2);background:var(--surface);}
-.profile-avatar{
-  width:36px;height:36px;border-radius:50%;background:var(--surface3);
-  display:grid;place-items:center;font-size:15px;flex-shrink:0;border:1px solid var(--border);
-}
+.profile-card:hover{border-color:var(--border2);box-shadow:var(--shadow-card-hover);}
 .profile-card-main{flex:1;min-width:0;}
 .profile-card-top{display:flex;align-items:flex-start;gap:8px;}
-.profile-name{font-weight:600;font-size:13.5px;color:var(--text);}
+.profile-name{font-weight:700;font-size:13.5px;color:var(--text);}
 .profile-meta{font-size:11.5px;color:var(--muted);margin-top:2px;}
 .profile-fields{
   display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
@@ -319,13 +328,21 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 }
 .profile-field{font-size:11.5px;color:var(--text);}
 .profile-field span{color:var(--muted);}
-.profile-skills{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+.profile-skills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
 .skill-tag{font-size:10px;padding:2px 7px;border-radius:4px;
   background:var(--accent-glow);border:1px solid rgba(35,131,226,0.2);color:var(--accent);}
+/* Bold solid status pills — same visual language as an ATS pipeline stage tag */
+.status-pill{
+  display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:0.4px;padding:3px 8px;border-radius:4px;color:#fff;
+}
+.status-pill.contact{background:var(--green);}
+.status-pill.nocontact{background:var(--surface3);color:var(--muted);text-transform:none;font-weight:600;letter-spacing:0;}
 .profile-linkedin-btn{
   flex-shrink:0;display:inline-flex;align-items:center;gap:4px;
-  font-size:11px;font-weight:600;padding:5px 10px;border-radius:5px;
+  font-size:11px;font-weight:700;padding:6px 11px;border-radius:6px;
   background:#0a66c2;color:#fff;text-decoration:none;white-space:nowrap;
+  box-shadow:0 1px 2px rgba(10,102,194,0.35);
   transition:background 0.12s;
 }
 .profile-linkedin-btn:hover{background:#0958a8;}
@@ -354,32 +371,31 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 /* ── SECTION HINT (short helper line under a card-head, before the fields) ── */
 .section-hint{font-size:11.5px;color:var(--muted);line-height:1.5;margin:-10px 0 16px;}
 
-/* ── SIDEBAR FOOTER ── */
-.sidebar-footer{margin-top:auto;padding:10px 8px 2px;border-top:1px solid var(--border);}
-.sidebar-version{font-family:var(--mono);font-size:9.5px;color:var(--muted);padding:4px 8px;letter-spacing:0.3px;}
 </style>
 </head>
 <body>
 
-<!-- ── SIDEBAR ── -->
-<div class="sidebar">
-  <div class="brand">
-    <div class="brand-icon">🎯</div>
-    <div>
-      <div class="brand-name">Talent<span>Trace</span></div>
-      <div style="font-size:10px;color:var(--muted);margin-top:-1px;">Recruiting workspace</div>
+<!-- ── TOP NAV ── -->
+<div class="topnav">
+  <div class="topnav-inner">
+    <div class="brand">
+      <div class="brand-icon">🎯</div>
+      <div>
+        <div class="brand-name">Talent<span>Trace</span></div>
+        <div class="topnav-sub">Recruiting workspace</div>
+      </div>
     </div>
-  </div>
 
-  <div class="sidebar-label">Sourcing Tools</div>
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('builder',this)">⚙️ Boolean Builder</button>
-    <button class="tab" onclick="switchTab('jd',this)">🧠 JD Analyzer <span style="font-size:9px;background:var(--ai-glow);color:var(--ai);border:1px solid rgba(217,115,13,0.3);border-radius:4px;padding:1px 6px;margin-left:auto;">AI</span></button>
-    <button class="tab" onclick="switchTab('crustdata',this)">🛰️ TalentData Search <span style="font-size:9px;background:var(--accent-glow);color:var(--accent2);border:1px solid rgba(35,131,226,0.3);border-radius:4px;padding:1px 6px;margin-left:auto;">LIVE</span></button>
-  </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('builder',this)">⚙️ Boolean Builder</button>
+      <button class="tab" onclick="switchTab('jd',this)">🧠 JD Analyzer</button>
+      <button class="tab" onclick="switchTab('crustdata',this)">🛰️ TalentData Search</button>
+    </div>
 
-  <div class="sidebar-footer">
-    <div class="sidebar-version">✦ TalentTrace v9</div>
+    <div class="topnav-right">
+      <span class="navpill ai">✦ AI-Powered</span>
+      <span class="topnav-version">v9</span>
+    </div>
   </div>
 </div>
 
@@ -842,19 +858,6 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
     </div>
     <label>Result Limit <span style="color:var(--muted);text-transform:none;font-weight:400;">(max 100 — controls API credit spend)</span></label>
     <input id="cd-limit" type="number" min="1" max="100" value="20" style="max-width:140px;">
-
-    <div class="btn-row" style="margin-top:6px;">
-      <button class="btn btn-primary" onclick="searchTalentData()" id="cd-search-btn">
-        <span id="cd-search-text">🛰️ Search TalentData</span>
-        <div class="spinner" id="cd-search-spinner"></div>
-      </button>
-      <button class="btn btn-ghost" onclick="enrichTalentDataResults()" id="cd-enrich-btn" style="border-color:rgba(35,131,226,0.3);color:var(--accent2);">
-        <span id="cd-enrich-text">🔎 Enrich LinkedIn results</span>
-        <div class="spinner" id="cd-enrich-spinner"></div>
-      </button>
-      <button class="btn btn-danger" onclick="clearTalentDataResults()">🗑 Clear</button>
-    </div>
-    <div class="status" id="cd-search-status"></div>
   </div>
 
   <!-- Criteria card — must haves / good to haves / companies / other notes -->
@@ -882,6 +885,15 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
     <textarea class="form-area" id="cd-notes" placeholder="Anything else worth remembering for this search — team context, must-avoid companies, visa constraints, notice period, etc."></textarea>
     <div style="font-size:10px;color:var(--muted);margin-top:-10px;">Saved in this browser for next time · sent along on export, but your Sheet needs a "Notes" column (Apps Script v5 doesn't have one yet) for it to actually land anywhere</div>
   </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="searchTalentData()" id="cd-search-btn">
+      <span id="cd-search-text">🛰️ Search TalentData</span>
+      <div class="spinner" id="cd-search-spinner"></div>
+    </button>
+    <button class="btn btn-danger" onclick="clearTalentDataResults()">🗑 Clear</button>
+  </div>
+  <div class="status" id="cd-search-status" style="margin-bottom:16px;"></div>
 
   <div class="card" style="margin-bottom:16px;">
     <div class="card-head">
@@ -1374,17 +1386,18 @@ function renderTalentDataResults() {
     const isLinkedIn = p.url && p.url.toLowerCase().includes('linkedin.com/in/');
     return `
     <div class="profile-card">
-      <div class="profile-avatar">🛰️</div>
       <div class="profile-card-main">
         <div class="profile-card-top">
           <div style="flex:1;min-width:0;">
             <div class="profile-name">${esc(p.name || 'Unknown')}</div>
-            <div class="profile-meta">${esc(p.jobTitle || '') || 'Title unknown'}</div>
+            <div class="profile-meta">${esc([p.jobTitle, p.company].filter(Boolean).join(' · ')) || 'Title unknown'}</div>
           </div>
           ${p.url ? `<a class="profile-linkedin-btn" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">${isLinkedIn ? '🔗 LinkedIn' : '↗ Profile'}</a>` : ''}
         </div>
+        <div style="margin-top:9px;">
+          <span class="status-pill ${(p.email || p.phone) ? 'contact' : 'nocontact'}">${(p.email || p.phone) ? '✓ Contact Found' : 'No Contact Info'}</span>
+        </div>
         <div class="profile-fields">
-          ${p.company ? `<div class="profile-field"><span>Company: </span>${esc(p.company)}</div>` : ''}
           ${p.location ? `<div class="profile-field"><span>Location: </span>${esc(p.location)}</div>` : ''}
           ${p.email ? `<div class="profile-field"><span>Email: </span>${esc(p.email)}</div>` : ''}
           ${p.phone ? `<div class="profile-field"><span>Phone: </span>${esc(p.phone)}</div>` : ''}
