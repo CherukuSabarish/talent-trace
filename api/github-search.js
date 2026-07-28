@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { keywords, language, location, minFollowers, minRepos, limit } = req.body || {};
+  const { keywords, language, location, minFollowers, minRepos, limit, page } = req.body || {};
 
   // Build the search qualifier string. Keywords match login/name/bio/email by default.
   const parts = [];
@@ -57,6 +57,10 @@ export default async function handler(req, res) {
   }
 
   const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 20, 1), MAX_RESULTS);
+  // GitHub's Search API refuses to paginate past the first 1000 results, so cap the
+  // page number at whatever stays inside that window for this page size.
+  const maxPage = Math.max(1, Math.floor(1000 / safeLimit));
+  const safePage = Math.min(Math.max(parseInt(page, 10) || 1, 1), maxPage);
   const q = parts.join(' ');
 
   const ghHeaders = {
@@ -68,7 +72,7 @@ export default async function handler(req, res) {
 
   try {
     const searchUrl = GITHUB_API + '/search/users?q=' + encodeURIComponent(q) +
-      '&sort=followers&order=desc&per_page=' + safeLimit;
+      '&sort=followers&order=desc&per_page=' + safeLimit + '&page=' + safePage;
     const searchRes = await fetch(searchUrl, { headers: ghHeaders });
     const searchData = await searchRes.json().catch(() => ({}));
 
@@ -109,7 +113,15 @@ export default async function handler(req, res) {
       };
     }));
 
-    res.status(200).json({ totalCount: searchData.total_count || 0, profiles });
+    const total = searchData.total_count || 0;
+    res.status(200).json({
+      totalCount: total,
+      page: safePage,
+      // False once we've served the last page of matches, or hit GitHub's 1000-result
+      // pagination ceiling — the client uses this to hide its "Load More" button.
+      hasMore: items.length === safeLimit && safePage < maxPage && safePage * safeLimit < total,
+      profiles
+    });
   } catch (err) {
     res.status(502).json({ error: 'Could not reach GitHub: ' + err.message });
   }
