@@ -1,19 +1,10 @@
-// api/github-search.js — TalentTrace
-// Proxies candidate search to GitHub's Search Users API. Same server-side-key model
-// as crustdata-search.js — the token lives only in this serverless function's
-// environment (GITHUB_TOKEN, set in Vercel Project Settings → Environment Variables)
-// and never reaches the browser.
-//
-// Flow: 1) GET /search/users with qualifiers built from the form fields.
-//       2) The search result only has login/avatar/html_url, so we enrich each hit
-//          with GET /users/{login} (name, company, location, bio, public email,
-//          followers, repos) — fetched in parallel, capped at 30 per request.
-//
-// Docs: https://docs.github.com/en/rest/search/search#search-users
-//       https://docs.github.com/en/search-github/searching-on-github/searching-users
+// api/crustdata-search.js — TalentTrace v9
+// Proxies people search to Crustdata's REST API. The API key lives only in this
+// serverless function's environment (CRUSTDATA_API_KEY, set in Vercel Project
+// Settings → Environment Variables) — it never reaches the browser.
 
-const GITHUB_API = 'https://api.github.com';
-const MAX_RESULTS = 30; // per-request cap — each result costs one extra enrich call
+const CRUSTDATA_BASE = 'https://api.crustdata.com';
+const CRUSTDATA_API_VERSION = '2025-11-01';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -21,96 +12,132 @@ export default async function handler(req, res) {
     return;
   }
 
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) {
+  const apiKey = process.env.CRUSTDATA_API_KEY;
+  if (!apiKey) {
     res.status(500).json({
-      error: 'GITHUB_TOKEN is not configured. Add it in Vercel → Project Settings → Environment Variables, then redeploy.'
+      error: 'CRUSTDATA_API_KEY is not configured. Add it in Vercel → Project Settings → Environment Variables, then redeploy.'
     });
     return;
   }
 
-  const { keywords, language, location, minFollowers, minRepos, limit } = req.body || {};
+  const { title, location, limit, mustSkills, currentCompany, minExp, maxExp, seniority } = req.body || {};
 
-  // Build the search qualifier string. Keywords match login/name/bio/email by default.
-  const parts = [];
-  if (keywords && String(keywords).trim()) parts.push(String(keywords).trim());
-  if (language && String(language).trim()) {
-    // GitHub's language qualifier takes one language at a time; multiple are ANDed,
-    // which is usually what a recruiter means ("knows Go AND Python").
-    String(language).split(',').map(s => s.trim()).filter(Boolean)
-      .forEach(l => parts.push('language:"' + l.replace(/"/g, '') + '"'));
-  }
-  if (location && String(location).trim()) {
-    String(location).split(',').map(s => s.trim()).filter(Boolean)
-      .forEach(l => parts.push('location:"' + l.replace(/"/g, '') + '"'));
-  }
-  const minF = parseInt(minFollowers, 10);
-  if (!isNaN(minF) && minF > 0) parts.push('followers:>=' + minF);
-  const minR = parseInt(minRepos, 10);
-  if (!isNaN(minR) && minR > 0) parts.push('repos:>=' + minR);
-  parts.push('type:user'); // people, not orgs
-
-  // Require at least one real search term besides type:user
-  if (parts.length <= 1) {
-    res.status(400).json({ error: 'Provide at least one of: keywords, language, or location.' });
+  if (!title || !String(title).trim()) {
+    res.status(400).json({ error: 'title is required' });
     return;
   }
 
-  const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 20, 1), MAX_RESULTS);
-  const q = parts.join(' ');
+  const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 100);
 
-  const ghHeaders = {
-    'Authorization': 'Bearer ' + token,
-    'Accept': 'application/vnd.github+json',
-    'X-GitHub-Api-Version': '2022-11-28',
-    'User-Agent': 'TalentTrace'
-  };
+  // Build filter conditions array.
+  //
+  // IMPORTANT — field names and operators below are validated against Crustdata's
+  // actual /person/search (v2025-11-01) schema and error responses. Do not "clean up"
+  // or "simplify" these without re-testing against a live call — several of these
+  // exact names were only discovered by triggering Crustdata's "Unsupported filter
+  // field" error and reading its returned list of valid fields:
+  //   - filters.type must be one of: =, !=, <, =<, >, =>, in, not_in, (.), (!), [.],
+  //     geo_distance, geo_exclude, has_all — 'contains'/'gte'/'lte'/'equals' are NOT
+  //     valid and will 400. Use '[.]' for substring/text matching, '=>' for >=, '=<'
+  //     for <=, and '=' for exact match.
+  //   - Location is 'basic_profile.location' (a free-text field) — NOT 'location.raw'
+  //     or 'professional_network.location.raw' (both rejected as unsupported).
+  //   - Current company is 'experience.employment_details.current.company_name' — NOT
+  //     '...current.company' (rejected as unsupported).
+  //   - Skills is 'skills.professional_network_skills' — NOT bare 'skills' (rejected).
+  //   - Years of experience is the TOP-LEVEL field 'years_of_experience_raw' — NOT
+  //     nested under 'experience.total_years_of_experience'.
+  //   - Seniority is nested: 'experience.employment_details.current.seniority_level' —
+  //     NOT a top-level 'seniority_level' field.
+  //   - The filters payload must always be wrapped as { op, conditions: [...] }, even
+  //     for a single condition — a bare condition object 400s with
+  //     "Missing required field: filters.op". This applies to OR-groups too.
+  const conditions = [];
+
+  // Job title (required)
+  conditions.push({
+    field: 'experience.employment_details.current.title',
+    type: '[.]',
+    value: String(title).trim()
+  });
+
+  // Location
+  if (location && String(location).trim()) {
+    conditions.push({
+      field: 'basic_profile.location',
+      type: '[.]',
+      value: String(location).trim()
+    });
+  }
+
+  // Current company(s) — comma-separated list ORed together, same pattern as mustSkills below
+  if (currentCompany && String(currentCompany).trim()) {
+    const companyList = String(currentCompany).split(',').map(s => s.trim()).filter(Boolean);
+    if (companyList.length === 1) {
+      conditions.push({ field: 'experience.employment_details.current.company_name', type: '[.]', value: companyList[0] });
+    } else if (companyList.length > 1) {
+      conditions.push({
+        op: 'or',
+        conditions: companyList.map(c => ({ field: 'experience.employment_details.current.company_name', type: '[.]', value: c }))
+      });
+    }
+  }
+
+  // Must-have skills — OR across each skill
+  if (mustSkills && String(mustSkills).trim()) {
+    const skillsList = String(mustSkills).split(',').map(s => s.trim()).filter(Boolean);
+    if (skillsList.length === 1) {
+      conditions.push({ field: 'skills.professional_network_skills', type: '[.]', value: skillsList[0] });
+    } else if (skillsList.length > 1) {
+      conditions.push({
+        op: 'or',
+        conditions: skillsList.map(s => ({ field: 'skills.professional_network_skills', type: '[.]', value: s }))
+      });
+    }
+  }
+
+  // Experience range (years) — top-level field, not nested under experience.*
+  const minExpNum = parseInt(minExp, 10);
+  const maxExpNum = parseInt(maxExp, 10);
+  if (!isNaN(minExpNum) && minExpNum > 0) {
+    conditions.push({ field: 'years_of_experience_raw', type: '=>', value: minExpNum });
+  }
+  if (!isNaN(maxExpNum) && maxExpNum > 0) {
+    conditions.push({ field: 'years_of_experience_raw', type: '=<', value: maxExpNum });
+  }
+
+  // Seniority level — nested under current employment, not a top-level field
+  if (seniority && String(seniority).trim()) {
+    conditions.push({ field: 'experience.employment_details.current.seniority_level', type: '=', value: String(seniority).trim() });
+  }
+
+  const filters = { op: 'and', conditions };
 
   try {
-    const searchUrl = GITHUB_API + '/search/users?q=' + encodeURIComponent(q) +
-      '&sort=followers&order=desc&per_page=' + safeLimit;
-    const searchRes = await fetch(searchUrl, { headers: ghHeaders });
-    const searchData = await searchRes.json().catch(() => ({}));
+    const crustRes = await fetch(CRUSTDATA_BASE + '/person/search', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + apiKey,
+        'Content-Type': 'application/json',
+        'x-api-version': CRUSTDATA_API_VERSION
+      },
+      body: JSON.stringify({ filters, limit: safeLimit })
+    });
+    const data = await crustRes.json().catch(() => ({}));
 
-    if (!searchRes.ok) {
-      // GitHub 422s on bad qualifiers with a message + errors[]; 403 on rate limit.
-      const detail = Array.isArray(searchData.errors) && searchData.errors.length
-        ? ' — ' + searchData.errors.map(e => e.message || e.code).filter(Boolean).join('; ')
-        : '';
-      res.status(searchRes.status).json({
-        error: (searchData.message || ('GitHub search failed (HTTP ' + searchRes.status + ')')) + detail
-      });
+    if (!crustRes.ok) {
+      // Crustdata's error field is sometimes a string, sometimes a structured object —
+      // never assume it's a string, or the frontend ends up displaying "[object Object]".
+      const rawError = data.description || data.reason || data.error;
+      const message = typeof rawError === 'string'
+        ? rawError
+        : (rawError && rawError.message) || (rawError ? JSON.stringify(rawError) : ('Crustdata search failed (HTTP ' + crustRes.status + ')'));
+      res.status(crustRes.status).json({ error: message });
       return;
     }
 
-    const items = Array.isArray(searchData.items) ? searchData.items : [];
-
-    // Enrich each hit with the full user profile (parallel; individual failures
-    // degrade to the bare search result instead of failing the whole request).
-    const profiles = await Promise.all(items.map(async (item) => {
-      let u = {};
-      try {
-        const uRes = await fetch(GITHUB_API + '/users/' + encodeURIComponent(item.login), { headers: ghHeaders });
-        if (uRes.ok) u = await uRes.json();
-      } catch (e) { /* keep bare result */ }
-      return {
-        login: item.login,
-        name: u.name || '',
-        url: item.html_url,
-        avatar: item.avatar_url,
-        company: u.company || '',
-        location: u.location || '',
-        bio: u.bio || '',
-        email: u.email || '',           // only if the user made it public
-        blog: u.blog || '',
-        followers: u.followers ?? null,
-        publicRepos: u.public_repos ?? null,
-        hireable: u.hireable === true
-      };
-    }));
-
-    res.status(200).json({ totalCount: searchData.total_count || 0, profiles });
+    res.status(200).json(data);
   } catch (err) {
-    res.status(502).json({ error: 'Could not reach GitHub: ' + err.message });
+    res.status(502).json({ error: 'Could not reach Crustdata: ' + err.message });
   }
 }
