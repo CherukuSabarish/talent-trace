@@ -310,14 +310,19 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 .interview-q:last-child{border-bottom:none;}
 .interview-q strong{color:var(--accent);font-size:10px;text-transform:uppercase;
   letter-spacing:1px;display:block;margin-bottom:3px;}
-.profile-cards{display:flex;flex-direction:column;gap:10px;}
+.profile-cards{display:flex;flex-direction:column;gap:12px;}
 .profile-card{
-  display:flex;gap:12px;padding:15px 16px;border:1px solid var(--border);
-  border-radius:var(--r);align-items:flex-start;background:var(--surface);
-  box-shadow:var(--shadow-card);
-  transition:box-shadow 0.15s,border-color 0.15s;
+  display:flex;gap:12px;padding:16px 18px;border:1px solid var(--border);
+  border-radius:16px;align-items:flex-start;background:var(--surface);
+  box-shadow:0 1px 2px rgba(20,20,30,0.05), 0 2px 8px rgba(20,20,30,0.06);
+  cursor:pointer;
+  transition:box-shadow 0.15s,border-color 0.15s,transform 0.15s;
 }
-.profile-card:hover{border-color:var(--border2);box-shadow:var(--shadow-card-hover);}
+.profile-card:hover{
+  border-color:var(--border2);transform:translateY(-2px);
+  box-shadow:0 4px 10px rgba(20,20,30,0.07), 0 8px 20px rgba(20,20,30,0.09);
+}
+.profile-card:active{transform:translateY(0);box-shadow:0 1px 2px rgba(20,20,30,0.06);}
 .profile-card-main{flex:1;min-width:0;}
 .profile-card-top{display:flex;align-items:flex-start;gap:8px;}
 .profile-name{font-weight:700;font-size:13.5px;color:var(--text);}
@@ -351,6 +356,29 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
   border:1px solid var(--border2);color:var(--muted);background:var(--surface);
   font-weight:600;transition:all 0.12s;}
 .jd-tab.active{background:var(--ai-glow);border-color:rgba(217,115,13,0.4);color:var(--ai);}
+
+/* ── CANDIDATE DETAIL MODAL ── */
+.cand-modal-head{display:flex;align-items:flex-start;gap:14px;margin-bottom:22px;}
+.cand-avatar-lg{
+  width:50px;height:50px;border-radius:50%;background:var(--accent);color:#fff;
+  font-weight:700;font-size:18px;display:grid;place-items:center;flex-shrink:0;
+  box-shadow:0 2px 6px rgba(35,131,226,0.35);
+}
+.cand-modal-name{font-size:17px;font-weight:700;color:var(--text);letter-spacing:-0.2px;}
+.cand-modal-role{font-size:12.5px;color:var(--muted);margin-top:2px;}
+.cand-section{margin-bottom:18px;}
+.cand-section-label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:8px;}
+.cand-field{font-size:13px;color:var(--text);margin-bottom:6px;line-height:1.5;}
+.cand-field:last-child{margin-bottom:0;}
+.cand-field span{color:var(--muted);}
+.cand-contact-locked{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:13px 14px;background:var(--surface2);border:1px dashed var(--border2);border-radius:8px;
+}
+.cand-contact-revealed{
+  padding:13px 14px;background:var(--green-glow);
+  border:1px solid rgba(47,158,99,0.3);border-radius:8px;
+}
 
 /* ── PAGE HEADER (Notion-style page identity block, sits above the first card) ── */
 .page-header{margin-bottom:30px;max-width:640px;}
@@ -985,6 +1013,15 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
   </div>
 </div>
 
+<!-- ══════════════════════════════
+     CANDIDATE DETAIL MODAL — opens on candidate-card click, holds the per-
+     candidate "reveal contact info" enrich action (was the bulk "Enrich
+     LinkedIn results" button, now scoped to one candidate at a time)
+══════════════════════════════ -->
+<div class="modal-overlay" id="candidate-modal-overlay" onclick="closeCandidateModalOutside(event)">
+  <div class="modal" id="candidate-modal" style="max-width:560px;"></div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════
 // DATA
@@ -1268,77 +1305,147 @@ function talentDataPersonToProfile(person) {
   };
 }
 
-async function enrichTalentDataResults() {
-  const targets = cdResults.filter(p => p.url && p.url.toLowerCase().includes('linkedin.com/in/'));
-  if (!targets.length) {
-    showStatus('cd-search-status', 'warn', '⚠ No LinkedIn-URL results to enrich yet — search first.');
+// ── CANDIDATE DETAIL MODAL ──
+// Opens on a candidate-card click (see renderTalentDataResults). Replaces the old
+// bulk "Enrich LinkedIn results" button — enrichment is now a per-candidate action
+// triggered from inside this modal ("Reveal Contact Info"), same /api/crustdata-enrich
+// call as before, just scoped to a single profile URL instead of a batch.
+let cdModalIndex = -1;
+
+function openCandidateModal(i) {
+  cdModalIndex = i;
+  renderCandidateModal();
+  document.getElementById('candidate-modal-overlay').classList.add('open');
+}
+
+function closeCandidateModal() {
+  document.getElementById('candidate-modal-overlay').classList.remove('open');
+  cdModalIndex = -1;
+}
+
+function closeCandidateModalOutside(event) {
+  if (event.target.id === 'candidate-modal-overlay') closeCandidateModal();
+}
+
+function renderCandidateModal() {
+  const p = cdResults[cdModalIndex];
+  const modal = document.getElementById('candidate-modal');
+  if (!p || !modal) return;
+
+  const initials = (p.name || '?').split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+  const isLinkedIn = p.url && p.url.toLowerCase().includes('linkedin.com/in/');
+  const hasContact = !!(p.email || p.phone);
+
+  modal.innerHTML = `
+    <div class="modal-head">
+      <div class="modal-title">Candidate</div>
+      <button class="modal-close" onclick="closeCandidateModal()">✕</button>
+    </div>
+    <div class="cand-modal-head">
+      <div class="cand-avatar-lg">${esc(initials || '?')}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="cand-modal-name">${esc(p.name || 'Unknown')}</div>
+        <div class="cand-modal-role">${esc([p.jobTitle, p.company].filter(Boolean).join(' at ')) || 'Role unknown'}</div>
+      </div>
+      ${p.url ? `<a class="profile-linkedin-btn" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">${isLinkedIn ? '🔗 LinkedIn' : '↗ Profile'}</a>` : ''}
+    </div>
+
+    <div class="cand-section">
+      <div class="cand-section-label">Summary</div>
+      <div class="cand-field">${p.snippet ? esc(p.snippet) : '<span style="color:var(--muted);">No headline captured for this candidate yet — try enriching below.</span>'}</div>
+    </div>
+
+    <div class="cand-section">
+      <div class="cand-section-label">Details</div>
+      <div class="cand-field"><span>Location: </span>${p.location ? esc(p.location) : '—'}</div>
+      <div class="cand-field"><span>Current Company: </span>${p.company ? esc(p.company) : '—'}</div>
+    </div>
+
+    <div class="cand-section" style="margin-bottom:6px;">
+      <div class="cand-section-label">Contact Info</div>
+      ${hasContact ? `
+        <div class="cand-contact-revealed">
+          ${p.email ? `<div class="cand-field">✉ ${esc(p.email)}</div>` : ''}
+          ${p.phone ? `<div class="cand-field">☎ ${esc(p.phone)}</div>` : ''}
+        </div>
+      ` : `
+        <div class="cand-contact-locked">
+          <span style="font-size:12px;color:var(--muted);">Email &amp; phone haven't been revealed yet.</span>
+          <button class="btn btn-ai btn-sm" onclick="enrichCandidateByIndex(${cdModalIndex})" id="cand-enrich-btn" ${isLinkedIn ? '' : 'disabled title="Needs a LinkedIn profile URL to enrich"'}>
+            <span id="cand-enrich-text">🔎 Reveal Contact Info</span>
+            <div class="spinner" id="cand-enrich-spinner"></div>
+          </button>
+        </div>
+      `}
+    </div>
+    <div class="status" id="cand-modal-status"></div>
+  `;
+}
+
+async function enrichCandidateByIndex(i) {
+  const p = cdResults[i];
+  if (!p || !p.url || !p.url.toLowerCase().includes('linkedin.com/in/')) {
+    showStatus('cand-modal-status', 'warn', '⚠ Needs a LinkedIn profile URL to enrich.');
     return;
   }
 
-  const btn = document.getElementById('cd-enrich-btn');
-  const sp  = document.getElementById('cd-enrich-spinner');
-  btn.disabled = true; sp.classList.add('on');
+  const btn = document.getElementById('cand-enrich-btn');
+  const sp  = document.getElementById('cand-enrich-spinner');
+  if (btn) btn.disabled = true;
+  if (sp) sp.classList.add('on');
+  showStatus('cand-modal-status', 'info', '⏳ Enriching from TalentData...');
 
-  let enriched = 0, noMatch = 0, failed = 0;
-  const batches = [];
-  for (let i = 0; i < targets.length; i += 25) batches.push(targets.slice(i, i + 25));
+  try {
+    const res = await fetch('/api/crustdata-enrich', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ urls: [p.url] })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
 
-  for (let i = 0; i < batches.length; i++) {
-    const batch = batches[i];
-    const urls  = batch.map(p => p.url);
-    showStatus('cd-search-status', 'info', `⏳ Enriching batch ${i + 1}/${batches.length} (${batch.length})...`);
+    const matchKey      = normalizeCdUrl(p.url);
+    const enrichEntry    = (data.enrich  || []).find(e => normalizeCdUrl(e.matched_on) === matchKey);
+    const contactEntry   = (data.contact || []).find(e => normalizeCdUrl(e.matched_on) === matchKey);
+    const match          = enrichEntry  && enrichEntry.matches  && enrichEntry.matches[0];
+    const contactMatch   = contactEntry && contactEntry.matches && contactEntry.matches[0];
 
-    try {
-      const res = await fetch('/api/crustdata-enrich', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ urls })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
-
-      batch.forEach(p => {
-        const matchKey = normalizeCdUrl(p.url);
-        const enrichEntry  = (data.enrich  || []).find(e => normalizeCdUrl(e.matched_on) === matchKey);
-        const contactEntry = (data.contact || []).find(e => normalizeCdUrl(e.matched_on) === matchKey);
-        const match        = enrichEntry  && enrichEntry.matches  && enrichEntry.matches[0];
-        const contactMatch = contactEntry && contactEntry.matches && contactEntry.matches[0];
-
-        if (!match && !contactMatch) { noMatch++; return; }
-
-        if (match && match.person_data) {
-          const pd = match.person_data;
-          const currentTitle = pd.experience && pd.experience.employment_details &&
-            pd.experience.employment_details.current && pd.experience.employment_details.current[0] &&
-            pd.experience.employment_details.current[0].title;
-          if (currentTitle) p.jobTitle = currentTitle;
-          if (pd.basic_profile && pd.basic_profile.headline) p.snippet = pd.basic_profile.headline;
-          if (pd.basic_profile && pd.basic_profile.location && pd.basic_profile.location.raw) {
-            p.location = pd.basic_profile.location.raw;
-          }
-        }
-        if (contactMatch && contactMatch.person_data && contactMatch.person_data.contact) {
-          const c = contactMatch.person_data.contact;
-          const bizEmail  = c.business_emails && c.business_emails[0] && c.business_emails[0].email;
-          const persEmail = c.personal_emails && c.personal_emails[0] && c.personal_emails[0].email;
-          p.email = bizEmail || persEmail || p.email || '';
-          p.phone = (c.phone_numbers && c.phone_numbers[0]) || p.phone || '';
-        }
-        enriched++;
-      });
-    } catch(err) {
-      console.error('TalentData enrich batch error:', err);
-      failed += batch.length;
+    if (!match && !contactMatch) {
+      showStatus('cand-modal-status', 'warn', '⚠ No additional TalentData match for this profile.');
+      if (btn) btn.disabled = false;
+      if (sp) sp.classList.remove('on');
+      return;
     }
 
-    if (i < batches.length - 1) await new Promise(r => setTimeout(r, 500));
-  }
+    if (match && match.person_data) {
+      const pd = match.person_data;
+      const currentTitle = pd.experience && pd.experience.employment_details &&
+        pd.experience.employment_details.current && pd.experience.employment_details.current[0] &&
+        pd.experience.employment_details.current[0].title;
+      if (currentTitle) p.jobTitle = currentTitle;
+      if (pd.basic_profile && pd.basic_profile.headline) p.snippet = pd.basic_profile.headline;
+      if (pd.basic_profile && pd.basic_profile.location && pd.basic_profile.location.raw) {
+        p.location = pd.basic_profile.location.raw;
+      }
+    }
+    if (contactMatch && contactMatch.person_data && contactMatch.person_data.contact) {
+      const c = contactMatch.person_data.contact;
+      const bizEmail  = c.business_emails && c.business_emails[0] && c.business_emails[0].email;
+      const persEmail = c.personal_emails && c.personal_emails[0] && c.personal_emails[0].email;
+      p.email = bizEmail || persEmail || p.email || '';
+      p.phone = (c.phone_numbers && c.phone_numbers[0]) || p.phone || '';
+    }
 
-  persistCdResults();
-  renderTalentDataResults();
-  btn.disabled = false; sp.classList.remove('on');
-  showStatus('cd-search-status', enriched ? 'success' : 'warn',
-    `✓ ${enriched} enriched · ${noMatch} no TalentData match` + (failed ? ` · ${failed} failed (try again in a minute)` : ''));
+    persistCdResults();
+    renderTalentDataResults();
+    renderCandidateModal();
+    showStatus('cand-modal-status', 'success', (p.email || p.phone) ? '✓ Contact info revealed.' : '✓ Enriched — no direct contact found.');
+  } catch(err) {
+    console.error('TalentData single enrich error:', err);
+    showStatus('cand-modal-status', 'error', '⚠ ' + (err.message || 'Enrich failed.'));
+    if (btn) btn.disabled = false;
+    if (sp) sp.classList.remove('on');
+  }
 }
 
 function normalizeCdUrl(url) {
@@ -1380,23 +1487,24 @@ function renderTalentDataResults() {
     ? niceEl.value.split(',').map(s => s.trim()).filter(Boolean)
     : [];
 
-  wrap.innerHTML = '<div class="profile-cards">' + cdResults.slice().reverse().map(p => {
+  // Map first (so index i is a stable position in cdResults), THEN reverse the
+  // rendered cards for display — reversing cdResults itself would make i point
+  // at the wrong candidate when a card's onclick opens the detail modal.
+  const cards = cdResults.map((p, i) => {
     const haystack = ((p.jobTitle || '') + ' ' + (p.snippet || '') + ' ' + (p.company || '')).toLowerCase();
     const niceMatches = niceList.filter(k => k && haystack.includes(k.toLowerCase()));
     const isLinkedIn = p.url && p.url.toLowerCase().includes('linkedin.com/in/');
     return `
-    <div class="profile-card">
+    <div class="profile-card" onclick="openCandidateModal(${i})">
       <div class="profile-card-main">
         <div class="profile-card-top">
           <div style="flex:1;min-width:0;">
             <div class="profile-name">${esc(p.name || 'Unknown')}</div>
             <div class="profile-meta">${esc([p.jobTitle, p.company].filter(Boolean).join(' · ')) || 'Title unknown'}</div>
           </div>
-          ${p.url ? `<a class="profile-linkedin-btn" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">${isLinkedIn ? '🔗 LinkedIn' : '↗ Profile'}</a>` : ''}
+          ${p.url ? `<a class="profile-linkedin-btn" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">${isLinkedIn ? '🔗 LinkedIn' : '↗ Profile'}</a>` : ''}
         </div>
-        <div style="margin-top:9px;">
-          <span class="status-pill ${(p.email || p.phone) ? 'contact' : 'nocontact'}">${(p.email || p.phone) ? '✓ Contact Found' : 'No Contact Info'}</span>
-        </div>
+        ${(p.email || p.phone) ? `<div style="margin-top:9px;"><span class="status-pill contact">✓ Contact Found</span></div>` : ''}
         <div class="profile-fields">
           ${p.location ? `<div class="profile-field"><span>Location: </span>${esc(p.location)}</div>` : ''}
           ${p.email ? `<div class="profile-field"><span>Email: </span>${esc(p.email)}</div>` : ''}
@@ -1409,7 +1517,9 @@ function renderTalentDataResults() {
       </div>
     </div>
   `;
-  }).join('') + '</div>';
+  });
+
+  wrap.innerHTML = '<div class="profile-cards">' + cards.slice().reverse().join('') + '</div>';
 }
 
 async function exportTalentDataToSheet() {
