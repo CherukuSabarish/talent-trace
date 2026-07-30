@@ -565,6 +565,8 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 .mi-trend-item{padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text);}
 .mi-trend-item:last-child{border-bottom:none;}
 .mi-caveat{font-size:10.5px;color:var(--muted);font-style:italic;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border2);}
+.mi-source-chip{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:14px;
+  background:var(--surface2);border:1px solid var(--border);font-size:11.5px;color:var(--text);font-weight:600;}
 
 /* Intake chat - modern flat "channel feed" UI (Slack/Discord-style rows: solid
    avatar circle, colored name + timestamp on one line, message below, no bubble
@@ -665,10 +667,12 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 .landing-feature{
   background:#ffffff;border:1px solid rgba(0,47,108,0.08);border-radius:16px;
   padding:24px 18px;box-shadow:0 2px 12px rgba(0,47,108,0.06);
-  transition:transform 0.22s cubic-bezier(.34,1.4,.64,1),box-shadow 0.22s;
-  cursor:default;
+  transition:transform 0.22s cubic-bezier(.34,1.4,.64,1),box-shadow 0.22s,border-color 0.22s;
+  cursor:pointer;
 }
-.landing-feature:hover{transform:translateY(-4px);box-shadow:0 10px 32px rgba(0,164,235,0.16);}
+.landing-feature:hover{transform:translateY(-4px);box-shadow:0 10px 32px rgba(0,164,235,0.16);border-color:rgba(0,164,235,0.35);}
+.landing-feature:active{transform:translateY(-1px);}
+.landing-feature:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
 .landing-footer{
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
   margin-top:36px;padding-top:22px;
@@ -940,7 +944,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
       Find great talent,<br><span class="landing-hl-accent">faster than ever</span>
     </h1>
 
-    <p class="landing-tagline">Your AI-powered recruiting workspace - boolean sourcing, job description analysis, and live candidate search across TalentData &amp; GitHub, all in one place.</p>
+    <p class="landing-tagline">Your AI-powered recruiting workspace - intake the role, understand the market, then source across Boolean, JD Analysis, TalentData &amp; GitHub, all in one flow.</p>
 
     <!-- Hero illustration -->
     <div class="landing-hero-wrap">
@@ -1034,25 +1038,25 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
     <div class="landing-divider"></div>
     <!-- Feature cards: 4 columns -->
     <div class="landing-features">
-      <div class="landing-feature">
-        <div class="landing-feature-icon"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#lbb)"/><defs><linearGradient id="lbb" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="7" y="7" width="10" height="10" rx="3" fill="white" opacity="0.95"/><rect x="23" y="7" width="10" height="10" rx="5" fill="white" opacity="0.6"/><rect x="15" y="23" width="10" height="10" rx="3" fill="white" opacity="0.9"/><line x1="12" y1="17" x2="20" y2="23" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/><line x1="28" y1="17" x2="20" y2="23" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/></svg></div>
-        <div class="landing-feature-title">Boolean Builder</div>
-        <div class="landing-feature-desc">Sourcing strings for LinkedIn, Google X-Ray, StackOverflow &amp; GitHub</div>
+      <div class="landing-feature" onclick="enterWorkspaceAt('intake')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')enterWorkspaceAt('intake')">
+        <div class="landing-feature-icon"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#ltin)"/><defs><linearGradient id="ltin" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><path d="M8 11a3 3 0 0 1 3-3h18a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H16l-6 6v-6h-.01A3 3 0 0 1 8 21V11Z" fill="white" opacity="0.95"/><circle cx="15" cy="16" r="1.6" fill="#002F6C" opacity="0.6"/><circle cx="20" cy="16" r="1.6" fill="#002F6C" opacity="0.6"/><circle cx="25" cy="16" r="1.6" fill="#002F6C" opacity="0.6"/></svg></div>
+        <div class="landing-feature-title">Intake</div>
+        <div class="landing-feature-desc">Chat with the hiring manager to nail down the ICP</div>
       </div>
-      <div class="landing-feature">
-        <div class="landing-feature-icon"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#ljd)"/><defs><linearGradient id="ljd" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#3ab8f5"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="9" y="7" width="18" height="22" rx="3" fill="white" opacity="0.95"/><line x1="13" y1="13" x2="23" y2="13" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="13" y1="17" x2="23" y2="17" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="13" y1="21" x2="19" y2="21" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><path d="M28 22 L29.4 26 L33 27 L29.4 28 L28 32 L26.6 28 L23 27 L26.6 26 Z" fill="white" opacity="0.95"/></svg></div>
-        <div class="landing-feature-title">Job Description Analyzer</div>
-        <div class="landing-feature-desc">Target companies, interview questions &amp; profile checklists</div>
+      <div class="landing-feature" onclick="enterWorkspaceAt('market-intel')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')enterWorkspaceAt('market-intel')">
+        <div class="landing-feature-icon"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#ltmi)"/><defs><linearGradient id="ltmi" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#3ab8f5"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="8" y="21" width="6" height="11" rx="1.5" fill="white" opacity="0.95"/><rect x="17" y="14" width="6" height="18" rx="1.5" fill="white" opacity="0.75"/><rect x="26" y="8" width="6" height="24" rx="1.5" fill="white" opacity="0.95"/></svg></div>
+        <div class="landing-feature-title">Market Intelligence</div>
+        <div class="landing-feature-desc">Compensation bands, demand signal &amp; comparable companies</div>
       </div>
-      <div class="landing-feature">
-        <div class="landing-feature-icon"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#ltd)"/><defs><linearGradient id="ltd" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#477c65"/></linearGradient></defs><circle cx="15" cy="14" r="5" fill="white" opacity="0.95"/><path d="M6 30c0-5 4-9 9-9s9 4 9 9" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.95"/><circle cx="28" cy="22" r="4.5" stroke="white" stroke-width="1.8" fill="none" opacity="0.7"/><circle cx="28" cy="22" r="7.5" stroke="white" stroke-width="1" fill="none" opacity="0.3"/><line x1="31.2" y1="25.2" x2="34.5" y2="28.5" stroke="white" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/></svg></div>
-        <div class="landing-feature-title">TalentData Search</div>
-        <div class="landing-feature-desc">Live candidate search across 800M+ profiles</div>
+      <div class="landing-feature" onclick="enterWorkspaceAt('sourcing')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')enterWorkspaceAt('sourcing')">
+        <div class="landing-feature-icon"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#ltsr)"/><defs><linearGradient id="ltsr" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#477c65"/></linearGradient></defs><circle cx="15" cy="14" r="5" fill="white" opacity="0.95"/><path d="M6 30c0-5 4-9 9-9s9 4 9 9" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.95"/><circle cx="28" cy="22" r="4.5" stroke="white" stroke-width="1.8" fill="none" opacity="0.7"/><line x1="31.2" y1="25.2" x2="34.5" y2="28.5" stroke="white" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/></svg></div>
+        <div class="landing-feature-title">Sourcing</div>
+        <div class="landing-feature-desc">Boolean Builder, JD Analyzer, TalentData &amp; GitHub search, all in one tab</div>
       </div>
-      <div class="landing-feature">
-        <div class="landing-feature-icon"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#lgh)"/><defs><linearGradient id="lgh" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#30363d"/><stop offset="1" stop-color="#111827"/></linearGradient></defs><g transform="translate(8,8) scale(1)"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" fill="white" opacity="0.9"/></g></svg></div>
-        <div class="landing-feature-title">GitHub Search</div>
-        <div class="landing-feature-desc">Find engineers by language, location &amp; activity</div>
+      <div class="landing-feature" onclick="enterWorkspaceAt('diversity')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')enterWorkspaceAt('diversity')">
+        <div class="landing-feature-icon"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#ltdv)"/><defs><linearGradient id="ltdv" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#ff8b3d"/><stop offset="1" stop-color="#ff5da2"/></linearGradient></defs><rect x="7" y="7" width="14" height="14" rx="3" fill="white" opacity="0.95"/><rect x="19" y="19" width="14" height="14" rx="3" fill="white" opacity="0.6"/><rect x="17" y="17" width="6" height="6" rx="1.3" fill="white" opacity="0.95" transform="rotate(45 20 20)"/></svg></div>
+        <div class="landing-feature-title">Other Resources</div>
+        <div class="landing-feature-desc">Diversity sourcing boolean strings &amp; reference lists</div>
       </div>
     </div>
 
@@ -1106,19 +1110,19 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
     </button>
 
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('intake',this)" title="Intake">
+      <button class="tab active" id="nav-tab-intake" onclick="switchTab('intake',this)" title="Intake">
         <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#tin)"/><defs><linearGradient id="tin" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><path d="M8 11a3 3 0 0 1 3-3h18a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H16l-6 6v-6h-.01A3 3 0 0 1 8 21V11Z" fill="white" opacity="0.95"/><circle cx="15" cy="16" r="1.6" fill="#002F6C" opacity="0.6"/><circle cx="20" cy="16" r="1.6" fill="#002F6C" opacity="0.6"/><circle cx="25" cy="16" r="1.6" fill="#002F6C" opacity="0.6"/></svg></span>
         <span class="tab-label">Intake</span>
       </button>
-      <button class="tab" onclick="switchTab('market-intel',this)" title="Market Intelligence">
+      <button class="tab" id="nav-tab-market-intel" onclick="switchTab('market-intel',this)" title="Market Intelligence">
         <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#tmi)"/><defs><linearGradient id="tmi" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#3ab8f5"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="8" y="21" width="6" height="11" rx="1.5" fill="white" opacity="0.95"/><rect x="17" y="14" width="6" height="18" rx="1.5" fill="white" opacity="0.75"/><rect x="26" y="8" width="6" height="24" rx="1.5" fill="white" opacity="0.95"/></svg></span>
         <span class="tab-label">Market Intelligence</span>
       </button>
-      <button class="tab" onclick="switchTab('sourcing',this)" title="Sourcing">
+      <button class="tab" id="nav-tab-sourcing" onclick="switchTab('sourcing',this)" title="Sourcing">
         <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#tsr)"/><defs><linearGradient id="tsr" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#477c65"/></linearGradient></defs><circle cx="15" cy="14" r="5" fill="white" opacity="0.95"/><path d="M6 30c0-5 4-9 9-9s9 4 9 9" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.95"/><circle cx="28" cy="22" r="4.5" stroke="white" stroke-width="1.8" fill="none" opacity="0.7"/><line x1="31.2" y1="25.2" x2="34.5" y2="28.5" stroke="white" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/></svg></span>
         <span class="tab-label">Sourcing</span>
       </button>
-      <button class="tab" onclick="switchTab('diversity',this)" title="Other Resources">
+      <button class="tab" id="nav-tab-diversity" onclick="switchTab('diversity',this)" title="Other Resources">
         <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#tdv)"/><defs><linearGradient id="tdv" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#ff8b3d"/><stop offset="1" stop-color="#ff5da2"/></linearGradient></defs><rect x="7" y="7" width="14" height="14" rx="3" fill="white" opacity="0.95"/><rect x="19" y="19" width="14" height="14" rx="3" fill="white" opacity="0.6"/><rect x="17" y="17" width="6" height="6" rx="1.3" fill="white" opacity="0.95" transform="rotate(45 20 20)"/></svg></span>
         <span class="tab-label">Other Resources</span>
       </button>
@@ -1206,7 +1210,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
   <div class="page-header">
     <div class="page-icon"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#phmi)"/><defs><linearGradient id="phmi" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#3ab8f5"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="8" y="21" width="6" height="11" rx="1.5" fill="white" opacity="0.95"/><rect x="17" y="14" width="6" height="18" rx="1.5" fill="white" opacity="0.75"/><rect x="26" y="8" width="6" height="24" rx="1.5" fill="white" opacity="0.95"/></svg></div>
     <div class="page-title">Market Intelligence</div>
-    <div class="page-desc">Talk through compensation bands, demand signal and comparable companies for the role - Trace's general market knowledge, not a live salary feed.</div>
+    <div class="page-desc">A complete compensation, demand and competitor report for the role, benchmarked against Akamai's real competitors for talent - Trace's general market knowledge, not a live salary feed.</div>
     <div class="page-badge ai">✨ Trace AI</div>
   </div>
 
@@ -2106,6 +2110,15 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
 
 function enterWorkspace() {
   document.getElementById('landing-page').classList.add('hidden');
+}
+
+// Lets a landing-page feature card jump straight into its matching tab, instead
+// of always landing on Intake - finds the real sidebar button for that tab so
+// switchTab() gets a real element to mark active, same as a normal click would.
+function enterWorkspaceAt(name) {
+  enterWorkspace();
+  const btn = document.getElementById('nav-tab-' + name);
+  if (btn) switchTab(name, btn);
 }
 
 function showLanding() {
@@ -4699,9 +4712,11 @@ function clearIntakeChat() {
 // single request/response instead of a running conversation.
 // ══════════════════════════════════════════════
 function marketIntelSystemPrompt() {
-  return `You are a compensation and talent-market intelligence analyst producing a single structured market intelligence report for a recruiter - not a conversation, a complete report in one response.
+  return `You are a compensation and talent-market intelligence analyst producing a single structured market intelligence report for a recruiter at Akamai Technologies - not a conversation, a complete report in one response.
 
-You do not have access to a live salary database or real-time market data - every figure you provide is a general estimate from training knowledge, not verified current numbers. Always say so plainly in the "caveat" field, and encourage cross-referencing real sources like Levels.fyi, Glassdoor, or the company's own comp bands before using any number in an actual offer.`;
+Akamai is the hiring company for every report you produce. Akamai operates in content delivery (CDN), cloud computing, edge computing, and cybersecurity - so tailor the report to that lens: when picking comparableCompanies, prioritize companies Akamai actually competes with for this kind of talent (e.g. Cloudflare, Fastly, AWS, Google Cloud, Microsoft Azure, Cisco, Palo Alto Networks, Zscaler, F5, Imperva, Oracle Cloud, VMware, or other relevant infrastructure/security/cloud players, adjusted for the specific role), and frame demandNotes/hiringTrends around what that means for Akamai specifically - e.g. whether Akamai would need to stretch to compete on comp for this role, or whether its recognized brand in networking/security is a hiring advantage. Do not literally repeat "Akamai" in every field - just make sure the comparable companies and framing make sense as if you were advising Akamai's own recruiting team, not a generic tech company.
+
+You do not have access to a live salary database or real-time market data - every figure you provide is a general estimate from training knowledge, not verified current numbers. Always say so plainly in the "caveat" field, and always populate "dataSources" with the kinds of real-world sources a recruiter should independently cross-reference before using any number in an actual offer (e.g. Levels.fyi, Glassdoor, Blind, LinkedIn Salary Insights, public H-1B/LCA wage disclosures, industry compensation surveys) - these are reference pointers for the recruiter to go check, not sources you actually queried.`;
 }
 
 function loadMarketIntelSettings() {
@@ -4760,7 +4775,7 @@ async function generateMarketIntelReport() {
     ? `\nAdditional context from the recruiter's Intake conversation: must-have skills: ${(icp.mustHaveSkills || []).join(', ') || 'not specified'}; experience range: ${icp.experienceRange || 'not specified'}.`
     : '';
 
-  const prompt = `Produce a market intelligence report for this role:
+  const prompt = `Produce a market intelligence report for Akamai's recruiting team, for this open role:
 
 Role Title: ${roleTitle}
 Level / Seniority: ${level || 'not specified - infer a reasonable ladder of levels for this role'}
@@ -4778,12 +4793,13 @@ Return ONLY a JSON object (no markdown, no explanation) with this exact shape:
   "demandSignal": "one of exactly: Hot, Competitive, Balanced, Oversupplied",
   "demandNotes": "1-2 sentences explaining the demand signal",
   "comparableCompanies": [{"name": "company name", "note": "short note on their comp/hiring for this role"}],
-  "hiringTrends": ["3-5 short bullet-style trend notes relevant to this role/market"],
+  "hiringTrends": ["3-5 short bullet-style trend notes relevant to this role/market, framed with Akamai's competitive position in mind"],
   "summary": "2-3 sentence plain-English overview of the whole report",
-  "caveat": "a sentence reminding the reader these are general estimates, not live/verified data, and to cross-reference Levels.fyi, Glassdoor, or the company's own comp bands"
+  "caveat": "a sentence reminding the reader these are general estimates, not live/verified data",
+  "dataSources": ["4-6 real-world sources a recruiter should cross-reference, e.g. Levels.fyi, Glassdoor, Blind, LinkedIn Salary Insights, public H-1B/LCA wage disclosures, industry compensation surveys"]
 }
 
-Include 4-6 rows in compLevels spanning a realistic ladder for this role (e.g. entry through staff/principal or manager-equivalent), and 3-5 comparableCompanies known to hire for this kind of role in this market.`;
+Include 4-6 rows in compLevels spanning a realistic ladder for this role (e.g. entry through staff/principal or manager-equivalent), and 3-5 comparableCompanies Akamai actually competes with for this kind of talent in this market.`;
 
   const btn = document.getElementById('mi-generate-btn');
   const sp = document.getElementById('mi-generate-spinner');
@@ -4881,13 +4897,26 @@ function renderMarketIntelReport(report) {
       ${(report.hiringTrends || []).map(t => `<div class="mi-trend-item">💡 ${esc(t)}</div>`).join('') || '<span style="font-size:12px;color:var(--muted);">None listed.</span>'}
     </div>
 
-    <div class="card">
+    <div class="card" style="margin-bottom:16px;">
       <div class="card-head">
         <div class="card-dot"></div>
         <div class="card-title">Summary</div>
       </div>
       <div style="font-size:12.5px;color:var(--text);line-height:1.7;">${esc(report.summary || '')}</div>
-      <div class="mi-caveat">⚠ ${esc(report.caveat || "These figures are general estimates from Trace's training knowledge, not live or verified data - cross-reference Levels.fyi, Glassdoor, or the company's own comp bands.")}</div>
+      <div class="mi-caveat">⚠ ${esc(report.caveat || "These figures are general estimates from Trace's training knowledge, not live or verified data.")}</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-dot" style="background:var(--muted);"></div>
+        <div class="card-title" style="color:var(--muted);">Data Sources</div>
+        <span style="margin-left:auto;font-size:10px;color:var(--muted);">Cross-reference before using in an offer</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${(report.dataSources || []).map(s => `<span class="mi-source-chip">🔗 ${esc(s)}</span>`).join('')
+          || `<span class="mi-source-chip">🔗 Levels.fyi</span><span class="mi-source-chip">🔗 Glassdoor</span><span class="mi-source-chip">🔗 Blind</span>`}
+      </div>
+      <div class="mi-caveat" style="border-top:none;padding-top:0;margin-top:8px;">These are reference points for you to check independently - Trace did not query them live, they reflect general patterns from training knowledge.</div>
     </div>
   `;
 }
