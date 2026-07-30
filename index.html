@@ -3149,11 +3149,21 @@ function renderGitHubResults() {
   `;
   });
 
-  // Newest search's results first - same as the TalentData tab, so fresh hits
-  // aren't buried under previously accumulated ones.
+  // Order: candidates pulled from a repo extraction rank by commit count
+  // (descending) - that's the whole point of that source, "who actually
+  // contributed the most" - rather than by when they were added. Candidates with
+  // no commit count (plain user-search hits) have nothing to rank by, so they fall
+  // back to newest-added-first, same behavior as before this table existed.
+  const order = ghResults.map((p, i) => i).sort((a, b) => {
+    const ca = ghResults[a].contributions, cb = ghResults[b].contributions;
+    if (ca != null && cb != null) return cb - ca;
+    if (ca != null) return -1;
+    if (cb != null) return 1;
+    return b - a;
+  });
   wrap.innerHTML = `<div class="gh-cand-table-wrap"><table class="gh-cand-table">
     <thead><tr><th>Candidate</th><th>Activity</th><th>Email</th><th></th></tr></thead>
-    <tbody>${rows.slice().reverse().join('')}</tbody>
+    <tbody>${order.map(i => rows[i]).join('')}</tbody>
   </table></div>`;
 }
 
