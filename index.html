@@ -542,12 +542,29 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
   font-weight:600;transition:all 0.12s;}
 .src-tab.active{background:var(--accent-glow);border-color:rgba(91,113,224,0.35);color:var(--accent2);}
 
-/* ── AI CHAT (Intake / Market Intelligence) ── */
+/* ── AI CHAT (Intake) - Market Intelligence moved to a one-shot report, see the
+   .mi-* rules further down, so it no longer needs a chat-log style of its own. ── */
 .chat-log{max-height:440px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:2px;}
-.chat-msg{max-width:82%;padding:10px 14px;border-radius:10px;font-size:12.5px;line-height:1.6;white-space:pre-wrap;}
-.chat-msg.user{align-self:flex-end;background:var(--accent-glow);color:var(--accent2);border:1px solid rgba(91,113,224,0.25);}
-.chat-msg.assistant{align-self:flex-start;background:var(--surface2);color:var(--text);border:1px solid var(--border);}
-.chat-msg-role{font-size:9.5px;text-transform:uppercase;letter-spacing:0.6px;font-weight:700;opacity:0.6;margin-bottom:4px;display:block;}
+
+/* ── MARKET INTELLIGENCE REPORT (Levels.fyi-inspired: a clean comp-by-level
+   table first, then demand/companies/trends/summary as separate cards). ── */
+.mi-comp-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.mi-comp-table th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.6px;
+  color:var(--muted);font-weight:700;padding:8px 10px;border-bottom:1.5px solid var(--border);white-space:nowrap;}
+.mi-comp-table td{padding:10px;border-bottom:1px solid var(--border);white-space:nowrap;}
+.mi-comp-table tr:last-child td{border-bottom:none;}
+.mi-comp-level{font-weight:700;color:var(--text);}
+.mi-comp-total{font-weight:700;color:var(--accent2);}
+.mi-demand-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-weight:700;font-size:12.5px;}
+.mi-demand-badge.hot{background:rgba(224,62,62,0.1);color:#c73a3a;}
+.mi-demand-badge.competitive{background:rgba(223,171,1,0.12);color:#95720a;}
+.mi-demand-badge.balanced{background:rgba(0,164,235,0.1);color:var(--accent2);}
+.mi-demand-badge.oversupplied{background:rgba(107,122,153,0.12);color:var(--muted);}
+.mi-company-chip{display:flex;flex-direction:column;padding:10px 14px;border:1px solid var(--border);
+  border-radius:8px;background:var(--surface2);min-width:150px;}
+.mi-trend-item{padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text);}
+.mi-trend-item:last-child{border-bottom:none;}
+.mi-caveat{font-size:10.5px;color:var(--muted);font-style:italic;margin-top:10px;padding-top:10px;border-top:1px dashed var(--border2);}
 
 /* Intake chat - modern flat "channel feed" UI (Slack/Discord-style rows: solid
    avatar circle, colored name + timestamp on one line, message below, no bubble
@@ -1204,36 +1221,34 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
   <div class="card">
     <div class="card-head">
       <div class="card-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2);"></div>
-      <div class="card-title" style="color:var(--accent2);">Market Intelligence Chat</div>
+      <div class="card-title" style="color:var(--accent2);">Report Inputs</div>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted);">Prefilled from Intake's ICP when available</span>
     </div>
-    <div id="mi-chat-log" class="chat-log">
-      <div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">Ask about compensation, demand signal, or comparable companies for the role to get started.</div>
+    <div class="grid-2" style="gap:12px;">
+      <div>
+        <label>Role Title</label>
+        <input id="mi-role-title" placeholder="e.g. Senior Backend Engineer">
+      </div>
+      <div>
+        <label>Level / Seniority <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional)</span></label>
+        <input id="mi-level" placeholder="e.g. Senior, Staff, L5">
+      </div>
     </div>
-    <div class="status" id="mi-chat-status" style="margin-top:10px;"></div>
-    <div style="display:flex;gap:8px;margin-top:12px;">
-      <input id="mi-chat-input" placeholder="Ask about comp, demand, or comparable companies for this role..." style="margin-bottom:0;" onkeydown="if(event.key==='Enter'){event.preventDefault();sendMarketIntelMessage();}">
-      <button class="btn btn-primary" onclick="sendMarketIntelMessage()" id="mi-send-btn" style="white-space:nowrap;">
-        <span id="mi-send-text">Send</span>
-        <div class="spinner" id="mi-send-spinner"></div>
-      </button>
+    <div class="grid-2" style="gap:12px;">
+      <div>
+        <label>Location <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional)</span></label>
+        <input id="mi-location" placeholder="e.g. Bangalore, Remote-US">
+      </div>
+      <div></div>
     </div>
-    <div class="btn-row" style="margin-top:12px;">
-      <button class="btn btn-primary" onclick="finalizeMarketIntel()" id="mi-finalize-btn">
-        <span id="mi-finalize-text">📊 Save Market Intel</span>
-        <div class="spinner" id="mi-finalize-spinner"></div>
-      </button>
-      <button class="btn btn-danger" onclick="clearMarketIntelChat()">🗑 Clear Conversation</button>
-    </div>
+    <button class="btn btn-primary" onclick="generateMarketIntelReport()" id="mi-generate-btn" style="width:100%;justify-content:center;margin-top:6px;">
+      <span id="mi-generate-text">📊 Generate Market Intelligence Report</span>
+      <div class="spinner" id="mi-generate-spinner"></div>
+    </button>
+    <div class="status" id="mi-status" style="margin-top:10px;"></div>
   </div>
 
-  <div class="card" id="mi-summary-card" style="margin-top:16px;display:none;">
-    <div class="card-head">
-      <div class="card-dot" style="background:var(--green);box-shadow:0 0 6px var(--green);"></div>
-      <div class="card-title" style="color:var(--green);">Saved Market Intelligence</div>
-      <span style="margin-left:auto;font-size:10px;color:var(--muted);">Available in Sourcing</span>
-    </div>
-    <div id="mi-summary-body"></div>
-  </div>
+  <div id="mi-report-wrap" style="margin-top:16px;"></div>
 
 </div><!-- /panel-market-intel -->
 
@@ -4675,33 +4690,44 @@ function clearIntakeChat() {
 }
 
 // ══════════════════════════════════════════════
-// MARKET INTELLIGENCE - AI chat about compensation/demand for the role, seeded
-// with the finalized ICP from Intake if one exists. Same direct-to-Anthropic
-// pattern, no server involved.
+// MARKET INTELLIGENCE - a complete, one-shot report rather than a back-and-forth
+// chat: the recruiter fills in role/level/location (or lets it inherit the ICP
+// from Intake), Trace returns one structured report, and it's rendered as a
+// compensation dashboard inspired by Levels.fyi's levels-by-company breakdown -
+// a clean table of comp by level, plus demand signal, comparable companies, and
+// hiring trends. Same direct-to-proxy Anthropic call as everything else, just a
+// single request/response instead of a running conversation.
 // ══════════════════════════════════════════════
-let miMessages = [];
-
 function marketIntelSystemPrompt() {
-  let icp = null;
-  try { icp = JSON.parse(localStorage.getItem('tt_icp') || 'null'); } catch (e) { icp = null; }
-  const icpContext = icp
-    ? `The role already defined in Intake: ${icp.roleTitle || 'unknown role'}${icp.seniority ? ', ' + icp.seniority : ''}${icp.location ? ', based in ' + icp.location : ''}${icp.experienceRange ? ', ' + icp.experienceRange + ' experience' : ''}. Must-haves: ${(icp.mustHaveSkills || []).join(', ') || 'not specified'}.`
-    : 'No ICP has been finalized in Intake yet - ask the recruiter for the role, level, and location if they do not provide it.';
+  return `You are a compensation and talent-market intelligence analyst producing a single structured market intelligence report for a recruiter - not a conversation, a complete report in one response.
 
-  return `You are a compensation and talent-market intelligence analyst helping a recruiter understand the market for a role.
-
-${icpContext}
-
-Discuss, as relevant to what the recruiter asks: typical compensation bands (base/bonus/equity ranges) for the role/level/location, current market demand and supply signal (hot/competitive/oversupplied), comparable companies hiring for similar roles, and relevant hiring trends.
-
-IMPORTANT: you do not have access to a live salary database or real-time market data - everything you say is a general estimate from training knowledge, not verified current figures. Always make this clear, and encourage cross-referencing with real sources like Levels.fyi, Glassdoor, or the company's own comp bands before using any number in an actual offer.`;
+You do not have access to a live salary database or real-time market data - every figure you provide is a general estimate from training knowledge, not verified current numbers. Always say so plainly in the "caveat" field, and encourage cross-referencing real sources like Levels.fyi, Glassdoor, or the company's own comp bands before using any number in an actual offer.`;
 }
 
 function loadMarketIntelSettings() {
-  try { miMessages = JSON.parse(localStorage.getItem('tt_mi_messages') || '[]'); } catch (e) { miMessages = []; }
-  renderMIChat();
-  renderMISummary();
+  const role = localStorage.getItem('tt_mi_role_title');
+  const level = localStorage.getItem('tt_mi_level');
+  const location = localStorage.getItem('tt_mi_location');
+  if (role) document.getElementById('mi-role-title').value = role;
+  if (level) document.getElementById('mi-level').value = level;
+  if (location) document.getElementById('mi-location').value = location;
+
+  // If Intake has a finalized ICP and the recruiter hasn't typed anything of
+  // their own yet, prefill from it so generating a report is a one-click thing.
+  if (!role) {
+    let icp = null;
+    try { icp = JSON.parse(localStorage.getItem('tt_icp') || 'null'); } catch (e) {}
+    if (icp) {
+      if (icp.roleTitle) document.getElementById('mi-role-title').value = icp.roleTitle;
+      if (icp.seniority) document.getElementById('mi-level').value = icp.seniority;
+      if (icp.location) document.getElementById('mi-location').value = icp.location;
+    }
+  }
+
   renderMIIcpBanner();
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem('tt_market_intel') || 'null'); } catch (e) {}
+  if (saved) renderMarketIntelReport(saved);
 }
 
 function renderMIIcpBanner() {
@@ -4715,112 +4741,155 @@ function renderMIIcpBanner() {
   body.innerHTML = `${esc(icp.roleTitle || 'Role')}${icp.seniority ? ' · ' + esc(icp.seniority) : ''}${icp.location ? ' · ' + esc(icp.location) : ''}${icp.experienceRange ? ' · ' + esc(icp.experienceRange) : ''}`;
 }
 
-function renderMIChat() {
-  const log = document.getElementById('mi-chat-log');
-  if (!log) return;
-  if (!miMessages.length) {
-    log.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">Ask about compensation, demand signal, or comparable companies for the role to get started.</div>';
+async function generateMarketIntelReport() {
+  const roleTitle = document.getElementById('mi-role-title').value.trim();
+  const level = document.getElementById('mi-level').value.trim();
+  const location = document.getElementById('mi-location').value.trim();
+
+  if (!roleTitle) {
+    showStatus('mi-status', 'error', '⚠ Enter at least a role title.');
     return;
   }
-  log.innerHTML = miMessages.map(m => `
-    <div class="chat-msg ${m.role === 'user' ? 'user' : 'assistant'}">
-      <span class="chat-msg-role">${m.role === 'user' ? 'You' : 'Trace'}</span>${esc(m.content)}
-    </div>
-  `).join('');
-  log.scrollTop = log.scrollHeight;
-}
+  localStorage.setItem('tt_mi_role_title', roleTitle);
+  localStorage.setItem('tt_mi_level', level);
+  localStorage.setItem('tt_mi_location', location);
 
-async function sendMarketIntelMessage() {
-  const input = document.getElementById('mi-chat-input');
-  const text = input.value.trim();
-  if (!text) return;
+  let icp = null;
+  try { icp = JSON.parse(localStorage.getItem('tt_icp') || 'null'); } catch (e) {}
+  const icpContext = icp
+    ? `\nAdditional context from the recruiter's Intake conversation: must-have skills: ${(icp.mustHaveSkills || []).join(', ') || 'not specified'}; experience range: ${icp.experienceRange || 'not specified'}.`
+    : '';
 
-  miMessages.push({ role: 'user', content: text });
-  input.value = '';
-  renderMIChat();
-  localStorage.setItem('tt_mi_messages', JSON.stringify(miMessages));
+  const prompt = `Produce a market intelligence report for this role:
 
-  const btn = document.getElementById('mi-send-btn');
-  const sp = document.getElementById('mi-send-spinner');
-  btn.disabled = true; sp.classList.add('on');
-  hideStatus('mi-chat-status');
+Role Title: ${roleTitle}
+Level / Seniority: ${level || 'not specified - infer a reasonable ladder of levels for this role'}
+Location: ${location || 'not specified - assume a major tech hub and note that assumption in the caveat'}${icpContext}
 
-  try {
-    const reply = await callClaudeChat(miMessages, marketIntelSystemPrompt());
-    miMessages.push({ role: 'assistant', content: reply });
-    localStorage.setItem('tt_mi_messages', JSON.stringify(miMessages));
-    renderMIChat();
-  } catch (err) {
-    console.error('Market intel chat error:', err);
-    showStatus('mi-chat-status', 'error', '⚠ ' + (err.message || 'Message failed.'));
-  } finally {
-    btn.disabled = false; sp.classList.remove('on');
-  }
-}
-
-async function finalizeMarketIntel() {
-  if (!miMessages.length) {
-    showStatus('mi-chat-status', 'error', '⚠ Chat a bit about the role first.');
-    return;
-  }
-  const btn = document.getElementById('mi-finalize-btn');
-  const sp = document.getElementById('mi-finalize-spinner');
-  btn.disabled = true; sp.classList.add('on');
-  showStatus('mi-chat-status', 'info', '⏳ Saving market intelligence...');
-
-  const finalizePrompt = `Based on the conversation so far, return ONLY a JSON object (no markdown, no explanation) summarizing the market intelligence discussed:
-
+Return ONLY a JSON object (no markdown, no explanation) with this exact shape:
 {
-  "compRangeNotes": "compensation band notes, as a plain string (e.g. base/bonus/equity ranges discussed)",
-  "demandSignal": "one of: Hot/Competitive, Balanced, Oversupplied, or Unclear",
-  "comparableCompanies": ["companies", "mentioned", "as", "comparable"],
-  "summary": "2-3 sentence plain-English summary, including the caveat that figures are estimates, not verified live data"
-}`;
+  "roleTitle": "role title, tidied up",
+  "level": "level/seniority as given, or your inferred ladder label",
+  "location": "location as given, or your assumption",
+  "currency": "3-letter currency code most appropriate for the location (e.g. USD, INR, GBP)",
+  "compLevels": [
+    {"level": "e.g. Entry/Junior", "totalComp": "e.g. 12-16L", "base": "...", "bonus": "...", "equity": "..."}
+  ],
+  "demandSignal": "one of exactly: Hot, Competitive, Balanced, Oversupplied",
+  "demandNotes": "1-2 sentences explaining the demand signal",
+  "comparableCompanies": [{"name": "company name", "note": "short note on their comp/hiring for this role"}],
+  "hiringTrends": ["3-5 short bullet-style trend notes relevant to this role/market"],
+  "summary": "2-3 sentence plain-English overview of the whole report",
+  "caveat": "a sentence reminding the reader these are general estimates, not live/verified data, and to cross-reference Levels.fyi, Glassdoor, or the company's own comp bands"
+}
+
+Include 4-6 rows in compLevels spanning a realistic ladder for this role (e.g. entry through staff/principal or manager-equivalent), and 3-5 comparableCompanies known to hire for this kind of role in this market.`;
+
+  const btn = document.getElementById('mi-generate-btn');
+  const sp = document.getElementById('mi-generate-spinner');
+  btn.disabled = true; sp.classList.add('on');
+  showStatus('mi-status', 'info', '⏳ Generating market intelligence report...');
 
   try {
-    const reply = await callClaudeChat(
-      [...miMessages, { role: 'user', content: finalizePrompt }],
-      marketIntelSystemPrompt()
-    );
+    const reply = await callClaudeChat([{ role: 'user', content: prompt }], marketIntelSystemPrompt());
     const clean = reply.replace(/```json|```/g, '').trim();
     const match = clean.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error("Could not parse the market intelligence summary from Trace's response.");
-    const intel = JSON.parse(match[0]);
-    localStorage.setItem('tt_market_intel', JSON.stringify(intel));
-    renderMISummary();
-    showStatus('mi-chat-status', 'success', '✓ Saved - available in Sourcing.');
+    if (!match) throw new Error("Could not parse the report from Trace's response.");
+    const report = JSON.parse(match[0]);
+    localStorage.setItem('tt_market_intel', JSON.stringify(report));
+    renderMarketIntelReport(report);
     renderSourcingHandoffBanner();
+    showStatus('mi-status', 'success', '✓ Report generated - available in Sourcing.');
   } catch (err) {
-    console.error('Finalize market intel error:', err);
-    showStatus('mi-chat-status', 'error', '⚠ ' + (err.message || 'Could not save market intelligence.'));
+    console.error('Market intel report error:', err);
+    showStatus('mi-status', 'error', '⚠ ' + (err.message || 'Could not generate the report.'));
   } finally {
     btn.disabled = false; sp.classList.remove('on');
   }
 }
 
-function renderMISummary() {
-  const card = document.getElementById('mi-summary-card');
-  const body = document.getElementById('mi-summary-body');
-  if (!card || !body) return;
-  let intel = null;
-  try { intel = JSON.parse(localStorage.getItem('tt_market_intel') || 'null'); } catch (e) { intel = null; }
-  if (!intel) { card.style.display = 'none'; return; }
-  card.style.display = 'block';
-  body.innerHTML = `
-    <div class="cand-field"><span>Compensation notes:</span> ${esc(intel.compRangeNotes || '—')}</div>
-    <div class="cand-field"><span>Demand signal:</span> ${esc(intel.demandSignal || '—')}</div>
-    <div class="cand-field"><span>Comparable companies:</span> ${esc((intel.comparableCompanies || []).join(', ')) || '—'}</div>
-    ${intel.summary ? `<div class="cand-field" style="margin-top:8px;font-style:italic;">${esc(intel.summary)}</div>` : ''}
-  `;
-}
+// Renders the report as a Levels.fyi-inspired dashboard: a clean comp-by-level
+// table first (the thing recruiters actually scan for), then demand signal,
+// comparable companies, hiring trends, and a plain-English summary + caveat.
+function renderMarketIntelReport(report) {
+  const wrap = document.getElementById('mi-report-wrap');
+  if (!wrap) return;
+  if (!report) { wrap.innerHTML = ''; return; }
 
-function clearMarketIntelChat() {
-  if (!miMessages.length) return;
-  if (!confirm('Clear the market intelligence conversation? Any saved summary stays.')) return;
-  miMessages = [];
-  localStorage.setItem('tt_mi_messages', '[]');
-  renderMIChat();
-  hideStatus('mi-chat-status');
+  const demandKey = (report.demandSignal || '').toLowerCase().replace(/[^a-z]/g, '');
+  const demandMeta = {
+    hot: { icon: '🔥', cls: 'hot' },
+    competitive: { icon: '⚡', cls: 'competitive' },
+    balanced: { icon: '⚖️', cls: 'balanced' },
+    oversupplied: { icon: '📉', cls: 'oversupplied' }
+  }[demandKey] || { icon: '📊', cls: 'balanced' };
+
+  wrap.innerHTML = `
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-head">
+        <div class="card-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2);"></div>
+        <div class="card-title" style="color:var(--accent2);">${esc(report.roleTitle || 'Role')}${report.level ? ' · ' + esc(report.level) : ''}</div>
+        <span style="margin-left:auto;font-size:10px;color:var(--muted);">${esc(report.location || '')}</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="mi-comp-table">
+          <thead><tr><th>Level</th><th>Total Comp</th><th>Base</th><th>Bonus</th><th>Equity</th></tr></thead>
+          <tbody>
+            ${(report.compLevels || []).map(l => `
+              <tr>
+                <td class="mi-comp-level">${esc(l.level || '-')}</td>
+                <td class="mi-comp-total">${esc(l.totalComp || '-')}${report.currency ? ' ' + esc(report.currency) : ''}</td>
+                <td>${esc(l.base || '-')}</td>
+                <td>${esc(l.bonus || '-')}</td>
+                <td>${esc(l.equity || '-')}</td>
+              </tr>
+            `).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--muted);">No level breakdown returned.</td></tr>`}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-head">
+        <div class="card-dot" style="background:var(--ai);box-shadow:0 0 6px var(--ai);"></div>
+        <div class="card-title" style="color:var(--ai);">Demand Signal</div>
+      </div>
+      <span class="mi-demand-badge ${demandMeta.cls}">${demandMeta.icon} ${esc(report.demandSignal || 'Unclear')}</span>
+      ${report.demandNotes ? `<div style="margin-top:10px;font-size:12.5px;color:var(--text);line-height:1.6;">${esc(report.demandNotes)}</div>` : ''}
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-head">
+        <div class="card-dot" style="background:var(--green);box-shadow:0 0 6px var(--green);"></div>
+        <div class="card-title" style="color:var(--green);">Comparable Companies</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        ${(report.comparableCompanies || []).map(c => `
+          <div class="mi-company-chip">
+            <div style="font-weight:700;font-size:12.5px;color:var(--text);">${esc(c.name || '-')}</div>
+            ${c.note ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">${esc(c.note)}</div>` : ''}
+          </div>
+        `).join('') || '<span style="font-size:12px;color:var(--muted);">None listed.</span>'}
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-head">
+        <div class="card-dot"></div>
+        <div class="card-title">Hiring Trends</div>
+      </div>
+      ${(report.hiringTrends || []).map(t => `<div class="mi-trend-item">💡 ${esc(t)}</div>`).join('') || '<span style="font-size:12px;color:var(--muted);">None listed.</span>'}
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-dot"></div>
+        <div class="card-title">Summary</div>
+      </div>
+      <div style="font-size:12.5px;color:var(--text);line-height:1.7;">${esc(report.summary || '')}</div>
+      <div class="mi-caveat">⚠ ${esc(report.caveat || "These figures are general estimates from Trace's training knowledge, not live or verified data - cross-reference Levels.fyi, Glassdoor, or the company's own comp bands.")}</div>
+    </div>
+  `;
 }
 
 // ══════════════════════════════════════════════
@@ -4846,7 +4915,7 @@ function renderSourcingHandoffBanner() {
       </div>
       <div style="font-size:12.5px;color:var(--text);line-height:1.6;margin-bottom:10px;">
         ${icp ? `<b>${esc(icp.roleTitle || 'Role')}</b>${icp.seniority ? ' · ' + esc(icp.seniority) : ''}${icp.location ? ' · ' + esc(icp.location) : ''}${icp.experienceRange ? ' · ' + esc(icp.experienceRange) : ''}<br>Must-haves: ${esc((icp.mustHaveSkills || []).join(', ')) || '—'}` : ''}
-        ${intel ? `<br>Comp: ${esc(intel.compRangeNotes || '—')} · Demand: ${esc(intel.demandSignal || '—')}` : ''}
+        ${intel ? `<br>Demand: ${esc(intel.demandSignal || '—')}${(intel.compLevels || [])[0] ? ' · ' + esc(intel.compLevels[0].level) + ' ~' + esc(intel.compLevels[0].totalComp || '') + (intel.currency ? ' ' + esc(intel.currency) : '') : ''}` : ''}
       </div>
       ${icp ? `<button class="btn btn-primary btn-sm" onclick="prefillSourcingFromICP()">↓ Prefill TalentData Search</button>` : ''}
     </div>
