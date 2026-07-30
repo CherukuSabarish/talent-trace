@@ -11,43 +11,68 @@
   BUILT WITH : Claude (Anthropic)
 
   ── FEATURE CHECKLIST (DO NOT BREAK) ──────────────────────────────────────────
-  ✅ Query Builder — Tech, Sales, Veterans, Freshers, Custom Roles
-  ✅ 4-Platform output — LinkedIn, Google X-Ray, StackOverflow, GitHub
-  ✅ Mandatory Keywords — AND / OR / Custom boolean logic
-  ✅ Female Filter — 500+ Indian female names, 3 X-Ray batches
-  ✅ Freshers — Year × Tier × Stream × Custom College (dynamic, no hardcoded years)
-  ✅ Company Clusters — FAANG, Unicorns, MNC, Fintech, Startups, EdTech, E-Comm
-  ✅ JD Analyzer — Boolean, Target Companies, Interview Questions, Profile Checklist
-  ✅ JD Role Detection — Scoring system (Full Stack ≠ DevOps)
-  ✅ GitHub X-Ray — "block or report user" signal for profile pages
-  ✅ India Location — locked in all searches
-  ✅ Sheet Protection — setupProtections() in AppsScript
-  ✅ Spell Corrections — vetran, fullstacker, tire1 etc.
-  ✅ Anthropic API — x-api-key + dangerous-direct-browser-access headers
-  ✅ v7 — Akamai brand palette (navy / blue / orange, live-sampled from akamai.com)
-  ✅ v8 — TalentData search + enrich, now built directly into this app (🛰️ TalentData tab)
+  ✅ Query Builder - Tech, Sales, Veterans, Freshers, Custom Roles
+  ✅ 4-Platform output - LinkedIn, Google X-Ray, StackOverflow, GitHub
+  ✅ Mandatory Keywords - AND / OR / Custom boolean logic
+  ✅ Diversity Sourcing Resources - 300+ India / 400+ US female first names, pronoun
+          signals, women-in-tech community signals, women's college signals (v9.2,
+          replaces the old in-Builder "Female Candidates Only" toggle - see below)
+  ✅ Freshers - Year × Tier × Stream × Custom College (dynamic, no hardcoded years)
+  ✅ Company Clusters - FAANG, Unicorns, MNC, Fintech, Startups, EdTech, E-Comm
+  ✅ Job Description Analyzer - Boolean, Target Companies, Interview Questions, Profile Checklist
+  ✅ Job Description Role Detection - Scoring system (Full Stack ≠ DevOps)
+  ✅ GitHub X-Ray - "block or report user" signal for profile pages
+  ✅ India Location - locked in all searches
+  ✅ Sheet Protection - setupProtections() in AppsScript
+  ✅ Spell Corrections - vetran, fullstacker, tire1 etc.
+  ✅ Anthropic API - x-api-key + dangerous-direct-browser-access headers
+  ✅ v7 - Akamai brand palette (navy / blue / orange, live-sampled from akamai.com)
+  ✅ v8 - TalentData search + enrich, now built directly into this app (🛰️ TalentData tab)
           instead of the Chrome extension. Runs through /api/crustdata-search and
           /api/crustdata-enrich Vercel serverless functions, which hold the data
-          provider API key server-side (CRUSTDATA_API_KEY env var — unchanged, tied to
-          existing Vercel config) — the browser never sees it, and same-origin calls
+          provider API key server-side (CRUSTDATA_API_KEY env var - unchanged, tied to
+          existing Vercel config) - the browser never sees it, and same-origin calls
           sidestep the CORS problem that kept this out of v7.
           Deploy target: Vercel project "tech-boolean-pro". The Chrome extension's own
           data-search section (extension_v1.7) still works independently if you use that.
-  ✅ v9 — Notion-style UI: left sidebar navigation replaces the top tab bar, light
+  ✅ v9 - Notion-style UI: left sidebar navigation replaces the top tab bar, light
           neutral palette, system font stack, subtler borders/radii throughout.
           "Crustdata" branding renamed to "TalentData" in all UI text and internal
           function/variable names. NOTE: the underlying data provider is still
-          Crustdata — the API endpoints (/api/crustdata-search, /api/crustdata-enrich),
+          Crustdata - the API endpoints (/api/crustdata-search, /api/crustdata-enrich),
           the CRUSTDATA_API_KEY env var, and api.crustdata.com references are left
           untouched on purpose so the live Vercel deployment keeps working.
-  ✅ v9.1 — Akamai rebrand: nav bar + accent palette recolored to Akamai navy/blue,
+  ✅ v9.1 - Akamai rebrand: nav bar + accent palette recolored to Akamai navy/blue,
           Akamai wordmark added to top nav (no more "AI-Powered"/version pill).
           Contact enrichment removed entirely (per-candidate "Reveal Contact Info"
-          and bulk "Deep-enrich all", plus their /api/crustdata-enrich calls) — the
+          and bulk "Deep-enrich all", plus their /api/crustdata-enrich calls) - the
           TalentData tab is search-only now. Result cards + candidate modal redone
           in a LinkedIn-style layout (avatar, headline, location, pill "View Profile"
-          button). api/crustdata-enrich.js is now unused dead code on the server —
+          button). api/crustdata-enrich.js is now unused dead code on the server -
           left in place rather than deleted since nothing in this file calls it.
+  ✅ v9.2 - Removed the Boolean Builder's "Female Candidates Only" checkbox/preview and
+          the femaleChecked branch in generate() (dead-simple generate() now always
+          builds the standard 4-platform output). Removed every "Open ↗" button next
+          to a Copy button (Boolean Builder outputs + Job Description Analyzer result
+          boxes) - Copy-only now; openFromEl() was deleted as dead code. Added a 5th
+          nav tab, Diversity Sourcing Resources: India (300+, the old female filter's
+          list, now standalone) and US (400+, the proven SSA-decade list) female first
+          names, modern pronoun-tag signals + Glen Cathey's classic "(her OR she)"
+          keyword search, women-in-tech community signals, US women's colleges (48)
+          and sororities (91), and - for racial/ethnic diversity - HBCUs (105),
+          African American Greek orgs (23), and Native American Tribal Colleges (36).
+          Everything past the India names list is adapted from Glen Cathey's
+          "Diversity Sourcing: Boolean Search Strings for LinkedIn" (booleanblackbelt.com).
+  ✅ v9.3 - Orbiting-logos hero animation on the landing page (LinkedIn, Google,
+          StackOverflow, GitHub, TalentData, AI-sparkle icons on 3 counter-rotating
+          rings around the Trace Rings mark), replacing the old static SVG mockup.
+          Added an Akamai logo + "Built for Akamai Internal Use Only" disclaimer
+          footer to the landing page, and matched the sidebar's existing Akamai
+          caption to the same wording. Removed all em dashes from user-facing text
+          (prose only; the decorative box-drawing dividers in this comment block are
+          untouched). Extended the landing page's polish into the workspace: soft
+          ambient background glows behind the main content area, and a staggered
+          fade-slide-up entrance for page headers and cards on every tab.
 
   ── UPGRADE RULES ──────────────────────────────────────────────────────────────
   NEVER edit this file directly for upgrades.
@@ -122,8 +147,8 @@ body{
 .brand{cursor:pointer;}
 .brand-icon{display:none;}
 .brand-name{font-weight:800;font-size:15px;letter-spacing:0;color:#002F6C;}
-.brand-name span{color:var(--accent2);}
-.topnav-sub{font-size:10px;color:var(--nav-muted);margin-top:-1px;}
+.brand-name span{color:var(--ai);}
+.topnav-sub{font-size:10px;color:var(--muted);margin-top:-1px;}
 
 /* ── PRODUCT LOGOS / ICONS ── */
 .tt-logo-mark,.tt-icon{
@@ -150,26 +175,11 @@ body{
 .tt-logo-lockup .tt-logo-mark::before{inset:10px;border-radius:10px;border-width:3px;}
 .tt-logo-lockup .tt-logo-mark::after{width:23px;height:3px;box-shadow:0 9px 0 rgba(255,255,255,0.78);}
 .landing-logo{display:none;}
-.tt-icon{width:42px;height:42px;border-radius:10px;box-shadow:none;}
-.tt-icon::before,.tt-icon::after,.tt-icon span::before,.tt-icon span::after{content:"";position:absolute;display:block;}
-.tt-icon-boolean::before{width:19px;height:19px;border:2px solid #fff;border-radius:6px;left:8px;top:8px;}
-.tt-icon-boolean::after{width:9px;height:9px;border:2px solid #fff;border-radius:50%;right:8px;bottom:9px;}
-.tt-icon-boolean span::before{width:14px;height:2px;background:#fff;left:20px;top:22px;transform:rotate(35deg);border-radius:2px;}
-.tt-icon-jd{--mark-a:#6f7f86;--mark-b:#46555b;}
-.tt-icon-jd::before{width:21px;height:26px;background:#fff;border-radius:5px;box-shadow:inset 0 -8px 0 rgba(91,113,224,0.12);}
-.tt-icon-jd::after{width:11px;height:2px;background:var(--mark-b);top:14px;left:15px;border-radius:2px;box-shadow:0 6px 0 var(--mark-b),0 12px 0 var(--mark-b);}
-.tt-icon-talent{--mark-a:#5b71e0;--mark-b:#477c65;}
-.tt-icon-talent::before{width:22px;height:22px;border:2px solid #fff;border-radius:50%;}
-.tt-icon-talent::after{width:28px;height:28px;border:2px solid rgba(255,255,255,0.5);border-radius:50%;}
-.tt-icon-talent span::before{width:6px;height:6px;background:#fff;border-radius:50%;left:18px;top:18px;box-shadow:8px -7px 0 rgba(255,255,255,0.8),-7px 8px 0 rgba(255,255,255,0.75);}
-.tt-icon-github{--mark-a:#30363d;--mark-b:#111827;}
-.tt-icon-github::before{width:18px;height:15px;border:2px solid #fff;border-radius:50% 50% 45% 45%;top:13px;}
-.tt-icon-github::after{width:22px;height:8px;border-top:2px solid #fff;border-left:2px solid #fff;border-right:2px solid #fff;border-radius:9px 9px 0 0;top:9px;}
-.tt-icon-github span::before{width:5px;height:7px;background:#fff;border-radius:0 0 5px 5px;left:16px;top:27px;box-shadow:6px 0 0 #fff;}
-.tab .tt-icon{width:18px;height:18px;border-radius:5px;box-shadow:none;}
-.tab .tt-icon::before,.tab .tt-icon::after,.tab .tt-icon span::before,.tab .tt-icon span::after{transform:scale(0.45);transform-origin:center;}
-.tab .tt-icon-boolean span::before{transform:rotate(35deg) scale(0.45);}
-.tab .tt-icon-github span::before{transform:scale(0.45);}
+/* Sidebar tab icons - the exact same inline SVG mark used in each tab's
+   page-header and on the landing feature cards, just scaled down, so the
+   icon is visually identical everywhere it appears. */
+.tab-icon{display:inline-flex;flex-shrink:0;width:24px;height:24px;}
+.tab-icon svg{width:100%;height:100%;display:block;}
 .landing-feature-icon{margin:0 auto 14px;display:flex;align-items:center;justify-content:center;}
 
 /* ── NAV LABEL ── */
@@ -187,15 +197,70 @@ body{
 .tab:hover{background:rgba(0,164,235,0.07);color:#002F6C;}
 .tab.active{background:rgba(0,164,235,0.10);color:#002F6C;font-weight:700;border-radius:8px;border-left:3px solid #00A4EB;}
 .tab.active svg{opacity:1 !important;}
-.topnav-right{margin-top:auto;display:flex;align-items:center;gap:10px;flex-shrink:0;padding:14px 8px 2px;border-top:1px solid var(--border);}
-.akamai-logo{height:30px;width:auto;flex-shrink:0;}
+.topnav-right{margin-top:auto;display:flex;flex-direction:column;align-items:flex-start;gap:8px;flex-shrink:0;padding:16px 8px 4px;border-top:1px solid var(--border);}
+.akamai-logo{height:64px;width:auto;flex-shrink:0;}
 .akamai-logo g{fill:#002f6c;}
 
+/* ── SIDEBAR COLLAPSE TOGGLE ── */
+.nav-toggle{
+  position:absolute;top:30px;right:-13px;width:26px;height:26px;
+  border-radius:50%;background:#fff;border:1px solid var(--border2);
+  box-shadow:0 2px 6px rgba(0,47,108,0.15);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  z-index:250;transition:background 0.15s,transform 0.15s;
+}
+.nav-toggle:hover{background:var(--surface2);}
+.nav-toggle svg{transition:transform 0.2s;}
+body.nav-collapsed .nav-toggle svg{transform:rotate(180deg);}
+body.nav-collapsed .brand-text,
+body.nav-collapsed .tab-label,
+body.nav-collapsed .topnav-right-text{display:none;}
+.topnav-right-text{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:9.5px;font-weight:600;color:#5a7090;letter-spacing:0;
+  padding:5px 9px;border-radius:14px;white-space:nowrap;
+  background:rgba(0,47,108,0.05);border:1px solid rgba(0,47,108,0.10);
+}
+.topnav-right-text svg{flex-shrink:0;opacity:0.75;}
+body.nav-collapsed .brand{justify-content:center;padding:6px 0;}
+body.nav-collapsed .tabs{align-items:center;}
+body.nav-collapsed .tab{justify-content:center;padding:10px 0;gap:0;}
+body.nav-collapsed .topnav-inner{padding:24px 10px;}
+body.nav-collapsed .topnav-right{align-items:center;}
+body.nav-collapsed .akamai-logo{height:28px;}
+@media(max-width:860px){
+  .nav-toggle{display:none;}
+}
+
 /* ── MAIN / PANELS ── */
-.main{min-height:100vh;}
+.main{min-height:100vh;position:relative;isolation:isolate;}
+.main::before,.main::after{
+  content:"";position:fixed;border-radius:50%;pointer-events:none;
+  filter:blur(80px);z-index:-1;
+}
+.main::before{
+  width:440px;height:440px;top:-120px;right:-100px;
+  background:radial-gradient(circle,rgba(0,164,235,0.11) 0%,transparent 70%);
+}
+.main::after{
+  width:380px;height:380px;bottom:-120px;left:calc(var(--nav-w) + 40px);
+  background:radial-gradient(circle,rgba(0,80,255,0.08) 0%,transparent 70%);
+}
+@media(max-width:860px){
+  .main::after{left:-60px;}
+}
 .panel{display:none;padding:34px 42px 60px;max-width:1240px;margin:0 auto;animation:fadeUp 0.2s ease;}
 .panel.active{display:block;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+/* Staggered entrance for panel content - the same fadeSlideUp touch used on the landing page */
+.panel.active .page-header{animation:fadeSlideUp 0.45s ease both;}
+.panel.active .card{animation:fadeSlideUp 0.4s ease both;}
+.panel.active .card:nth-of-type(1){animation-delay:0.04s;}
+.panel.active .card:nth-of-type(2){animation-delay:0.08s;}
+.panel.active .card:nth-of-type(3){animation-delay:0.12s;}
+.panel.active .card:nth-of-type(4){animation-delay:0.16s;}
+.panel.active .card:nth-of-type(n+5){animation-delay:0.2s;}
 
 /* ── LAYOUT ── */
 .grid-2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-bottom:16px;}
@@ -333,7 +398,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 .saved-role-cat{font-size:10.5px;color:var(--muted);margin-top:2px;}
 .no-saved{text-align:center;padding:16px;color:var(--muted);font-size:12px;}
 
-/* ── JD ANALYZER ── */
+/* ── JOB DESCRIPTION ANALYZER ── */
 .jd-textarea{
   width:100%;min-height:140px;background:var(--surface2);
   border:1px solid var(--border);border-radius:var(--r);
@@ -472,7 +537,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 }
 .landing.hidden{display:none;}
 .landing-inner{max-width:780px;width:100%;text-align:center;margin:auto;}
-.landing-tagline{font-size:15px;color:#4a6080;line-height:1.65;max-width:500px;margin:0 auto 32px;}
+.landing-tagline{font-size:17px;color:#4a6080;line-height:1.65;max-width:560px;margin:0 auto 20px;}
 .landing-features{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:36px;}
 .landing-feature{
   background:#ffffff;border:1px solid rgba(0,47,108,0.08);border-radius:16px;
@@ -481,10 +546,23 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
   cursor:default;
 }
 .landing-feature:hover{transform:translateY(-4px);box-shadow:0 10px 32px rgba(0,164,235,0.16);}
-.landing-feature-title{font-size:13.5px;font-weight:700;color:#002F6C;margin-bottom:6px;}
-.landing-feature-desc{font-size:12px;color:rgba(180,210,240,0.75);line-height:1.5;}
+.landing-footer{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  margin-top:36px;padding-top:22px;
+  border-top:1px solid rgba(0,47,108,0.09);
+}
+.landing-footer-logo{height:52px;width:auto;flex-shrink:0;opacity:0.92;}
+.landing-footer-text{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;color:#5a7090;letter-spacing:0.2px;font-weight:600;
+  padding:6px 14px;border-radius:20px;
+  background:rgba(0,47,108,0.05);border:1px solid rgba(0,47,108,0.10);
+}
+.landing-footer-text svg{flex-shrink:0;opacity:0.75;}
+.landing-feature-title{font-size:15px;font-weight:700;color:#002F6C;margin-bottom:6px;}
+.landing-feature-desc{font-size:13px;color:#5a7090;line-height:1.5;}
 .landing-cta{
-  padding:14px 36px;font-size:15px;border-radius:12px;
+  padding:14px 36px;font-size:16px;border-radius:12px;
   background:linear-gradient(135deg,#00A4EB,#0050FF) !important;
   box-shadow:0 8px 28px rgba(0,164,235,0.45);
   transition:transform 0.18s,box-shadow 0.18s;
@@ -499,54 +577,87 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 
 /* ══ LANDING PAGE ANIMATIONS (scoped, no global breakage) ══ */
 
-/* Grid overlay — absolute inside .landing */
-.landing-grid{
-  position:absolute;inset:0;pointer-events:none;overflow:hidden;
-  background-image:
-    linear-gradient(rgba(0,47,108,0.04) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,47,108,0.04) 1px,transparent 1px);
-  background-size:52px 52px;
+/* Canvas grid effect - a fine grid with a few cells that softly light up
+   and short traveling light-trace lines (with a glowing dot at the head)
+   that grow across the grid and fade out. Movement lives in the
+   background layer itself, nothing floats on top of it. */
+.landing-fx{
+  position:absolute;inset:0;width:100%;height:100%;
+  pointer-events:none;
   mask-image:radial-gradient(ellipse 85% 80% at 50% 30%,#000 0%,transparent 80%);
   -webkit-mask-image:radial-gradient(ellipse 85% 80% at 50% 30%,#000 0%,transparent 80%);
 }
 
-/* Floating orbs — absolute inside .landing */
+/* Ambient glows - static depth behind the hero (no bouncing/translating) */
 .l-orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(60px);}
 .l-orb-1{
   width:380px;height:380px;
-  background:radial-gradient(circle,rgba(0,164,235,0.12) 0%,transparent 70%);
+  background:radial-gradient(circle,rgba(0,164,235,0.32) 0%,transparent 70%);
   top:-80px;left:-60px;
-  animation:orbFloat1 9s ease-in-out infinite;
 }
 .l-orb-2{
   width:300px;height:300px;
-  background:radial-gradient(circle,rgba(0,80,255,0.08) 0%,transparent 70%);
+  background:radial-gradient(circle,rgba(0,80,255,0.24) 0%,transparent 70%);
   bottom:-60px;right:-40px;
-  animation:orbFloat2 11s ease-in-out infinite;
 }
-@keyframes orbFloat1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(20px,-30px) scale(1.06);}}
-@keyframes orbFloat2{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-15px,20px) scale(1.08);}}
 
-/* Geometric floating shapes — absolute inside .landing */
-.l-geo{
-  position:absolute;pointer-events:none;border-radius:6px;
-  border:1.5px solid rgba(0,47,108,0.10);backdrop-filter:blur(2px);
-}
-.l-geo-1{width:24px;height:24px;top:14%;left:8%;animation:geoFloat 7s ease-in-out infinite;transform:rotate(16deg);}
-.l-geo-2{width:16px;height:16px;top:22%;right:9%;animation:geoFloat 9s ease-in-out infinite 1s;transform:rotate(-20deg);}
-.l-geo-3{width:20px;height:20px;bottom:20%;left:6%;animation:geoFloat 8s ease-in-out infinite 2s;transform:rotate(30deg);}
-.l-geo-4{width:14px;height:14px;bottom:28%;right:7%;animation:geoFloat 6s ease-in-out infinite 0.5s;transform:rotate(-12deg);}
-@keyframes geoFloat{0%,100%{transform:translateY(0) rotate(16deg);}50%{transform:translateY(-12px) rotate(20deg);}}
-
-/* Hero SVG */
+/* Hero - orbiting logos around the TalentTrace mark */
 .landing-hero-wrap{
-  width:100%;max-width:760px;margin:0 auto 32px;
-  position:relative;
+  width:100%;max-width:760px;margin:0 auto 20px;
+  position:relative;height:190px;overflow:hidden;
+  display:flex;justify-content:center;
 }
-.landing-hero-svg{
-  width:100%;height:auto;max-height:260px;
-  filter:drop-shadow(0 12px 40px rgba(91,95,239,0.10));
+@media(min-width:640px){
+  .landing-hero-wrap{height:230px;}
 }
+.orbit-center{
+  position:absolute;bottom:0;left:50%;transform:translate(-50%,50%);
+  width:110px;height:110px;border-radius:50%;z-index:5;
+  background:radial-gradient(circle,rgba(0,164,235,0.18) 0%,transparent 72%);
+  display:flex;align-items:center;justify-content:center;
+}
+.orbit-center-mark{
+  width:78px;height:78px;border-radius:50%;background:#fff;
+  box-shadow:0 12px 32px rgba(0,47,108,0.20);
+  display:flex;align-items:center;justify-content:center;
+}
+.orbit-ring{
+  position:absolute;bottom:0;left:50%;transform:translate(-50%,50%);
+  border-radius:50%;border:1px solid rgba(0,47,108,0.12);
+}
+.orbit-ring-1{width:180px;height:180px;}
+.orbit-ring-2{width:260px;height:260px;}
+.orbit-ring-3{width:340px;height:340px;}
+@media(min-width:640px){
+  .orbit-ring-1{width:230px;height:230px;}
+  .orbit-ring-2{width:330px;height:330px;}
+  .orbit-ring-3{width:430px;height:430px;}
+}
+.orbit-icon-wrap{
+  position:absolute;bottom:0;left:50%;width:38px;margin-left:-19px;
+  transform-origin:bottom center;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+}
+.orbit-icon-wrap-1{height:90px;}
+.orbit-icon-wrap-2{height:130px;}
+.orbit-icon-wrap-3{height:170px;}
+@media(min-width:640px){
+  .orbit-icon-wrap-1{height:115px;}
+  .orbit-icon-wrap-2{height:165px;}
+  .orbit-icon-wrap-3{height:215px;}
+}
+.orbit-icon{
+  width:38px;height:38px;border-radius:50%;background:#fff;margin-top:-19px;
+  border:1px solid rgba(0,47,108,0.10);box-shadow:0 6px 16px rgba(0,47,108,0.14);
+  display:flex;align-items:center;justify-content:center;position:relative;z-index:2;
+}
+.orbit-icon svg{width:20px;height:20px;display:block;}
+.orbit-icon span{font-size:18px;color:#FF8B00;line-height:1;}
+
+@keyframes orbit-cw{from{transform:rotate(var(--start-angle))}to{transform:rotate(calc(var(--start-angle) + 360deg))}}
+@keyframes orbit-ccw{from{transform:rotate(var(--start-angle))}to{transform:rotate(calc(var(--start-angle) - 360deg))}}
+@keyframes counter-cw{from{transform:rotate(var(--counter-offset,0deg))}to{transform:rotate(calc(var(--counter-offset,0deg) - 360deg))}}
+@keyframes counter-ccw{from{transform:rotate(var(--counter-offset,0deg))}to{transform:rotate(calc(var(--counter-offset,0deg) + 360deg))}}
 
 /* Logo mark */
 .landing-logo-wrap{display:flex;justify-content:center;margin-bottom:20px;animation:fadeSlideUp 0.6s ease both;}
@@ -568,7 +679,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
 
-/* Entrance animations — landing only */
+/* Entrance animations - landing only */
 @keyframes fadeSlideUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
 
 .landing-inner > .landing-logo-wrap{animation:fadeSlideUp 0.5s ease both 0s;}
@@ -602,7 +713,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
   width:600px;height:300px;
   left:50%;top:30%;
   transform:translate(-50%,-50%);
-  background:radial-gradient(ellipse,rgba(0,164,235,0.10) 0%,rgba(0,80,255,0.04) 40%,transparent 70%);
+  background:radial-gradient(ellipse,rgba(0,164,235,0.24) 0%,rgba(0,80,255,0.12) 40%,transparent 70%);
   pointer-events:none;
   filter:blur(20px);
   animation:glowPulse 5s ease-in-out infinite;
@@ -615,16 +726,13 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 }
 .landing-wave svg{width:100%;height:100%;position:absolute;top:0;left:0;}
 
-/* Hero SVG: dark-mode safe card colours */
-.landing-hero-svg text{font-family:-apple-system,BlinkMacSystemFont,sans-serif;}
-
-/* Narrow "badge" above headline — Akamai does this */
+/* Narrow "badge" above headline - Akamai does this */
 .landing-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:5px 14px;border-radius:20px;
+  display:inline-flex;align-items:center;gap:7px;
+  padding:7px 16px;border-radius:20px;
   background:rgba(0,164,235,0.08);
   border:1px solid rgba(0,164,235,0.20);
-  font-size:12px;font-weight:600;color:#00A4EB;
+  font-size:13.5px;font-weight:600;color:#00A4EB;
   letter-spacing:0.02em;margin-bottom:18px;
   animation:fadeSlideUp 0.4s ease both 0s;
 }
@@ -644,7 +752,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 }
 
 
-.landing-headline{color:#002F6C !important;}
+.landing-headline{color:#002F6C !important;font-size:clamp(34px,5vw,50px);font-weight:800;line-height:1.15;letter-spacing:-0.5px;}
 .landing-hl-accent{background:linear-gradient(135deg,#00A4EB 0%,#0050FF 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 </style>
 </head>
@@ -653,50 +761,43 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 <!-- ── LANDING PAGE ── -->
 <div id="landing-page" class="landing">
 
-  <!-- Animated grid background (Atlan-style) -->
-  <div class="landing-grid" aria-hidden="true"></div>
+  <!-- Grid + traveling light-trace canvas (Atlan-style moving background) -->
+  <canvas id="landing-fx" class="landing-fx" aria-hidden="true"></canvas>
 
-  <!-- Floating orbs -->
+  <!-- Ambient glows (static) -->
   <div class="l-orb l-orb-1" aria-hidden="true"></div>
   <div class="l-orb l-orb-2" aria-hidden="true"></div>
-
-  <!-- Floating geo shapes -->
-  <div class="l-geo l-geo-1" aria-hidden="true"></div>
-  <div class="l-geo l-geo-2" aria-hidden="true"></div>
-  <div class="l-geo l-geo-3" aria-hidden="true"></div>
-  <div class="l-geo l-geo-4" aria-hidden="true"></div>
 
   <div class="landing-inner">
 
     <!-- Logo mark -->
     <div class="landing-logo-wrap">
-      <svg width="160" height="56" viewBox="0 0 160 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="250" height="56" viewBox="0 0 250 56" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="arcGrad" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stop-color="#4dc8f5"/>
             <stop offset="100%" stop-color="#0090d6"/>
           </linearGradient>
         </defs>
-        <!-- Akamai-style concentric arcs (swoosh) -->
-        <!-- Outermost arc -->
-        <path d="M28,4 A24,24 0 1,0 52,28" stroke="#7dd8f8" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-        <!-- Middle arc -->
+        <!-- Trace Rings - aligned arc gaps, even stroke weight -->
+        <path d="M28,4 A24,24 0 1,0 52,28" stroke="#7dd8f8" stroke-width="4" fill="none" stroke-linecap="round"/>
         <path d="M28,10 A18,18 0 1,0 46,28" stroke="#2ab4f0" stroke-width="4" fill="none" stroke-linecap="round"/>
-        <!-- Inner arc -->
-        <path d="M28,16 A12,12 0 1,0 40,28" stroke="#0090d6" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-        <!-- Innermost arc -->
-        <path d="M28,22 A6,6 0 1,0 34,28" stroke="#005fa3" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+        <path d="M28,16 A12,12 0 1,0 40,28" stroke="#0090d6" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path d="M28,22 A6,6 0 1,0 34,28" stroke="#005fa3" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <!-- Center point - the signal homing in on talent -->
+        <circle cx="24" cy="33" r="7" stroke="#7dd8f8" stroke-width="1.6" fill="none" opacity="0.55"/>
+        <circle cx="24" cy="33" r="3.3" fill="#FF8B00"/>
 
-        <!-- "TT" bold text in Akamai navy style -->
+        <!-- "TalentTrace" wordmark -->
         <text x="64" y="37" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif" font-size="30" font-weight="900" fill="#002F6C" letter-spacing="-1">Talent</text>
-        <text x="143" y="37" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif" font-size="30" font-weight="900" fill="#00A4EB" letter-spacing="-1">T</text>
+        <text x="143" y="37" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif" font-size="30" font-weight="900" fill="#FF8B00" letter-spacing="-1">Trace</text>
       </svg>
     </div>
 
     <!-- Akamai-style badge -->
     <div class="landing-badge">
       <span class="landing-badge-dot"></span>
-      AI-Powered Recruiting Workspace
+      AI-Powered Sourcing Workspace
     </div>
 
     <!-- Deep glow -->
@@ -716,132 +817,95 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
       Find great talent,<br><span class="landing-hl-accent">faster than ever</span>
     </h1>
 
-    <p class="landing-tagline">Your AI-powered recruiting workspace — boolean sourcing, JD analysis, and live candidate search across TalentData &amp; GitHub, all in one place.</p>
+    <p class="landing-tagline">Your AI-powered recruiting workspace - boolean sourcing, job description analysis, and live candidate search across TalentData &amp; GitHub, all in one place.</p>
 
     <!-- Hero illustration -->
     <div class="landing-hero-wrap">
-      <svg viewBox="0 0 720 260" fill="none" xmlns="http://www.w3.org/2000/svg" class="landing-hero-svg">
-        <defs>
-          <linearGradient id="hg1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#002F6C"/></linearGradient>
-          <linearGradient id="hg2" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#f4f5ff"/></linearGradient>
-          <filter id="hfshadow"><feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#002F6C" flood-opacity="0.12"/></filter>
-          <filter id="hfchip"><feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#00A4EB" flood-opacity="0.12"/></filter>
-        </defs>
 
-        <!-- Main app window -->
-        <rect x="100" y="10" width="520" height="240" rx="14" fill="url(#hg2)" filter="url(#hfshadow)" stroke="rgba(0,164,235,0.10)" stroke-width="1"/>
-        <!-- Title bar -->
-        <rect x="100" y="10" width="520" height="36" rx="14" fill="#f6f7ff"/>
-        <rect x="100" y="32" width="520" height="14" fill="#f6f7ff"/>
-        <!-- Traffic lights -->
-        <circle cx="122" cy="28" r="5.5" fill="#f87171" opacity=".7"/>
-        <circle cx="140" cy="28" r="5.5" fill="#fbbf24" opacity=".7"/>
-        <circle cx="158" cy="28" r="5.5" fill="#34d399" opacity=".7"/>
-        <!-- URL bar -->
-        <rect x="180" y="19" width="260" height="18" rx="5" fill="rgba(91,95,239,0.07)"/>
-        <text x="310" y="31.5" font-size="9.5" fill="#8b8fa8" text-anchor="middle" font-family="-apple-system,sans-serif">talenttrace.vercel.app</text>
+      <!-- Center mark -->
+      <div class="orbit-center" aria-hidden="true">
+        <div class="orbit-center-mark">
+          <svg width="46" height="46" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18,3 A15,15 0 1,0 33,18" stroke="#7dd8f8" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+            <path d="M18,7 A11,11 0 1,0 29,18" stroke="#2ab4f0" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+            <path d="M18,11 A7,7 0 1,0 25,18" stroke="#0090d6" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+            <path d="M18,15 A3,3 0 1,0 21,18" stroke="#005fa3" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+            <circle cx="15.5" cy="21" r="4.4" stroke="#7dd8f8" stroke-width="1.1" fill="none" opacity="0.55"/>
+            <circle cx="15.5" cy="21" r="2.1" fill="#FF8B00"/>
+          </svg>
+        </div>
+      </div>
 
-        <!-- Left sidebar -->
-        <rect x="100" y="46" width="104" height="204" fill="#f4f5ff" rx="0"/>
-        <!-- Brand -->
-        <rect x="110" y="56" width="84" height="20" rx="6" fill="url(#hg1)" opacity=".9"/>
-        <text x="152" y="69.5" font-size="8.5" fill="white" text-anchor="middle" font-family="-apple-system,sans-serif" font-weight="700">TalentTrace</text>
-        <!-- Nav items -->
-        <rect x="110" y="84" width="84" height="16" rx="5" fill="#00A4EB"/>
-        <rect x="114" y="88.5" width="3" height="7" rx="1.5" fill="white"/>
-        <text x="121" y="95" font-size="7.5" fill="white" font-family="-apple-system,sans-serif" font-weight="600">Boolean Builder</text>
-        <rect x="110" y="106" width="84" height="14" rx="5" fill="transparent"/>
-        <text x="114" y="116" font-size="7.5" fill="#8b8fa8" font-family="-apple-system,sans-serif">JD Analyzer</text>
-        <rect x="110" y="124" width="84" height="14" rx="5" fill="transparent"/>
-        <text x="114" y="134" font-size="7.5" fill="#8b8fa8" font-family="-apple-system,sans-serif">TalentData</text>
-        <rect x="110" y="142" width="84" height="14" rx="5" fill="transparent"/>
-        <text x="114" y="152" font-size="7.5" fill="#8b8fa8" font-family="-apple-system,sans-serif">GitHub Search</text>
-        <!-- Separator -->
-        <line x1="204" y1="46" x2="204" y2="250" stroke="rgba(91,95,239,0.1)" stroke-width="1"/>
+      <!-- Orbit rings -->
+      <div class="orbit-ring orbit-ring-1" aria-hidden="true"></div>
+      <div class="orbit-ring orbit-ring-2" aria-hidden="true"></div>
+      <div class="orbit-ring orbit-ring-3" aria-hidden="true"></div>
 
-        <!-- Main content -->
-        <!-- Page heading -->
-        <text x="218" y="68" font-size="12.5" fill="#1e1e3a" font-family="-apple-system,sans-serif" font-weight="800">Boolean Builder</text>
-        <line x1="218" y1="73" x2="606" y2="73" stroke="rgba(91,95,239,0.1)" stroke-width="1"/>
+      <!-- Ring 1 - LinkedIn / Google X-Ray -->
+      <div class="orbit-icon-wrap orbit-icon-wrap-1" style="--start-angle:-90deg;animation:orbit-cw 16s linear infinite;">
+        <div class="orbit-icon" style="--counter-offset:90deg;animation:counter-cw 16s linear infinite;">
+          <svg viewBox="0 0 24 24"><path fill="#0A66C2" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </div>
+      </div>
+      <div class="orbit-icon-wrap orbit-icon-wrap-1" style="--start-angle:0deg;animation:orbit-cw 16s linear infinite;">
+        <div class="orbit-icon" style="--counter-offset:0deg;animation:counter-cw 16s linear infinite;">
+          <svg viewBox="0 0 48 48"><path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/><path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/><path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.88l7.35-5.7z"/><path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/></svg>
+        </div>
+      </div>
+      <div class="orbit-icon-wrap orbit-icon-wrap-1" style="--start-angle:90deg;animation:orbit-cw 16s linear infinite;">
+        <div class="orbit-icon" style="--counter-offset:-90deg;animation:counter-cw 16s linear infinite;">
+          <svg viewBox="0 0 24 24"><path fill="#0A66C2" d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </div>
+      </div>
+      <div class="orbit-icon-wrap orbit-icon-wrap-1" style="--start-angle:180deg;animation:orbit-cw 16s linear infinite;">
+        <div class="orbit-icon" style="--counter-offset:-180deg;animation:counter-cw 16s linear infinite;">
+          <svg viewBox="0 0 48 48"><path fill="#4285F4" d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"/><path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/><path fill="#FBBC05" d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24s.85 6.91 2.34 9.88l7.35-5.7z"/><path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/></svg>
+        </div>
+      </div>
 
-        <!-- Role card -->
-        <rect x="218" y="80" width="178" height="96" rx="10" fill="white" stroke="rgba(91,95,239,0.1)" stroke-width="1"/>
-        <rect x="226" y="89" width="3" height="16" rx="1.5" fill="#00A4EB"/>
-        <text x="234" y="100" font-size="9" fill="#1e1e3a" font-family="-apple-system,sans-serif" font-weight="700">Role</text>
-        <rect x="226" y="106" width="160" height="13" rx="4" fill="#f4f5ff" stroke="rgba(91,95,239,0.1)" stroke-width=".8"/>
-        <text x="232" y="115.5" font-size="7" fill="#8b8fa8" font-family="-apple-system,sans-serif">Senior Data Engineer</text>
-        <rect x="226" y="124" width="160" height="13" rx="4" fill="#f4f5ff" stroke="rgba(91,95,239,0.1)" stroke-width=".8"/>
-        <text x="232" y="133.5" font-size="7" fill="#8b8fa8" font-family="-apple-system,sans-serif">Bangalore · 5–10 yrs</text>
-        <rect x="226" y="142" width="70" height="13" rx="4" fill="#00A4EB"/>
-        <text x="261" y="151.5" font-size="7" fill="white" text-anchor="middle" font-family="-apple-system,sans-serif" font-weight="600">Generate →</text>
+      <!-- Ring 2 - StackOverflow / GitHub -->
+      <div class="orbit-icon-wrap orbit-icon-wrap-2" style="--start-angle:-45deg;animation:orbit-ccw 22s linear infinite;">
+        <div class="orbit-icon" style="--counter-offset:45deg;animation:counter-ccw 22s linear infinite;">
+          <svg viewBox="0 0 24 24"><path fill="#F48024" d="M18.986 21.865v-6.404h2.134V24H1.844v-8.539h2.13v6.404h15.012zM6.111 19.731H17.78v-2.137H6.111v2.137zm.259-4.852 11.383 2.381.45-2.077-11.382-2.382-.451 2.078zm1.359-5.056 10.57 4.93.894-1.95-10.57-4.929-.894 1.95zm2.748-4.691 8.946 7.404 1.362-1.681-8.945-7.403-1.363 1.68zm5.101-5.049-1.742 1.294 6.921 9.42 1.742-1.294-6.921-9.42z"/></svg>
+        </div>
+      </div>
+      <div class="orbit-icon-wrap orbit-icon-wrap-2" style="--start-angle:45deg;animation:orbit-ccw 22s linear infinite;">
+        <div class="orbit-icon" style="--counter-offset:-45deg;animation:counter-ccw 22s linear infinite;">
+          <svg viewBox="0 0 24 24"><path fill="#181717" fill-rule="evenodd" clip-rule="evenodd" d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+        </div>
+      </div>
+      <div class="orbit-icon-wrap orbit-icon-wrap-2" style="--start-angle:135deg;animation:orbit-ccw 22s linear infinite;">
+        <div class="orbit-icon" style="--counter-offset:-135deg;animation:counter-ccw 22s linear infinite;">
+          <svg viewBox="0 0 24 24"><path fill="#F48024" d="M18.986 21.865v-6.404h2.134V24H1.844v-8.539h2.13v6.404h15.012zM6.111 19.731H17.78v-2.137H6.111v2.137zm.259-4.852 11.383 2.381.45-2.077-11.382-2.382-.451 2.078zm1.359-5.056 10.57 4.93.894-1.95-10.57-4.929-.894 1.95zm2.748-4.691 8.946 7.404 1.362-1.681-8.945-7.403-1.363 1.68zm5.101-5.049-1.742 1.294 6.921 9.42 1.742-1.294-6.921-9.42z"/></svg>
+        </div>
+      </div>
+      <div class="orbit-icon-wrap orbit-icon-wrap-2" style="--start-angle:-135deg;animation:orbit-ccw 22s linear infinite;">
+        <div class="orbit-icon" style="--counter-offset:135deg;animation:counter-ccw 22s linear infinite;">
+          <svg viewBox="0 0 24 24"><path fill="#181717" fill-rule="evenodd" clip-rule="evenodd" d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+        </div>
+      </div>
 
-        <!-- Output card -->
-        <rect x="406" y="80" width="194" height="96" rx="10" fill="white" stroke="rgba(91,95,239,0.1)" stroke-width="1"/>
-        <rect x="414" y="89" width="3" height="16" rx="1.5" fill="#002F6C"/>
-        <text x="422" y="100" font-size="9" fill="#1e1e3a" font-family="-apple-system,sans-serif" font-weight="700">LinkedIn Query</text>
-        <rect x="414" y="106" width="177" height="62" rx="5" fill="#f4f5ff"/>
-        <text x="420" y="117" font-size="6.5" fill="#00A4EB" font-family="monospace">"Data Engineer" AND</text>
-        <text x="420" y="127" font-size="6.5" fill="#00A4EB" font-family="monospace">(Spark OR Kafka) AND</text>
-        <text x="420" y="137" font-size="6.5" fill="#00A4EB" font-family="monospace">(Bangalore OR Remote)</text>
-        <text x="420" y="147" font-size="6.5" fill="#002F6C" font-family="monospace">NOT (intern OR fresher)</text>
-
-        <!-- Platform pills at bottom -->
-        <rect x="218" y="185" width="68" height="19" rx="6" fill="url(#hg1)"/>
-        <text x="252" y="197.5" font-size="7.5" fill="white" text-anchor="middle" font-family="-apple-system,sans-serif" font-weight="600">LinkedIn</text>
-        <rect x="294" y="185" width="58" height="19" rx="6" fill="#f4f5ff" stroke="rgba(91,95,239,0.15)" stroke-width="1"/>
-        <text x="323" y="197.5" font-size="7.5" fill="#002F6C" text-anchor="middle" font-family="-apple-system,sans-serif">Google X-Ray</text>
-        <rect x="360" y="185" width="72" height="19" rx="6" fill="#f4f5ff" stroke="rgba(91,95,239,0.15)" stroke-width="1"/>
-        <text x="396" y="197.5" font-size="7.5" fill="#002F6C" text-anchor="middle" font-family="-apple-system,sans-serif">StackOverflow</text>
-        <rect x="440" y="185" width="54" height="19" rx="6" fill="#f4f5ff" stroke="rgba(91,95,239,0.15)" stroke-width="1"/>
-        <text x="467" y="197.5" font-size="7.5" fill="#002F6C" text-anchor="middle" font-family="-apple-system,sans-serif">GitHub</text>
-
-        <!-- Animated dots along paths -->
-        <path id="p1" d="M60 80 C80 80 95 110 100 130" stroke="none" fill="none"/>
-        <circle r="3.5" fill="#00A4EB" opacity="0.7"><animateMotion dur="2.8s" repeatCount="indefinite" begin="0s"><mpath href="#p1"/></animateMotion><animate attributeName="opacity" values="0;0.8;0.8;0" dur="2.8s" repeatCount="indefinite"/></circle>
-        <circle r="2.5" fill="#a78bfa" opacity="0.5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="1.4s"><mpath href="#p1"/></animateMotion><animate attributeName="opacity" values="0;0.6;0.6;0" dur="2.8s" repeatCount="indefinite" begin="1.4s"/></circle>
-
-        <path id="p2" d="M660 80 C640 80 625 120 620 150" stroke="none" fill="none"/>
-        <circle r="3" fill="#00A4EB" opacity="0.7"><animateMotion dur="3.2s" repeatCount="indefinite" begin="0.6s"><mpath href="#p2"/></animateMotion><animate attributeName="opacity" values="0;0.8;0.8;0" dur="3.2s" repeatCount="indefinite" begin="0.6s"/></circle>
-
-        <!-- Floating candidate chips -->
-        <!-- Left -->
-        <rect x="4" y="58" width="88" height="36" rx="10" fill="white" stroke="rgba(91,95,239,0.1)" stroke-width="1" filter="url(#hfchip)"/>
-        <circle cx="20" cy="76" r="9" fill="url(#hg1)"/>
-        <text x="20" y="79.5" font-size="7.5" fill="white" text-anchor="middle" font-family="-apple-system,sans-serif" font-weight="700">RS</text>
-        <text x="34" y="71" font-size="7.5" fill="#1e1e3a" font-family="-apple-system,sans-serif" font-weight="600">Riya S.</text>
-        <text x="34" y="81" font-size="7" fill="#8b8fa8" font-family="-apple-system,sans-serif">8 yrs · Data</text>
-
-        <rect x="4" y="108" width="88" height="36" rx="10" fill="white" stroke="rgba(91,95,239,0.1)" stroke-width="1" filter="url(#hfchip)"/>
-        <circle cx="20" cy="126" r="9" fill="#477c65"/>
-        <text x="20" y="129.5" font-size="7.5" fill="white" text-anchor="middle" font-family="-apple-system,sans-serif" font-weight="700">AK</text>
-        <text x="34" y="121" font-size="7.5" fill="#1e1e3a" font-family="-apple-system,sans-serif" font-weight="600">Arjun K.</text>
-        <text x="34" y="131" font-size="7" fill="#8b8fa8" font-family="-apple-system,sans-serif">6 yrs · ML</text>
-
-        <rect x="4" y="158" width="88" height="36" rx="10" fill="white" stroke="rgba(91,95,239,0.1)" stroke-width="1" filter="url(#hfchip)"/>
-        <circle cx="20" cy="176" r="9" fill="#3ab8f5"/>
-        <text x="20" y="179.5" font-size="7.5" fill="white" text-anchor="middle" font-family="-apple-system,sans-serif" font-weight="700">PM</text>
-        <text x="34" y="171" font-size="7.5" fill="#1e1e3a" font-family="-apple-system,sans-serif" font-weight="600">Priya M.</text>
-        <text x="34" y="181" font-size="7" fill="#8b8fa8" font-family="-apple-system,sans-serif">9 yrs · SDE</text>
-
-        <!-- Right -->
-        <rect x="628" y="58" width="88" height="36" rx="10" fill="white" stroke="rgba(91,95,239,0.1)" stroke-width="1" filter="url(#hfchip)"/>
-        <circle cx="644" cy="76" r="9" fill="#b8860b"/>
-        <text x="644" y="79.5" font-size="7.5" fill="white" text-anchor="middle" font-family="-apple-system,sans-serif" font-weight="700">SK</text>
-        <text x="658" y="71" font-size="7.5" fill="#1e1e3a" font-family="-apple-system,sans-serif" font-weight="600">Suresh K.</text>
-        <text x="658" y="81" font-size="7" fill="#8b8fa8" font-family="-apple-system,sans-serif">7 yrs · DE</text>
-
-        <rect x="628" y="108" width="88" height="36" rx="10" fill="white" stroke="rgba(91,95,239,0.1)" stroke-width="1" filter="url(#hfchip)"/>
-        <circle cx="644" cy="126" r="9" fill="#00A4EB"/>
-        <text x="644" y="129.5" font-size="7.5" fill="white" text-anchor="middle" font-family="-apple-system,sans-serif" font-weight="700">NR</text>
-        <text x="658" y="121" font-size="7.5" fill="#1e1e3a" font-family="-apple-system,sans-serif" font-weight="600">Neha R.</text>
-        <text x="658" y="131" font-size="7" fill="#8b8fa8" font-family="-apple-system,sans-serif">5 yrs · BI</text>
-
-        <rect x="628" y="158" width="88" height="36" rx="10" fill="white" stroke="rgba(91,95,239,0.1)" stroke-width="1" filter="url(#hfchip)"/>
-        <circle cx="644" cy="176" r="9" fill="#d85d69"/>
-        <text x="644" y="179.5" font-size="7.5" fill="white" text-anchor="middle" font-family="-apple-system,sans-serif" font-weight="700">VS</text>
-        <text x="658" y="171" font-size="7.5" fill="#1e1e3a" font-family="-apple-system,sans-serif" font-weight="600">Vikram S.</text>
-        <text x="658" y="181" font-size="7" fill="#8b8fa8" font-family="-apple-system,sans-serif">10 yrs · DE</text>
-      </svg>
+      <!-- Ring 3 - TalentData / AI-powered -->
+      <div class="orbit-icon-wrap orbit-icon-wrap-3" style="--start-angle:-20deg;animation:orbit-cw 28s linear infinite;">
+        <div class="orbit-icon" style="--counter-offset:20deg;animation:counter-cw 28s linear infinite;">
+          <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.4" fill="#00A4EB"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="#00A4EB" stroke-width="1.8" stroke-linecap="round" fill="none"/><circle cx="17.5" cy="14" r="3" stroke="#002F6C" stroke-width="1.6" fill="none"/><line x1="19.6" y1="16.1" x2="22" y2="18.5" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+      <div class="orbit-icon-wrap orbit-icon-wrap-3" style="--start-angle:70deg;animation:orbit-cw 28s linear infinite;">
+        <div class="orbit-icon" style="--counter-offset:-70deg;animation:counter-cw 28s linear infinite;">
+          <span>✦</span>
+        </div>
+      </div>
+      <div class="orbit-icon-wrap orbit-icon-wrap-3" style="--start-angle:160deg;animation:orbit-cw 28s linear infinite;">
+        <div class="orbit-icon" style="--counter-offset:-160deg;animation:counter-cw 28s linear infinite;">
+          <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.4" fill="#00A4EB"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="#00A4EB" stroke-width="1.8" stroke-linecap="round" fill="none"/><circle cx="17.5" cy="14" r="3" stroke="#002F6C" stroke-width="1.6" fill="none"/><line x1="19.6" y1="16.1" x2="22" y2="18.5" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+      <div class="orbit-icon-wrap orbit-icon-wrap-3" style="--start-angle:-110deg;animation:orbit-cw 28s linear infinite;">
+        <div class="orbit-icon" style="--counter-offset:110deg;animation:counter-cw 28s linear infinite;">
+          <span>✦</span>
+        </div>
+      </div>
     </div>
 
     <div class="landing-divider"></div>
@@ -854,7 +918,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
       </div>
       <div class="landing-feature">
         <div class="landing-feature-icon"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#ljd)"/><defs><linearGradient id="ljd" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#3ab8f5"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="9" y="7" width="18" height="22" rx="3" fill="white" opacity="0.95"/><line x1="13" y1="13" x2="23" y2="13" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="13" y1="17" x2="23" y2="17" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="13" y1="21" x2="19" y2="21" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><path d="M28 22 L29.4 26 L33 27 L29.4 28 L28 32 L26.6 28 L23 27 L26.6 26 Z" fill="white" opacity="0.95"/></svg></div>
-        <div class="landing-feature-title">JD Analyzer</div>
+        <div class="landing-feature-title">Job Description Analyzer</div>
         <div class="landing-feature-desc">Target companies, interview questions &amp; profile checklists</div>
       </div>
       <div class="landing-feature">
@@ -871,45 +935,95 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 
     <button class="btn btn-primary landing-cta" onclick="enterWorkspace()">Enter Workspace →</button>
 
+    <div class="landing-footer">
+      <svg class="landing-footer-logo" viewBox="296 265 1298 530" xmlns="http://www.w3.org/2000/svg">
+        <g>
+          <path fill="#00a4eb" d="M592.85,764.11c-100.8-30.77-174.12-123.92-174.12-234.05s74.88-205.29,177.4-235.02c10.48-3.06,7.73-9.86-4.91-9.86-136.28,0-246.8,109.69-246.8,244.89s110.51,244.86,246.8,244.86c12.63,0,13.14-7.3,1.63-10.81Z"/>
+          <path fill="#00a4eb" d="M465.48,587.42c-.68-6.58-1.01-13.23-1.01-19.94,0-107.36,87.05-194.39,194.43-194.39,101.52,0,132,45.31,135.78,42.35,4.12-3.26-36.84-93.07-156.05-93.07-107.39,0-194.44,87.03-194.44,194.39,0,24.84,4.65,48.52,13.13,70.31,3.58,9.14,9.08,9.22,8.17.35Z"/>
+          <path fill="#00a4eb" d="M546.92,447.31c50.53-22.03,114.01-22.7,176.42-.89,41.91,14.62,66.2,35.5,68.19,34.64,3.31-1.43-24.38-45.28-74.36-64.24-60.51-22.93-125.69-10.93-173.18,26.32-5.22,4.11-3.25,6.87,2.93,4.17Z"/>
+          <path fill="#00a4eb" d="M1546.23,538.76c0,14.11-11.44,25.52-25.51,25.52s-25.52-11.41-25.52-25.52,11.42-25.49,25.52-25.49,25.51,11.42,25.51,25.49Z"/>
+          <path fill="#002f6c" d="M710.44,643.53h-49.24l42.38-85.89h.49l6.37,85.89h0ZM712.82,682.16l3.01,34.07h53.95l-18.16-198.26h-80.34l-101.57,198.26h54.96l17.05-34.07h71.11Z"/>
+          <polygon fill="#002f6c" points="845 629.54 852.9 629.54 891.51 577.43 941.5 577.43 888.16 644.07 920.88 716.23 867.8 716.23 846.48 659.89 838.53 659.89 826.53 716.23 781.12 716.23 823.22 517.97 868.71 517.97 845 629.54 845 629.54"/>
+          <path fill="#002f6c" d="M999.69,658.87c14.82,0,24.6,1.02,22.14,12.67-3.12,14.53-9.4,16.95-28.43,16.95-6.93,0-19.8,0-16.63-15.07,2.71-12.75,11.76-14.54,22.91-14.54h0ZM1012.36,716.23h45.45l18.42-86.69c10.1-47.88-8.21-53.69-54.69-53.69-32.46,0-63.87-.28-73.07,42.83h45.5c2.58-12.46,10.28-15.04,21.68-15.04,19.78,0,18.91,8.21,16.11,21.09l-4.62,21.99h-2.11c-1.72-15.87-21.61-15.64-34.52-15.64-32.82,0-52.37,10.32-59.51,43.67-7.49,35.37,9.36,43.06,41.06,43.06,15.9,0,37.15-3.14,44.66-22.26h1.56l-5.92,20.68h0Z"/>
+          <path fill="#002f6c" d="M1149.57,577.43l-4.16,19.56h1.86c9.02-16.39,26.97-21.14,42.55-21.14,19.58,0,38.9,3.41,36.21,27.24h2.12c6.66-19.79,26.94-27.24,44.39-27.24,32.03,0,45.59,13.23,38.75,45.53l-20.23,94.86h-45.42l17.1-80.38c2.23-14.48,4.82-25.1-12.92-25.1s-23.62,11.8-26.77,26.67l-16.78,78.81h-45.45l17.87-84.06c2.19-12.71,3.23-21.42-12.63-21.42-18.77,0-24.34,10.05-27.8,26.67l-16.82,78.81h-45.47l29.57-138.8h44.06Z"/>
+          <path fill="#002f6c" d="M1382.84,658.87c14.72,0,24.57,1.02,22.13,12.67-3.06,14.53-9.38,16.95-28.47,16.95-6.88,0-19.82,0-16.62-15.07,2.72-12.75,11.8-14.54,22.95-14.54h0ZM1395.43,716.23h45.45l18.44-86.69c10.15-47.88-8.11-53.69-54.6-53.69-32.59,0-64.04-.28-73.11,42.83h45.49c2.58-12.46,10.36-15.04,21.6-15.04,19.88,0,18.89,8.21,16.28,21.09l-4.74,21.99h-2.12c-1.7-15.87-21.56-15.64-34.47-15.64-32.79,0-52.43,10.32-59.5,43.67-7.5,35.37,9.34,43.06,41.06,43.06,15.88,0,37.14-3.14,44.68-22.26h1.56l-5.99,20.68h0Z"/>
+          <path fill="#002f6c" d="M1506.4,716.23h-45.39l29.41-138.8h45.5l-29.53,138.8h0Z"/>
+        </g>
+      </svg>
+      <span class="landing-footer-text">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 10V8a6 6 0 1 1 12 0v2" stroke="#5a7090" stroke-width="2" stroke-linecap="round"/><rect x="4" y="10" width="16" height="11" rx="2.5" stroke="#5a7090" stroke-width="2"/></svg>
+        Built for Akamai &middot; Internal Use Only
+      </span>
+    </div>
+
   </div>
 </div>
 
 <div class="topnav">
   <div class="topnav-inner">
     <div class="brand" onclick="showLanding()" title="Back to home">
-      <svg width="130" height="36" viewBox="0 0 130 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Arcs -->
-          <path d="M18,3 A15,15 0 1,0 33,18" stroke="#7dd8f8" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-          <path d="M18,7 A11,11 0 1,0 29,18" stroke="#2ab4f0" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-          <path d="M18,11 A7,7 0 1,0 25,18" stroke="#0090d6" stroke-width="2.8" fill="none" stroke-linecap="round"/>
-          <path d="M18,15 A3,3 0 1,0 21,18" stroke="#005fa3" stroke-width="2.8" fill="none" stroke-linecap="round"/>
-          <!-- Text -->
-          <text x="40" y="24" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif" font-size="19" font-weight="900" fill="#002F6C" letter-spacing="-0.5">Talent</text>
-          <text x="92" y="24" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif" font-size="19" font-weight="900" fill="#00A4EB" letter-spacing="-0.5">T</text>
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Trace Rings - aligned arc gaps, even stroke weight -->
+          <path d="M18,3 A15,15 0 1,0 33,18" stroke="#7dd8f8" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <path d="M18,7 A11,11 0 1,0 29,18" stroke="#2ab4f0" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <path d="M18,11 A7,7 0 1,0 25,18" stroke="#0090d6" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <path d="M18,15 A3,3 0 1,0 21,18" stroke="#005fa3" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+          <!-- Center point - the signal homing in on talent -->
+          <circle cx="15.5" cy="21" r="4.4" stroke="#7dd8f8" stroke-width="1.1" fill="none" opacity="0.55"/>
+          <circle cx="15.5" cy="21" r="2.1" fill="#FF8B00"/>
         </svg>
-      <div>
+      <div class="brand-text">
         <div class="brand-name">Talent<span>Trace</span></div>
-        <div class="topnav-sub">Recruiting workspace</div>
+        <div class="topnav-sub">Sourcing Workspace</div>
       </div>
     </div>
 
+    <button class="nav-toggle" onclick="toggleNavCollapse()" title="Collapse sidebar" id="nav-toggle-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="#5a7090" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('builder',this)">
-        <svg width="15" height="15" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="8" fill="currentColor" opacity="0.15"/><rect x="7" y="7" width="10" height="10" rx="3" fill="currentColor"/><rect x="23" y="7" width="10" height="10" rx="5" fill="currentColor" opacity="0.5"/><rect x="15" y="23" width="10" height="10" rx="3" fill="currentColor" opacity="0.85"/></svg>
-        Boolean Builder
+      <button class="tab active" onclick="switchTab('builder',this)" title="Boolean Builder">
+        <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#tbb)"/><defs><linearGradient id="tbb" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="7" y="7" width="10" height="10" rx="3" fill="white" opacity="0.95"/><rect x="23" y="7" width="10" height="10" rx="5" fill="white" opacity="0.6"/><rect x="15" y="23" width="10" height="10" rx="3" fill="white" opacity="0.9"/><line x1="12" y1="17" x2="20" y2="23" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/><line x1="28" y1="17" x2="20" y2="23" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/></svg></span>
+        <span class="tab-label">Boolean Builder</span>
       </button>
-      <button class="tab" onclick="switchTab('jd',this)">
-        <svg width="15" height="15" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="8" fill="currentColor" opacity="0.15"/><rect x="9" y="7" width="18" height="22" rx="3" fill="currentColor" opacity="0.9"/><path d="M28 22 L29.4 26 L33 27 L29.4 28 L28 32 L26.6 28 L23 27 L26.6 26 Z" fill="currentColor"/></svg>
-        JD Analyzer
+      <button class="tab" onclick="switchTab('jd',this)" title="Job Description Analyzer">
+        <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#tjd)"/><defs><linearGradient id="tjd" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#3ab8f5"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="9" y="7" width="18" height="22" rx="3" fill="white" opacity="0.95"/><line x1="13" y1="13" x2="23" y2="13" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="13" y1="17" x2="23" y2="17" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="13" y1="21" x2="19" y2="21" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><path d="M28 22 L29.4 26 L33 27 L29.4 28 L28 32 L26.6 28 L23 27 L26.6 26 Z" fill="white" opacity="0.95"/></svg></span>
+        <span class="tab-label">Job Description Analyzer</span>
       </button>
-      <button class="tab" onclick="switchTab('crustdata',this)">
-        <svg width="15" height="15" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="8" fill="currentColor" opacity="0.15"/><circle cx="15" cy="14" r="6" fill="currentColor" opacity="0.9"/><path d="M6 30c0-5 4-9 9-9s9 4 9 9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" fill="none"/><circle cx="29" cy="23" r="5" stroke="currentColor" stroke-width="2" fill="none"/><line x1="32.5" y1="26.5" x2="36" y2="30" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
-        TalentData Search
+      <button class="tab" onclick="switchTab('crustdata',this)" title="TalentData Search">
+        <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#ttd)"/><defs><linearGradient id="ttd" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#477c65"/></linearGradient></defs><circle cx="15" cy="14" r="5" fill="white" opacity="0.95"/><path d="M6 30c0-5 4-9 9-9s9 4 9 9" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.95"/><circle cx="28" cy="22" r="4.5" stroke="white" stroke-width="1.8" fill="none" opacity="0.7"/><line x1="31.2" y1="25.2" x2="34.5" y2="28.5" stroke="white" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/></svg></span>
+        <span class="tab-label">TalentData Search</span>
       </button>
-      <button class="tab" onclick="switchTab('github',this)">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" fill="currentColor"/></svg>
-        GitHub Search
+      <button class="tab" onclick="switchTab('github',this)" title="GitHub Search">
+        <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#tgh)"/><defs><linearGradient id="tgh" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#30363d"/><stop offset="1" stop-color="#111827"/></linearGradient></defs><g transform="translate(8,8) scale(1)"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" fill="white" opacity="0.9"/></g></svg></span>
+        <span class="tab-label">GitHub Search</span>
       </button>
+      <button class="tab" onclick="switchTab('diversity',this)" title="Diversity Sourcing Resources">
+        <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#tdv)"/><defs><linearGradient id="tdv" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#ff8b3d"/><stop offset="1" stop-color="#ff5da2"/></linearGradient></defs><rect x="7" y="7" width="14" height="14" rx="3" fill="white" opacity="0.95"/><rect x="19" y="19" width="14" height="14" rx="3" fill="white" opacity="0.6"/><rect x="17" y="17" width="6" height="6" rx="1.3" fill="white" opacity="0.95" transform="rotate(45 20 20)"/></svg></span>
+        <span class="tab-label">Diversity Sourcing Resources</span>
+      </button>
+    </div>
+
+    <div class="topnav-right">
+      <svg class="akamai-logo" viewBox="296 265 1298 530" xmlns="http://www.w3.org/2000/svg">
+        <g>
+          <path fill="#00a4eb" d="M592.85,764.11c-100.8-30.77-174.12-123.92-174.12-234.05s74.88-205.29,177.4-235.02c10.48-3.06,7.73-9.86-4.91-9.86-136.28,0-246.8,109.69-246.8,244.89s110.51,244.86,246.8,244.86c12.63,0,13.14-7.3,1.63-10.81Z"/>
+          <path fill="#00a4eb" d="M465.48,587.42c-.68-6.58-1.01-13.23-1.01-19.94,0-107.36,87.05-194.39,194.43-194.39,101.52,0,132,45.31,135.78,42.35,4.12-3.26-36.84-93.07-156.05-93.07-107.39,0-194.44,87.03-194.44,194.39,0,24.84,4.65,48.52,13.13,70.31,3.58,9.14,9.08,9.22,8.17.35Z"/>
+          <path fill="#00a4eb" d="M546.92,447.31c50.53-22.03,114.01-22.7,176.42-.89,41.91,14.62,66.2,35.5,68.19,34.64,3.31-1.43-24.38-45.28-74.36-64.24-60.51-22.93-125.69-10.93-173.18,26.32-5.22,4.11-3.25,6.87,2.93,4.17Z"/>
+          <path fill="#00a4eb" d="M1546.23,538.76c0,14.11-11.44,25.52-25.51,25.52s-25.52-11.41-25.52-25.52,11.42-25.49,25.52-25.49,25.51,11.42,25.51,25.49Z"/>
+          <path fill="#002f6c" d="M710.44,643.53h-49.24l42.38-85.89h.49l6.37,85.89h0ZM712.82,682.16l3.01,34.07h53.95l-18.16-198.26h-80.34l-101.57,198.26h54.96l17.05-34.07h71.11Z"/>
+          <polygon fill="#002f6c" points="845 629.54 852.9 629.54 891.51 577.43 941.5 577.43 888.16 644.07 920.88 716.23 867.8 716.23 846.48 659.89 838.53 659.89 826.53 716.23 781.12 716.23 823.22 517.97 868.71 517.97 845 629.54 845 629.54"/>
+          <path fill="#002f6c" d="M999.69,658.87c14.82,0,24.6,1.02,22.14,12.67-3.12,14.53-9.4,16.95-28.43,16.95-6.93,0-19.8,0-16.63-15.07,2.71-12.75,11.76-14.54,22.91-14.54h0ZM1012.36,716.23h45.45l18.42-86.69c10.1-47.88-8.21-53.69-54.69-53.69-32.46,0-63.87-.28-73.07,42.83h45.5c2.58-12.46,10.28-15.04,21.68-15.04,19.78,0,18.91,8.21,16.11,21.09l-4.62,21.99h-2.11c-1.72-15.87-21.61-15.64-34.52-15.64-32.82,0-52.37,10.32-59.51,43.67-7.49,35.37,9.36,43.06,41.06,43.06,15.9,0,37.15-3.14,44.66-22.26h1.56l-5.92,20.68h0Z"/>
+          <path fill="#002f6c" d="M1149.57,577.43l-4.16,19.56h1.86c9.02-16.39,26.97-21.14,42.55-21.14,19.58,0,38.9,3.41,36.21,27.24h2.12c6.66-19.79,26.94-27.24,44.39-27.24,32.03,0,45.59,13.23,38.75,45.53l-20.23,94.86h-45.42l17.1-80.38c2.23-14.48,4.82-25.1-12.92-25.1s-23.62,11.8-26.77,26.67l-16.78,78.81h-45.45l17.87-84.06c2.19-12.71,3.23-21.42-12.63-21.42-18.77,0-24.34,10.05-27.8,26.67l-16.82,78.81h-45.47l29.57-138.8h44.06Z"/>
+          <path fill="#002f6c" d="M1382.84,658.87c14.72,0,24.57,1.02,22.13,12.67-3.06,14.53-9.38,16.95-28.47,16.95-6.88,0-19.82,0-16.62-15.07,2.72-12.75,11.8-14.54,22.95-14.54h0ZM1395.43,716.23h45.45l18.44-86.69c10.15-47.88-8.11-53.69-54.6-53.69-32.59,0-64.04-.28-73.11,42.83h45.49c2.58-12.46,10.36-15.04,21.6-15.04,19.88,0,18.89,8.21,16.28,21.09l-4.74,21.99h-2.12c-1.7-15.87-21.56-15.64-34.47-15.64-32.79,0-52.43,10.32-59.5,43.67-7.5,35.37,9.34,43.06,41.06,43.06,15.88,0,37.14-3.14,44.68-22.26h1.56l-5.99,20.68h0Z"/>
+          <path fill="#002f6c" d="M1506.4,716.23h-45.39l29.41-138.8h45.5l-29.53,138.8h0Z"/>
+        </g>
+      </svg>
+      <span class="topnav-right-text">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M6 10V8a6 6 0 1 1 12 0v2" stroke="#5a7090" stroke-width="2" stroke-linecap="round"/><rect x="4" y="10" width="16" height="11" rx="2.5" stroke="#5a7090" stroke-width="2"/></svg>
+        Built for Akamai &middot; Internal Use Only
+      </span>
     </div>
   </div>
 </div>
@@ -917,14 +1031,14 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 <div class="main">
 
 <!-- ══════════════════════════════
-     TAB 1 — QUERY BUILDER
+     TAB 1 - QUERY BUILDER
 ══════════════════════════════ -->
 <div class="panel active" id="panel-builder" style="display:block;">
 
   <div class="page-header">
     <div class="page-icon"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#phbb)"/><defs><linearGradient id="phbb" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="7" y="7" width="10" height="10" rx="3" fill="white" opacity="0.95"/><rect x="23" y="7" width="10" height="10" rx="5" fill="white" opacity="0.6"/><rect x="15" y="23" width="10" height="10" rx="3" fill="white" opacity="0.9"/><line x1="12" y1="17" x2="20" y2="23" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/><line x1="28" y1="17" x2="20" y2="23" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/></svg></div>
     <div class="page-title">Boolean Builder</div>
-    <div class="page-desc">Build a sourcing query once and get search strings for LinkedIn, Google X-Ray, StackOverflow and GitHub at the same time — tuned for tech, sales, veteran and campus hiring in India.</div>
+    <div class="page-desc">Build a sourcing query once and get search strings for LinkedIn, Google X-Ray, StackOverflow and GitHub at the same time - tuned for tech, sales, veteran and campus hiring in India.</div>
   </div>
 
   <div class="grid-2">
@@ -935,7 +1049,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 
       <label>Role Category</label>
       <select id="category" onchange="populateRoles()">
-        <option value="">— Select Category —</option>
+        <option value="">- Select Category -</option>
         <option value="tech">Technology</option>
         <option value="sales">Sales</option>
         <option value="veterans">🎖 Veterans (Indian Defence)</option>
@@ -944,9 +1058,9 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
       </select>
 
       <label>Role</label>
-      <select id="role"><option value="">— Select Role —</option></select>
+      <select id="role"><option value="">- Select Role -</option></select>
       <div id="lgbtq-tip" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(168,139,250,0.08);border:1px solid rgba(168,139,250,0.25);border-radius:8px;font-size:10.5px;color:#a78bfa;line-height:1.6;">
-        🏳️‍🌈 <strong>LGBTQ+ Sourcing Note:</strong> Results depend on candidates who have self-disclosed on their profiles (ERG membership, Pride@ groups, advocacy work). The Boolean targets professional signals like <em>Pride@Company</em>, <em>Out in Tech</em>, <em>Humsafar</em>, <em>ERG Lead</em> — not identity directly. Always combine with location and mandatory keywords for tighter results.
+        🏳️‍🌈 <strong>LGBTQ+ Sourcing Note:</strong> Results depend on candidates who have self-disclosed on their profiles (ERG membership, Pride@ groups, advocacy work). The Boolean targets professional signals like <em>Pride@Company</em>, <em>Out in Tech</em>, <em>Humsafar</em>, <em>ERG Lead</em> - not identity directly. Always combine with location and mandatory keywords for tighter results.
       </div>
 
       <label>Location</label>
@@ -954,8 +1068,8 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 
       <label>Experience Range</label>
       <div class="exp-row">
-        <input id="minExp" placeholder="Min  e.g. 3">
-        <input id="maxExp" placeholder="Max  e.g. 8">
+        <input id="minExp" placeholder="Minimum  e.g. 3">
+        <input id="maxExp" placeholder="Maximum  e.g. 8">
       </div>
     </div>
 
@@ -966,7 +1080,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 
       <label>Company Cluster</label>
       <select id="cluster">
-        <option value="">— None —</option>
+        <option value="">- None -</option>
         <option value="faang">FAANG</option>
         <option value="unicorn">Indian Unicorns</option>
         <option value="fintech">Fintech</option>
@@ -974,7 +1088,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 
       <label>Talent Cluster</label>
       <select id="talentCluster">
-        <option value="">— None —</option>
+        <option value="">- None -</option>
         <option value="blrProduct">Bangalore Product Tech</option>
         <option value="puneProduct">Pune Product Tech</option>
         <option value="startup">Startup Growth</option>
@@ -983,9 +1097,9 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 
       <label>Education Filter</label>
       <select id="education">
-        <option value="">— None —</option>
-        <option value="tier1">Tier 1 — IIT / IIM / BITS / NIT</option>
-        <option value="tier2">Tier 2 — VIT / SRM / Manipal</option>
+        <option value="">- None -</option>
+        <option value="tier1">Tier 1 - IIT / IIM / BITS / NIT</option>
+        <option value="tier2">Tier 2 - VIT / SRM / Manipal</option>
         <option value="tier3">Tier 3</option>
       </select>
 
@@ -994,16 +1108,6 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 
       <label>Exclude Keywords</label>
       <input id="exclude" placeholder="Intern, Contract">
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;margin-top:-8px;margin-bottom:14px;padding:10px 14px;background:rgba(255,107,179,0.06);border:1px solid rgba(255,107,179,0.2);border-radius:8px;">
-      <input type="checkbox" id="female-filter" style="width:16px;height:16px;accent-color:#ff6bb3;cursor:pointer;" onchange="updateFemaleFilter()">
-      <div>
-        <label for="female-filter" style="font-size:11px;font-weight:700;color:#ff6bb3;cursor:pointer;">🚺 Female Candidates Only</label>
-        <div style="font-size:10px;color:var(--muted);">Uses Indian female names Boolean — more effective than She/Her for India sourcing</div>
-      </div>
-    </div>
-    <div id="female-preview" style="display:none;font-size:10px;color:#ff6bb3;background:rgba(255,107,179,0.06);border:1px solid rgba(255,107,179,0.25);border-radius:7px;padding:8px 12px;margin-top:-10px;margin-bottom:10px;">🚺 <strong>Female mode active</strong> — Google X-Ray uses Indian female names as the primary filter. Boolean string contains all 500+ names. Only female candidates will appear in results.</div>
-    <div style="display:none;">
     </div>
   </div>
 
@@ -1048,7 +1152,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
       <div>
         <label>Passout Year</label>
         <select id="fresher-year" onchange="buildFresherQuery()">
-          <option value="">— Select Year —</option>
+          <option value="">- Select Year -</option>
           <option value="2027">2027</option>
           <option value="2026" selected>2026</option>
           <option value="2025">2025</option>
@@ -1062,10 +1166,10 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
       <div>
         <label>College Tier</label>
         <select id="fresher-tier" onchange="onFresherTierChange()">
-          <option value="">— Select Tier —</option>
-          <option value="tier1">Tier 1 — IIT / BITS / NIT / IIIT / IISc</option>
-          <option value="tier2">Tier 2 — VIT / SRM / Manipal / PES / RV</option>
-          <option value="tier3">Tier 3 — State / Affiliated Universities</option>
+          <option value="">- Select Tier -</option>
+          <option value="tier1">Tier 1 - IIT / BITS / NIT / IIIT / IISc</option>
+          <option value="tier2">Tier 2 - VIT / SRM / Manipal / PES / RV</option>
+          <option value="tier3">Tier 3 - State / Affiliated Universities</option>
           <option value="custom">✏️ Add College / University manually</option>
         </select>
       </div>
@@ -1089,14 +1193,14 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
         <label>Stream / Degree</label>
         <select id="fresher-stream" onchange="buildFresherQuery()">
           <option value="any">Any Degree</option>
-          <option value="btech_cs">B.Tech — Computer Science / IT</option>
-          <option value="btech_ece">B.Tech — Electronics / ECE / EEE</option>
-          <option value="btech_mech">B.Tech — Mechanical</option>
-          <option value="btech_civil">B.Tech — Civil</option>
+          <option value="btech_cs">B.Tech - Computer Science / IT</option>
+          <option value="btech_ece">B.Tech - Electronics / ECE / EEE</option>
+          <option value="btech_mech">B.Tech - Mechanical</option>
+          <option value="btech_civil">B.Tech - Civil</option>
           <option value="mtech">M.Tech / ME</option>
           <option value="mba">MBA</option>
           <option value="mca">MCA / M.Sc CS</option>
-          <option value="bsc">B.Sc — CS / IT / Maths</option>
+          <option value="bsc">B.Sc - CS / IT / Maths</option>
         </select>
       </div>
 
@@ -1151,20 +1255,14 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
     <div class="out-wrap" style="margin-bottom:0;">
       <div class="out-head">
         <span class="out-label" style="color:var(--accent2);">🔍 Google X-Ray</span>
-        <div style="display:flex;gap:6px;">
-          <button class="copy-btn" onclick="copyText('xray',this)">Copy</button>
-          <button class="copy-btn" style="color:var(--accent2);border-color:rgba(11,110,153,0.3);" onclick="openGoogle()">Open ↗</button>
-        </div>
+        <button class="copy-btn" onclick="copyText('xray',this)">Copy</button>
       </div>
       <textarea class="out-area" id="xray" placeholder="Google X-Ray string appears here..." style="min-height:70px;"></textarea>
     </div>
     <div class="out-wrap" style="margin-bottom:0;">
       <div class="out-head">
         <span class="out-label" style="color:var(--warn);">📦 StackOverflow</span>
-        <div style="display:flex;gap:6px;">
-          <button class="copy-btn" onclick="copyText('so-query',this)">Copy</button>
-          <button class="copy-btn" style="color:var(--warn);border-color:rgba(223,171,1,0.3);" onclick="openStackOverflow()">Open ↗</button>
-        </div>
+        <button class="copy-btn" onclick="copyText('so-query',this)">Copy</button>
       </div>
       <textarea class="out-area" id="so-query" placeholder="StackOverflow X-Ray string appears here..." style="min-height:70px;"></textarea>
     </div>
@@ -1172,10 +1270,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
   <div class="out-wrap" style="margin-top:14px;">
     <div class="out-head">
       <span class="out-label" style="color:var(--ai);">🐙 GitHub</span>
-      <div style="display:flex;gap:6px;">
-        <button class="copy-btn" onclick="copyText('gh-query',this)">Copy</button>
-        <button class="copy-btn" style="color:var(--ai);border-color:rgba(217,115,13,0.3);" onclick="openGitHub()">Open ↗</button>
-      </div>
+      <button class="copy-btn" onclick="copyText('gh-query',this)">Copy</button>
     </div>
     <textarea class="out-area" id="gh-query" placeholder="GitHub search string appears here..." style="min-height:60px;"></textarea>
   </div>
@@ -1185,14 +1280,14 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 
 
 <!-- ══════════════════════════════
-     TAB 2 — JD ANALYZER
+     TAB 2 - JOB DESCRIPTION ANALYZER
 ══════════════════════════════ -->
 <div class="panel" id="panel-jd" style="display:none;">
 
   <div class="page-header">
     <div class="page-icon"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#phjd)"/><defs><linearGradient id="phjd" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#3ab8f5"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="9" y="7" width="18" height="22" rx="3" fill="white" opacity="0.95"/><line x1="13" y1="13" x2="23" y2="13" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="13" y1="17" x2="23" y2="17" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="13" y1="21" x2="19" y2="21" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><path d="M28 22 L29.4 26 L33 27 L29.4 28 L28 32 L26.6 28 L23 27 L26.6 26 Z" fill="white" opacity="0.95"/></svg></div>
-    <div class="page-title">JD Analyzer</div>
-    <div class="page-desc">Paste a job description and Claude turns it into a full sourcing kit — boolean strings, companies likely to have this talent, screening questions, and what to look for on a profile.</div>
+    <div class="page-title">Job Description Analyzer</div>
+    <div class="page-desc">Paste a job description and Claude turns it into a full sourcing kit - boolean strings, companies likely to have this talent, screening questions, and what to look for on a profile.</div>
     <div class="page-badge ai">✦ AI-powered</div>
   </div>
 
@@ -1200,7 +1295,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
     <div class="card-head">
       <div class="card-dot" style="background:var(--ai);box-shadow:0 0 6px var(--ai);"></div>
       <div class="card-title" style="color:var(--ai);">Job Description</div>
-      <span style="margin-left:auto;font-size:10px;color:var(--muted);">Paste any JD · AI does the rest</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted);">Paste any job description · AI does the rest</span>
     </div>
     <textarea class="jd-textarea" id="jd-input"
       placeholder="Paste your Job Description here...
@@ -1208,12 +1303,12 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 Example: We are looking for a Senior DevOps Engineer with 5+ years experience in Kubernetes, Terraform, AWS or GCP. The candidate should have strong scripting skills in Python or Bash, experience with CI/CD pipelines, and exposure to observability tools like Datadog or Prometheus. Prior experience in a fast-paced product startup is preferred..."></textarea>
 
     <div style="margin-top:12px;margin-bottom:10px;">
-      <!-- API KEY FIELD — STEP 1 -->
+      <!-- API KEY FIELD - STEP 1 -->
       <div style="background:rgba(217,115,13,0.08);border:1.5px solid rgba(217,115,13,0.4);border-radius:10px;padding:14px 16px;margin-bottom:4px;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
           <span style="font-size:18px;">🔑</span>
           <div>
-            <div style="font-size:11.5px;font-weight:700;color:var(--ai);">STEP 1 — Enter your Anthropic API Key</div>
+            <div style="font-size:11.5px;font-weight:700;color:var(--ai);">STEP 1 - Enter your Anthropic API Key</div>
             <div style="font-size:10px;color:var(--muted);">Get a free key at <strong style="color:var(--ai);">console.anthropic.com</strong> → API Keys → Create Key</div>
           </div>
         </div>
@@ -1222,13 +1317,13 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
           style="width:100%;background:var(--surface2);border:1px solid rgba(217,115,13,0.5);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:12px;padding:10px 14px;outline:none;box-sizing:border-box;"
           oninput="localStorage.setItem('tt_api_key', this.value); this.style.borderColor = this.value.startsWith('sk-ant') ? 'var(--accent)' : 'rgba(217,115,13,0.5)';"
         />
-        <div style="font-size:10px;color:var(--muted);margin-top:6px;">🔒 Saved in your browser only — never shared anywhere else</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:6px;">🔒 Saved in your browser only - never shared anywhere else</div>
       </div>
-      <!-- JD FIELD — STEP 2 -->
-      <div style="font-size:11px;font-weight:700;color:var(--accent);margin:14px 0 6px;">📋 STEP 2 — Paste your Job Description below</div>
+      <!-- JOB DESCRIPTION FIELD - STEP 2 -->
+      <div style="font-size:11px;font-weight:700;color:var(--accent);margin:14px 0 6px;">📋 STEP 2 - Paste your Job Description below</div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
-      <button class="btn btn-primary" onclick="analyzeJD()">🧠 Analyze JD</button>
+      <button class="btn btn-primary" onclick="analyzeJD()">🧠 Analyze Job Description</button>
       <button class="btn btn-ghost" onclick="clearJD()">✕ Clear</button>
     </div>
     <div id="jd-error" style="display:none;margin-top:10px;font-size:11px;color:var(--danger);padding:8px 12px;background:rgba(224,62,62,0.08);border-radius:8px;border:1px solid rgba(224,62,62,0.2);"></div>
@@ -1253,29 +1348,20 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
         <button class="copy-btn" style="margin-top:10px;" onclick="copyEl('res-boolean',this)">Copy</button>
       </div>
       <div class="ai-result-box blue" id="res-xray-wrap">
-        <div class="ai-section-title" style="color:var(--accent2);">🔍 Google X-Ray — LinkedIn</div>
+        <div class="ai-section-title" style="color:var(--accent2);">🔍 Google X-Ray - LinkedIn</div>
         <div id="res-xray" style="font-family:var(--mono);font-size:11px;color:var(--accent2);line-height:1.7;word-break:break-all;"></div>
-        <div style="display:flex;gap:8px;margin-top:10px;">
-          <button class="copy-btn" onclick="copyEl('res-xray',this)">Copy</button>
-          <button class="copy-btn" style="color:var(--accent2);border-color:rgba(11,110,153,0.3);" onclick="openFromEl('res-xray')">Open ↗</button>
-        </div>
+        <button class="copy-btn" style="margin-top:10px;" onclick="copyEl('res-xray',this)">Copy</button>
       </div>
       <div class="grid-2">
         <div class="ai-result-box" id="res-so-wrap">
           <div class="ai-section-title" style="color:var(--warn);">📦 StackOverflow X-Ray</div>
           <div id="res-so" style="font-family:var(--mono);font-size:10.5px;color:var(--warn);line-height:1.7;word-break:break-all;"></div>
-          <div style="display:flex;gap:8px;margin-top:10px;">
-            <button class="copy-btn" onclick="copyEl('res-so',this)">Copy</button>
-            <button class="copy-btn" style="color:var(--warn);border-color:rgba(223,171,1,0.3);" onclick="openFromEl('res-so')">Open ↗</button>
-          </div>
+          <button class="copy-btn" style="margin-top:10px;" onclick="copyEl('res-so',this)">Copy</button>
         </div>
         <div class="ai-result-box" id="res-gh-wrap">
           <div class="ai-section-title" style="color:var(--ai);">🐙 GitHub X-Ray (via Google)</div><div style="font-size:10px;color:var(--muted);margin-bottom:8px;">Opens Google search → Chrome Extension scrapes GitHub profiles → Export to Sheets</div>
           <div id="res-gh" style="font-family:var(--mono);font-size:10.5px;color:var(--ai);line-height:1.7;word-break:break-all;"></div>
-          <div style="display:flex;gap:8px;margin-top:10px;">
-            <button class="copy-btn" onclick="copyEl('res-gh',this)">Copy</button>
-            <button class="copy-btn" style="color:var(--ai);border-color:rgba(217,115,13,0.3);" onclick="openFromEl('res-gh')">Open ↗</button>
-          </div>
+          <button class="copy-btn" style="margin-top:10px;" onclick="copyEl('res-gh',this)">Copy</button>
         </div>
       </div>
     </div>
@@ -1284,17 +1370,14 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
     <div id="jdtab-companies" style="display:none;">
       <div class="ai-result-box blue">
         <div class="ai-section-title" style="color:var(--accent2);">🏢 Companies Likely Hiring for This Role</div>
-        <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">Based on the skills and role in your JD — companies known to hire this profile. Click any to add to your Boolean search.</p>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">Based on the skills and role in your job description - companies known to hire this profile. Click any to add to your Boolean search.</p>
         <div class="company-grid" id="res-companies"></div>
       </div>
       <div class="ai-result-box" style="border-left-color:var(--accent);">
         <div class="ai-section-title" style="color:var(--accent);">💡 X-Ray These Companies</div>
         <p style="font-size:11px;color:var(--muted);margin-bottom:12px;">Auto-generated X-Ray targeting these specific companies on LinkedIn.</p>
         <div id="res-company-xray" style="font-family:var(--mono);font-size:11px;color:var(--accent);line-height:1.7;word-break:break-all;margin-bottom:10px;"></div>
-        <div style="display:flex;gap:8px;">
-          <button class="copy-btn" onclick="copyEl('res-company-xray',this)">Copy</button>
-          <button class="copy-btn" style="color:var(--accent2);border-color:rgba(11,110,153,0.3);" onclick="openFromEl('res-company-xray')">Open ↗</button>
-        </div>
+        <button class="copy-btn" onclick="copyEl('res-company-xray',this)">Copy</button>
       </div>
     </div>
 
@@ -1302,7 +1385,7 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
     <div id="jdtab-interview" style="display:none;">
       <div class="ai-result-box" style="border-left-color:var(--warn);">
         <div class="ai-section-title" style="color:var(--warn);">❓ Interview Questions for Recruiter Screening</div>
-        <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">Based on the JD — questions to ask candidates during your initial screening call.</p>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">Based on the job description - questions to ask candidates during your initial screening call.</p>
         <div id="res-interview"></div>
       </div>
     </div>
@@ -1310,17 +1393,17 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
     <!-- Profile Review Checklist -->
     <div id="jdtab-profile" style="display:none;">
       <div class="ai-result-box" style="border-left-color:var(--accent);">
-        <div class="ai-section-title" style="color:var(--accent);">✅ What to Look For — Profile Review Checklist</div>
-        <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">Based on your JD — use this when reviewing real LinkedIn profiles from your search results.</p>
+        <div class="ai-section-title" style="color:var(--accent);">✅ What to Look For - Profile Review Checklist</div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:14px;">Based on your job description - use this when reviewing real LinkedIn profiles from your search results.</p>
         <div id="res-profiles"></div>
       </div>
       <div class="grid-2" style="margin-top:14px;">
         <div class="ai-result-box" style="border-left-color:var(--green);margin-bottom:0;">
-          <div class="ai-section-title" style="color:var(--green);">✅ Green Flags — Strong Match</div>
+          <div class="ai-section-title" style="color:var(--green);">✅ Green Flags - Strong Match</div>
           <div id="res-green-flags"></div>
         </div>
         <div class="ai-result-box" style="border-left-color:var(--danger);margin-bottom:0;">
-          <div class="ai-section-title" style="color:var(--danger);">⚠️ Red Flags — Review Carefully</div>
+          <div class="ai-section-title" style="color:var(--danger);">⚠️ Red Flags - Review Carefully</div>
           <div id="res-red-flags"></div>
         </div>
       </div>
@@ -1332,15 +1415,15 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
   <div id="jd-loading" style="display:none;">
     <div class="ai-loading">
       <div class="ai-spinner"></div>
-      <span id="jd-loading-msg">Analyzing JD with Claude AI...</span>
+      <span id="jd-loading-msg">Analyzing Job Description with Claude AI...</span>
     </div>
   </div>
 
 </div><!-- /panel-jd -->
 
 <!-- ══════════════════════════════
-     TAB 3 — TALENTDATA (direct search + enrich)
-     Calls same-origin /api/crustdata-search and /api/crustdata-enrich — the Vercel
+     TAB 3 - TALENTDATA (direct search + enrich)
+     Calls same-origin /api/crustdata-search and /api/crustdata-enrich - the Vercel
      serverless functions hold CRUSTDATA_API_KEY server-side, so the browser never
      sees it and there's no CORS problem (unlike calling api.crustdata.com directly).
      [Endpoint names, env var, and the api.crustdata.com domain are the real backing
@@ -1371,11 +1454,11 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
         <input id="cd-location" placeholder="e.g. Bangalore">
       </div>
     </div>
-    <label>Result Limit <span style="color:var(--muted);text-transform:none;font-weight:400;">(max 100 — controls API credit spend)</span></label>
+    <label>Result Limit <span style="color:var(--muted);text-transform:none;font-weight:400;">(max 100 - controls API credit spend)</span></label>
     <input id="cd-limit" type="number" min="1" max="100" value="20" style="max-width:140px;">
   </div>
 
-  <!-- Criteria card — must haves / good to haves / companies / other notes -->
+  <!-- Criteria card - must haves / good to haves / companies / other notes -->
   <div class="card" style="margin-bottom:16px;">
     <div class="card-head">
       <div class="card-dot" style="background:var(--warn);box-shadow:0 0 6px var(--warn);"></div>
@@ -1386,18 +1469,18 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
       <div>
         <label>🔒 Must Haves <span style="color:var(--muted);text-transform:none;font-weight:400;">(comma separated)</span></label>
         <input id="cd-must" placeholder='e.g. Python, Kubernetes, AWS'>
-        <div style="font-size:10px;color:var(--muted);margin-top:-10px;">Applied as a real filter — candidate must have at least one</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:-10px;">Applied as a real filter - candidate must have at least one</div>
       </div>
       <div>
         <label>✨ Good to Haves <span style="color:var(--muted);text-transform:none;font-weight:400;">(comma separated)</span></label>
         <input id="cd-nice" placeholder='e.g. Terraform, Datadog, Go'>
-        <div style="font-size:10px;color:var(--muted);margin-top:-10px;">Not filtered out — just highlighted on matching profiles</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:-10px;">Not filtered out - just highlighted on matching profiles</div>
       </div>
     </div>
-    <label>🏢 Companies <span style="color:var(--muted);text-transform:none;font-weight:400;">(comma separated — current employer)</span></label>
+    <label>🏢 Companies <span style="color:var(--muted);text-transform:none;font-weight:400;">(comma separated - current employer)</span></label>
     <input id="cd-target-companies" placeholder='e.g. Google, Flipkart, Razorpay'>
     <label>📝 Other Things That Are Important</label>
-    <textarea class="form-area" id="cd-notes" placeholder="Anything else worth remembering for this search — team context, must-avoid companies, visa constraints, notice period, etc."></textarea>
+    <textarea class="form-area" id="cd-notes" placeholder="Anything else worth remembering for this search - team context, must-avoid companies, visa constraints, notice period, etc."></textarea>
     <div style="font-size:10px;color:var(--muted);margin-top:-10px;">Saved in this browser for next time · sent along on export, but your Sheet needs a "Notes" column (Apps Script v5 doesn't have one yet) for it to actually land anywhere</div>
   </div>
 
@@ -1439,8 +1522,8 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
         <input id="cd-role" placeholder="e.g. SRE">
       </div>
       <div>
-        <label>Exp range</label>
-        <input id="cd-exp" placeholder="e.g. 3-8 yrs">
+        <label>Experience range</label>
+        <input id="cd-exp" placeholder="e.g. 3-8 years">
       </div>
     </div>
     <button class="btn btn-primary" onclick="exportTalentDataToSheet()" id="cd-export-btn" disabled style="width:100%;justify-content:center;margin-top:8px;">
@@ -1457,7 +1540,7 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
   <div class="page-header">
     <div class="page-icon"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#phgh)"/><defs><linearGradient id="phgh" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#30363d"/><stop offset="1" stop-color="#111827"/></linearGradient></defs><g transform="translate(8,8) scale(1)"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" fill="white" opacity="0.9"/></g></svg></div>
     <div class="page-title">GitHub Search</div>
-    <div class="page-desc">Find engineers directly on GitHub by language, location and activity — sorted by followers, with bio, company and public email when available.</div>
+    <div class="page-desc">Find engineers directly on GitHub by language, location and activity - sorted by followers, with bio, company and public email when available.</div>
     <div class="page-badge live">● Live data</div>
   </div>
 
@@ -1469,14 +1552,14 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
     </div>
     <div class="grid-2" style="gap:12px;">
       <div>
-        <label>Keywords <span style="color:var(--muted);text-transform:none;font-weight:400;">(boolean — matches name &amp; bio)</span></label>
+        <label>Keywords <span style="color:var(--muted);text-transform:none;font-weight:400;">(boolean - matches name &amp; bio)</span></label>
         <input id="gh-keywords" placeholder='e.g. (SRE OR "site reliability") AND python NOT recruiter'>
         <div style="font-size:10px;color:var(--muted);margin-top:-10px;line-height:1.5;">
           Supports <b>AND</b> · <b>OR</b> · <b>NOT</b> · <b>( )</b> · <b>"exact phrases"</b>. A space means AND, a comma means OR, and <b>-word</b> is short for NOT.
         </div>
       </div>
       <div>
-        <label>Languages <span style="color:var(--muted);text-transform:none;font-weight:400;">(comma separated — must have all · programming languages only, put tools like AWS in Keywords)</span></label>
+        <label>Languages <span style="color:var(--muted);text-transform:none;font-weight:400;">(comma separated - must have all · programming languages only, put tools like AWS in Keywords)</span></label>
         <input id="gh-language" placeholder="e.g. Go, Python">
       </div>
     </div>
@@ -1492,11 +1575,11 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
     </div>
     <div class="grid-2" style="gap:12px;">
       <div>
-        <label>Min Followers <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional — signal of visibility)</span></label>
+        <label>Minimum Followers <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional - signal of visibility)</span></label>
         <input id="gh-min-followers" type="number" min="0" placeholder="e.g. 50">
       </div>
       <div>
-        <label>Min Public Repos <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional — signal of activity)</span></label>
+        <label>Minimum Public Repos <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional - signal of activity)</span></label>
         <input id="gh-min-repos" type="number" min="0" placeholder="e.g. 10">
       </div>
     </div>
@@ -1543,8 +1626,8 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
         <input id="gh-role" placeholder="e.g. SRE">
       </div>
       <div>
-        <label>Exp range</label>
-        <input id="gh-exp" placeholder="e.g. 3-8 yrs">
+        <label>Experience range</label>
+        <input id="gh-exp" placeholder="e.g. 3-8 years">
       </div>
     </div>
     <button class="btn btn-primary" onclick="exportGitHubToSheet()" id="gh-export-btn" disabled style="width:100%;justify-content:center;margin-top:8px;">
@@ -1555,6 +1638,150 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
   </div>
 
 </div><!-- /panel-github -->
+
+<!-- ══════════════════════════════
+     TAB 5 - DIVERSITY SOURCING RESOURCES
+══════════════════════════════ -->
+<div class="panel" id="panel-diversity" style="display:none;">
+
+  <div class="page-header">
+    <div class="page-icon"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#phdv)"/><defs><linearGradient id="phdv" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#ff8b3d"/><stop offset="1" stop-color="#ff5da2"/></linearGradient></defs><rect x="7" y="7" width="14" height="14" rx="3" fill="white" opacity="0.95"/><rect x="19" y="19" width="14" height="14" rx="3" fill="white" opacity="0.6"/><rect x="17" y="17" width="6" height="6" rx="1.3" fill="white" opacity="0.95" transform="rotate(45 20 20)"/></svg></div>
+    <div class="page-title">Diversity Sourcing Resources</div>
+    <div class="page-desc">Ready-to-copy boolean strings for diversity sourcing - first-name lists for India and the US, pronoun signals, women-in-tech communities, women's colleges and sororities, and HBCU / Native American college lists for racial and ethnic diversity. The US name list, colleges, sororities, HBCUs, and tribal colleges are adapted from Glen Cathey's "Diversity Sourcing: Boolean Search Strings for LinkedIn" (booleanblackbelt.com). Drop any of these into the Boolean Query, Google X-Ray, or GitHub search boxes on the other tabs.</div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><div class="card-title">India - Female First Names (300+)</div></div>
+      <div class="section-hint">Curated Indian female first names, grouped alphabetically. More reliable than "She/Her" alone for India sourcing.</div>
+      <div class="out-wrap">
+        <div class="out-head">
+          <span class="out-label">🇮🇳 Names Boolean</span>
+          <button class="copy-btn" onclick="copyText('div-india-names',this)">Copy</button>
+        </div>
+        <textarea class="out-area" id="div-india-names" style="min-height:120px;"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><div class="card-title">United States - Female First Names (400+)</div></div>
+      <div class="section-hint">Common US female first names spanning classic-to-modern generations, grouped alphabetically.</div>
+      <div class="out-wrap">
+        <div class="out-head">
+          <span class="out-label">🇺🇸 Names Boolean</span>
+          <button class="copy-btn" onclick="copyText('div-us-names',this)">Copy</button>
+        </div>
+        <textarea class="out-area" id="div-us-names" style="min-height:120px;"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><div class="card-title">Pronoun Signals</div></div>
+      <div class="section-hint">Bios that self-identify with she/her pronoun tags - a direct, low-noise signal wherever it appears.</div>
+      <div class="out-wrap">
+        <div class="out-head">
+          <span class="out-label">💬 Pronoun Boolean</span>
+          <button class="copy-btn" onclick="copyText('div-pronoun',this)">Copy</button>
+        </div>
+        <textarea class="out-area" id="div-pronoun" style="min-height:60px;"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><div class="card-title">Classic "(her OR she)" Search</div></div>
+      <div class="section-hint">Glen Cathey's original technique - run as a plain keyword search (not a name field). "Her"/"she" turn up disproportionately in the summary and recommendation text on women's profiles, making this the single most inclusive gender-diversity search there is.</div>
+      <div class="out-wrap" style="margin-bottom:0;">
+        <div class="out-head">
+          <span class="out-label">👥 Keyword Boolean</span>
+          <button class="copy-btn" onclick="copyText('div-she-her',this)">Copy</button>
+        </div>
+        <textarea class="out-area" id="div-she-her" style="min-height:60px;"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><div class="card-title">Women-in-Tech Community Signals</div></div>
+      <div class="section-hint">Community / program affiliations that show up in an "About" section, group membership, or resume.</div>
+      <div class="out-wrap">
+        <div class="out-head">
+          <span class="out-label">🤝 Community Boolean</span>
+          <button class="copy-btn" onclick="copyText('div-women-tech',this)">Copy</button>
+        </div>
+        <textarea class="out-area" id="div-women-tech" style="min-height:60px;"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><div class="card-title">US Women's Colleges (48)</div></div>
+      <div class="section-hint">Same idea as the Boolean Builder's Education Filter, but for diversity sourcing - a women's-college alma mater is a strong signal.</div>
+      <div class="out-wrap" style="margin-bottom:0;">
+        <div class="out-head">
+          <span class="out-label">🎓 Colleges Boolean</span>
+          <button class="copy-btn" onclick="copyText('div-womens-colleges',this)">Copy</button>
+        </div>
+        <textarea class="out-area" id="div-womens-colleges" style="min-height:80px;"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><div class="card-title">US Sororities (91)</div></div>
+    <div class="section-hint">Sorority names ORed together - returns almost 2x the results of searching the single word "sorority."</div>
+    <div class="out-wrap" style="margin-bottom:0;">
+      <div class="out-head">
+        <span class="out-label">💜 Sororities Boolean</span>
+        <button class="copy-btn" onclick="copyText('div-sororities',this)">Copy</button>
+      </div>
+      <textarea class="out-area" id="div-sororities" style="min-height:80px;"></textarea>
+    </div>
+  </div>
+
+  <div class="nav-label" style="margin:20px 0 4px;padding-left:0;">Racial &amp; Ethnic Diversity</div>
+  <div class="section-hint" style="margin-bottom:14px;">The same first-name / affiliation logic works for racial and ethnic diversity sourcing - a few starter lists below.</div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-dot"></div><div class="card-title">Historically Black Colleges &amp; Universities (105)</div></div>
+    <div class="section-hint">All current HBCUs, ORed together - LinkedIn is one of the few places that can handle a Boolean string this long in one search.</div>
+    <div class="out-wrap" style="margin-bottom:0;">
+      <div class="out-head">
+        <span class="out-label">🎓 HBCU Boolean</span>
+        <button class="copy-btn" onclick="copyText('div-hbcu',this)">Copy</button>
+      </div>
+      <textarea class="out-area" id="div-hbcu" style="min-height:100px;"></textarea>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><div class="card-title">African American Fraternities &amp; Sororities (23)</div></div>
+      <div class="section-hint">The historically Black Greek-letter organizations ("Divine Nine" and related).</div>
+      <div class="out-wrap" style="margin-bottom:0;">
+        <div class="out-head">
+          <span class="out-label">✊🏾 Greek Life Boolean</span>
+          <button class="copy-btn" onclick="copyText('div-aa-greek',this)">Copy</button>
+        </div>
+        <textarea class="out-area" id="div-aa-greek" style="min-height:70px;"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-dot"></div><div class="card-title">Native American / Tribal Colleges (36)</div></div>
+      <div class="section-hint">Tribal Colleges and Universities across the US - a strong signal for Native American diversity sourcing.</div>
+      <div class="out-wrap" style="margin-bottom:0;">
+        <div class="out-head">
+          <span class="out-label">🪶 Tribal Colleges Boolean</span>
+          <button class="copy-btn" onclick="copyText('div-native-colleges',this)">Copy</button>
+        </div>
+        <textarea class="out-area" id="div-native-colleges" style="min-height:70px;"></textarea>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /panel-diversity -->
 
 </div><!-- /main -->
 
@@ -1571,7 +1798,7 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
     <!-- Saved roles -->
     <div style="font-family:var(--font);font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px;">Saved Roles</div>
     <div class="saved-roles-list" id="saved-roles-list">
-      <div class="no-saved">No custom roles yet — add one below.</div>
+      <div class="no-saved">No custom roles yet - add one below.</div>
     </div>
 
     <div class="divider"></div>
@@ -1589,10 +1816,10 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
     <label>Role Name (display label)</label>
     <input type="text" id="new-role-label" placeholder="e.g. Data Engineer">
 
-    <label>Job Titles (for Boolean — use quotes & OR)</label>
+    <label>Job Titles (for Boolean - use quotes & OR)</label>
     <textarea class="form-area" id="new-role-titles" placeholder='"Data Engineer" OR "Big Data Engineer" OR "ETL Developer"'></textarea>
 
-    <label>Key Skills (for Boolean — use quotes & OR)</label>
+    <label>Key Skills (for Boolean - use quotes & OR)</label>
     <textarea class="form-area" id="new-role-skills" placeholder='"Spark" OR "Kafka" OR "Airflow" OR "dbt" OR "Snowflake"'></textarea>
 
     <div class="status" id="modal-status"></div>
@@ -1605,7 +1832,7 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
 </div>
 
 <!-- ══════════════════════════════
-     CANDIDATE DETAIL MODAL — opens on candidate-card click, holds the per-
+     CANDIDATE DETAIL MODAL - opens on candidate-card click, holds the per-
      candidate "reveal contact info" enrich action (was the bulk "Enrich
      LinkedIn results" button, now scoped to one candidate at a time)
 ══════════════════════════════ -->
@@ -1621,7 +1848,183 @@ function enterWorkspace() {
 
 function showLanding() {
   document.getElementById('landing-page').classList.remove('hidden');
+  if (window.__startLandingFx) window.__startLandingFx();
 }
+
+// ── SIDEBAR COLLAPSE ──
+function toggleNavCollapse() {
+  var collapsed = document.body.classList.toggle('nav-collapsed');
+  document.documentElement.style.setProperty('--nav-w', collapsed ? '76px' : '270px');
+  localStorage.setItem('tt_nav_collapsed', collapsed ? '1' : '0');
+  var btn = document.getElementById('nav-toggle-btn');
+  if (btn) btn.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+}
+(function () {
+  if (localStorage.getItem('tt_nav_collapsed') === '1') {
+    document.body.classList.add('nav-collapsed');
+    document.documentElement.style.setProperty('--nav-w', '76px');
+  }
+})();
+
+// ══════════════════════════════════════════════
+// LANDING BACKGROUND FX - grid + traveling light traces
+// (grid lines, softly-lit cells, and short lines that grow across the
+// grid with a glowing dot at the head, then fade - the movement lives
+// in the background layer, nothing floats on top of it)
+// ══════════════════════════════════════════════
+(function () {
+  const canvas = document.getElementById('landing-fx');
+  if (!canvas || !canvas.getContext) return;
+  const ctx = canvas.getContext('2d');
+  const landingPage = document.getElementById('landing-page');
+
+  const CELL = 48, FPS = 30, DENSITY = 0.10, MAX_ALPHA = 0.18;
+  const MAX_TRACES = 10, TRACE_SPAWN = 0.045;
+  const GRID_COLOR = 'rgba(0,47,108,0.07)';
+  const SHIMMER_COLOR = '0,164,235';
+  const TRACE_COLOR = '0,164,235';
+
+  let shimmerCells = [], traces = [], lastTs = 0, animId = null;
+  let dpr = 1, cssW = 0, cssH = 0, cols = 0, rows = 0, resizeTimer = null;
+
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const randInt = (a, b) => Math.floor(rand(a, b));
+
+  function buildCells() {
+    shimmerCells = [];
+    const count = Math.floor(cols * rows * DENSITY);
+    for (let i = 0; i < count; i++) {
+      shimmerCells.push({
+        col: randInt(0, cols), row: randInt(0, rows),
+        alpha: 0, targetAlpha: rand(MAX_ALPHA * 0.4, MAX_ALPHA),
+        speed: rand(0.004, 0.014),
+        phase: Math.random() < 0.5 ? 'in' : 'idle',
+        holdFrames: randInt(20, 90), holdCounter: 0
+      });
+    }
+  }
+
+  function spawnTrace() {
+    if (traces.length >= MAX_TRACES) return;
+    const isH = Math.random() < 0.55;
+    const cells = randInt(4, 12);
+    const maxC = isH ? cols - cells : cols;
+    const maxR = isH ? rows : rows - cells;
+    if (maxC <= 0 || maxR <= 0) return;
+    traces.push({
+      x: randInt(0, maxC) * CELL, y: randInt(0, maxR) * CELL,
+      isH, cells, progress: 0,
+      speed: rand(0.010, 0.022),
+      alpha: rand(0.55, 1.0),
+      fadeAlpha: 1, fadeSpeed: rand(0.018, 0.040)
+    });
+  }
+
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    cssW = canvas.offsetWidth; cssH = canvas.offsetHeight;
+    canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssH * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cols = Math.ceil(cssW / CELL) + 1; rows = Math.ceil(cssH / CELL) + 1;
+    buildCells();
+  }
+
+  function frame() {
+    const W = cssW, H = cssH;
+    ctx.clearRect(0, 0, W, H);
+
+    for (const c of shimmerCells) {
+      switch (c.phase) {
+        case 'idle':
+          if (Math.random() < 0.004) { c.phase = 'in'; c.targetAlpha = rand(MAX_ALPHA * 0.4, MAX_ALPHA); c.holdCounter = 0; }
+          break;
+        case 'in':
+          c.alpha += (c.targetAlpha - c.alpha) * (c.speed * 1.8);
+          if (c.alpha >= c.targetAlpha * 0.92) { c.phase = 'hold'; c.holdCounter = 0; c.holdFrames = randInt(15, 60); }
+          break;
+        case 'hold':
+          if (++c.holdCounter >= c.holdFrames) c.phase = 'out';
+          break;
+        case 'out':
+          c.alpha += (0 - c.alpha) * (c.speed * 1.4);
+          if (c.alpha < 0.004) { c.alpha = 0; c.phase = 'idle'; c.col = randInt(0, cols); c.row = randInt(0, rows); }
+          break;
+      }
+      if (c.alpha < 0.004) continue;
+      ctx.fillStyle = `rgba(${SHIMMER_COLOR},${c.alpha})`;
+      ctx.fillRect(c.col * CELL + 1, c.row * CELL + 1, CELL - 2, CELL - 2);
+    }
+
+    ctx.strokeStyle = GRID_COLOR;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let c = 0; c <= cols; c++) { const x = c * CELL + 0.5; ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+    for (let r = 0; r <= rows; r++) { const y = r * CELL + 0.5; ctx.moveTo(0, y); ctx.lineTo(W, y); }
+    ctx.stroke();
+
+    if (Math.random() < TRACE_SPAWN) spawnTrace();
+
+    for (let i = traces.length - 1; i >= 0; i--) {
+      const t = traces[i];
+      const totalLen = t.cells * CELL;
+      if (t.progress < 1) {
+        t.progress = Math.min(1, t.progress + t.speed);
+      } else {
+        t.fadeAlpha = Math.max(0, t.fadeAlpha - t.fadeSpeed);
+        if (t.fadeAlpha <= 0) { traces.splice(i, 1); continue; }
+      }
+      const drawnLen = t.progress * totalLen;
+      const x2 = t.isH ? t.x + drawnLen : t.x;
+      const y2 = t.isH ? t.y : t.y + drawnLen;
+      const opacity = t.alpha * t.fadeAlpha;
+      const g = t.isH
+        ? ctx.createLinearGradient(t.x, t.y, t.x + totalLen, t.y)
+        : ctx.createLinearGradient(t.x, t.y, t.x, t.y + totalLen);
+      g.addColorStop(0, `rgba(${TRACE_COLOR},0)`);
+      g.addColorStop(0.12, `rgba(${TRACE_COLOR},${opacity * 0.55})`);
+      g.addColorStop(0.88, `rgba(${TRACE_COLOR},${opacity})`);
+      g.addColorStop(1, `rgba(${TRACE_COLOR},0)`);
+      ctx.strokeStyle = g;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(t.x, t.y);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+
+      if (t.progress < 1) {
+        const headA = opacity * (0.7 + t.progress * 0.3);
+        const glow = ctx.createRadialGradient(x2, y2, 0, x2, y2, 8);
+        glow.addColorStop(0, `rgba(${TRACE_COLOR},${headA * 0.7})`);
+        glow.addColorStop(1, `rgba(${TRACE_COLOR},0)`);
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(x2, y2, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = `rgba(${TRACE_COLOR},${headA})`;
+        ctx.beginPath(); ctx.arc(x2, y2, 2, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+
+  function draw(ts) {
+    animId = requestAnimationFrame(draw);
+    if (ts - lastTs < 1000 / FPS) return;
+    lastTs = ts;
+    if (landingPage.classList.contains('hidden')) return;
+    frame();
+  }
+
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resize, 150);
+  });
+
+  window.__startLandingFx = function () {
+    if (animId) return;
+    resize();
+    animId = requestAnimationFrame(draw);
+  };
+
+  window.__startLandingFx();
+})();
 // ══════════════════════════════════════════════
 // DATA
 // ══════════════════════════════════════════════
@@ -1637,30 +2040,30 @@ const salesRoles = {
   channel:   { label:"Channel Sales",       titles:'"Channel Sales Manager" OR "Partner Account Manager"',           skills:'"Channel Sales" OR "Partner Management"' },
   presales:  { label:"Pre-Sales / Solutions",titles:'"Solutions Engineer" OR "Pre Sales Consultant"',               skills:'"Technical Pre Sales" OR "Solution Architect" OR "Demo"' }
 };
-// ── VETERANS (India — Army, Navy, Air Force, Coast Guard) ──────────
+// ── VETERANS (India - Army, Navy, Air Force, Coast Guard) ──────────
 const veteranRoles = {
   vet_any: {
-    label: "Veterans — Any Role",
+    label: "Veterans - Any Role",
     titles: '"Ex-Indian Army" OR "Ex-Army" OR "Indian Army" OR "Ex-Navy" OR "Indian Navy" OR "Ex-Air Force" OR "Indian Air Force" OR "Ex-IAF" OR "Ex-Coast Guard" OR "Indian Coast Guard" OR "Ex-NDA" OR "Ex-Defence" OR "Retired Army" OR "Retired Navy" OR "Retired Air Force" OR "Fauji" OR "Armed Forces Veteran"',
     skills: '"Leadership" OR "Operations" OR "Strategy" OR "Project Management" OR "Logistics" OR "Supply Chain" OR "Security" OR "Crisis Management" OR "Team Management" OR "Discipline"'
   },
   vet_tech: {
-    label: "Veterans — Tech / IT",
+    label: "Veterans - Tech / IT",
     titles: '"Ex-Indian Army" OR "Ex-Navy" OR "Ex-Air Force" OR "Ex-IAF" OR "Ex-Defence" OR "Retired Army" OR "Retired Air Force" OR "Armed Forces Veteran"',
     skills: '"IT" OR "Cybersecurity" OR "Network" OR "Systems" OR "Technology" OR "Software" OR "Cloud" OR "Infrastructure" OR "Signals" OR "EME" OR "AFNET"'
   },
   vet_ops: {
-    label: "Veterans — Operations / Logistics",
+    label: "Veterans - Operations / Logistics",
     titles: '"Ex-Indian Army" OR "Ex-Navy" OR "Ex-Air Force" OR "Ex-Coast Guard" OR "Ex-Defence" OR "Retired Army" OR "Retired Navy" OR "Fauji"',
     skills: '"Operations" OR "Logistics" OR "Supply Chain" OR "Fleet Management" OR "Procurement" OR "Administration" OR "Facility Management" OR "Security Management"'
   },
   vet_sales: {
-    label: "Veterans — Sales / BD",
+    label: "Veterans - Sales / BD",
     titles: '"Ex-Indian Army" OR "Ex-Navy" OR "Ex-Air Force" OR "Ex-Defence" OR "Retired Army" OR "Armed Forces Veteran"',
     skills: '"Sales" OR "Business Development" OR "Account Management" OR "Client Relations" OR "Territory Management" OR "Channel Sales"'
   },
   vet_leadership: {
-    label: "Veterans — Leadership / Consulting",
+    label: "Veterans - Leadership / Consulting",
     titles: '"Ex-Indian Army" OR "Ex-Navy" OR "Ex-Air Force" OR "Ex-IAF" OR "Ex-Defence" OR "Retired Colonel" OR "Retired Brigadier" OR "Retired Major General" OR "Retired Vice Admiral" OR "Retired Air Marshal" OR "Ex-NDA"',
     skills: '"Leadership" OR "Strategy" OR "Consulting" OR "General Management" OR "P&L" OR "Business Transformation" OR "Change Management" OR "Corporate Training"'
   }
@@ -1671,35 +2074,35 @@ const veteranRoles = {
 // These are specific enough to cut noise vs generic "Diversity/Inclusion" terms
 const lgbtqRoles = {
   lgbtq_any: {
-    label: "LGBTQ+ — Any Role",
+    label: "LGBTQ+ - Any Role",
     titles: '"DEI" OR "Diversity and Inclusion" OR "Pride Network" OR "LGBTQ" OR "ERG Lead" OR "Inclusion Lead" OR "Queer Affinity"',
     skills: '"Pride@" OR "LGBTQ ERG" OR "Queer" OR "Trans Inclusion" OR "Humsafar" OR "Umang" OR "Out in Tech" OR "Gender Identity"'
   },
   lgbtq_dei: {
-    label: "LGBTQ+ — DEI / HR",
+    label: "LGBTQ+ - DEI / HR",
     titles: '"Diversity" OR "Inclusion" OR "DEI" OR "DEIB" OR "Belonging" OR "Equity" OR "People and Culture" OR "Culture and Belonging"',
     skills: '"LGBTQ+" OR "Queer Inclusion" OR "Trans Inclusion" OR "Pride Network" OR "ERG" OR "Gender Identity" OR "Humsafar" OR "Umang"'
   },
   lgbtq_tech: {
-    label: "LGBTQ+ — Technology",
+    label: "LGBTQ+ - Technology",
     titles: '"Software Engineer" OR "Product Manager" OR "Data Scientist" OR "Designer" OR "Engineering Manager" OR "Developer"',
     skills: '"Pride@" OR "LGBTQ ERG" OR "Out in Tech" OR "Lesbians Who Tech" OR "Trans*H4CK" OR "Queer" OR "LGBTQ inclusion"'
   },
   lgbtq_community: {
-    label: "LGBTQ+ — Community / Advocacy",
+    label: "LGBTQ+ - Community / Advocacy",
     titles: '"Community Manager" OR "Program Manager" OR "Policy" OR "Advocacy" OR "NGO" OR "Social Impact" OR "Outreach"',
     skills: '"LGBTQ" OR "Queer" OR "Trans" OR "Humsafar Trust" OR "Umang" OR "Yaariyan" OR "Pride India" OR "The Queer Muslim Project"'
   },
   lgbtq_marketing: {
-    label: "LGBTQ+ — Marketing / Comms",
+    label: "LGBTQ+ - Marketing / Comms",
     titles: '"Marketing" OR "Brand Manager" OR "Communications" OR "PR" OR "Content Creator" OR "Social Media Manager"',
     skills: '"Inclusive Marketing" OR "Pride Campaign" OR "LGBTQ Marketing" OR "Queer Representation" OR "Diversity Marketing" OR "Allyship"'
   }
 };
 
 
-// ── FRESHERS — Dynamic (Year + Tier + Stream + Custom College) ──
-// Single placeholder role — actual query built dynamically by buildFresherQuery()
+// ── FRESHERS - Dynamic (Year + Tier + Stream + Custom College) ──
+// Single placeholder role - actual query built dynamically by buildFresherQuery()
 const fresherRoles = {
   fresher: {
     label: "🎓 Configure below ↓",
@@ -1710,9 +2113,9 @@ const fresherRoles = {
 
 // College tier definitions
 const collegeTiers = {
-  tier1: { label: 'Tier 1 — IIT / BITS / NIT / IIIT / IISc', colleges: '"IIT" OR "IIT Bombay" OR "IIT Delhi" OR "IIT Madras" OR "IIT Kharagpur" OR "IIT Hyderabad" OR "IIT Kanpur" OR "IIT Roorkee" OR "IIT Guwahati" OR "BITS Pilani" OR "BITS Goa" OR "BITS Hyderabad" OR "NIT Trichy" OR "NIT Surathkal" OR "NIT Warangal" OR "NIT Calicut" OR "IIIT Hyderabad" OR "IIIT Bangalore" OR "IISc"' },
-  tier2: { label: 'Tier 2 — VIT / SRM / Manipal / PES / RV', colleges: '"VIT" OR "SRM" OR "Manipal" OR "PES University" OR "RV College" OR "BMS College" OR "PESIT" OR "Dayananda Sagar" OR "MS Ramaiah" OR "NMIMS" OR "Christ University" OR "Amrita" OR "Thapar" OR "SASTRA" OR "Symbiosis" OR "Sathyabama"' },
-  tier3: { label: 'Tier 3 — State / Affiliated Universities', colleges: '"Anna University" OR "JNTU" OR "Mumbai University" OR "Pune University" OR "VTU" OR "RTU" OR "GTU" OR "MDU" OR "AKTU" OR "RGPV" OR "GGSIPU" OR "Osmania University" OR "Bangalore University" OR "Andhra University"' },
+  tier1: { label: 'Tier 1 - IIT / BITS / NIT / IIIT / IISc', colleges: '"IIT" OR "IIT Bombay" OR "IIT Delhi" OR "IIT Madras" OR "IIT Kharagpur" OR "IIT Hyderabad" OR "IIT Kanpur" OR "IIT Roorkee" OR "IIT Guwahati" OR "BITS Pilani" OR "BITS Goa" OR "BITS Hyderabad" OR "NIT Trichy" OR "NIT Surathkal" OR "NIT Warangal" OR "NIT Calicut" OR "IIIT Hyderabad" OR "IIIT Bangalore" OR "IISc"' },
+  tier2: { label: 'Tier 2 - VIT / SRM / Manipal / PES / RV', colleges: '"VIT" OR "SRM" OR "Manipal" OR "PES University" OR "RV College" OR "BMS College" OR "PESIT" OR "Dayananda Sagar" OR "MS Ramaiah" OR "NMIMS" OR "Christ University" OR "Amrita" OR "Thapar" OR "SASTRA" OR "Symbiosis" OR "Sathyabama"' },
+  tier3: { label: 'Tier 3 - State / Affiliated Universities', colleges: '"Anna University" OR "JNTU" OR "Mumbai University" OR "Pune University" OR "VTU" OR "RTU" OR "GTU" OR "MDU" OR "AKTU" OR "RGPV" OR "GGSIPU" OR "Osmania University" OR "Bangalore University" OR "Andhra University"' },
   custom: { label: '✏️ Add College / University manually', colleges: '' }
 };
 
@@ -1740,8 +2143,62 @@ const clusters = {
   edtech:      '"Byju" OR "Unacademy" OR "Vedantu" OR "UpGrad" OR "Simplilearn" OR "Great Learning" OR "Coursera" OR "WhiteHat Jr" OR "Toppr" OR "Doubtnut" OR "Scaler" OR "Newton School"',
 };
 
-// ── FEMALE NAMES DIVERSITY FILTER ─────────────────────────────
-const femaleNamesBoolean = `(Aabha OR Aadarshini OR Aaddhya OR Aadhaya OR Aadhya OR Aadya OR Aahana OR Aairah OR Aakaanksha OR Aalia OR Aanchal OR Aaniya OR Aanya OR Aaradhya OR Aarati OR Aarna OR Aarohi OR Aarti OR Aarushi OR Aasha OR Aashna OR Aashvi OR Aastha OR Aayushi OR Abha OR Abhilasha OR Aditi OR Advika OR Aesha OR Afreen OR Aisha OR Aiswarya OR Akanksha OR Akhila OR Akshara OR Alisha OR Alka OR Alpana OR Amaira OR Amaya OR Ambika OR Amisha OR Amrita OR Ananya OR Anaya OR Anchal OR Anika OR Anisha OR Anita OR Anjali OR Anjana OR Ankita OR Anshula OR Antara OR Anu OR Anupama OR Anuradha OR Anusha OR Anushka OR Anvi OR Anvitha OR Aparna OR Arpita OR Arti OR Aruna OR Arundhati OR Arushi OR Arya OR Asha OR Asmita OR Aswini OR Athira OR Avani OR Avantika OR Avni OR Ayesha OR Ayushi) OR (Babita OR Barkha OR Beena OR Bela OR Bhagyashri OR Bhairavi OR Bhanu OR Bharati OR Bharti OR Bhavana OR Bhavika OR Bhavna OR Bhoomika OR Bhumika OR Bijoya OR Bimala OR Bina OR Bindu OR Binita OR Bipasha OR Brinda) OR (Chaaya OR Chameli OR Champa OR Chanchal OR Chandani OR Chandni OR Chandralekha OR Charu OR Chetana OR Chetna OR Chhavi OR Chhaya OR Chitra) OR (Damini OR Darshita OR Deepa OR Deepali OR Deepika OR Deepti OR Devangi OR Devanshi OR Devi OR Devika OR Devyani OR Dhanvi OR Dhara OR Diksha OR Dimple OR Dipali OR Dipika OR Disha OR Divya OR Diya OR Drashti OR Drishti OR Durga) OR (Esha OR Ekta) OR (Falak OR Falguni OR Farah OR Farida OR Fatima) OR (Ganga OR Garima OR Gauri OR Gayatri OR Geet OR Geeta OR Geetanjali OR Girija) OR (Heema OR Heena OR Heer OR Hema OR Himani OR Hina) OR (Indira OR Ira OR Isha OR Ishani OR Ishika OR Ishita) OR (Jahnavi OR Janaki OR Jasmin OR Jasmine OR Jaspreet OR Jayalaxmi OR Jayanti OR Jhanvi OR Jiya OR Juhi OR Jyoti OR Jyotika) OR (Kajal OR Kalpana OR Kalyani OR Kamala OR Kamini OR Kanchan OR Kanika OR Karishma OR Karuna OR Kashish OR Kashmira OR Kavita OR Kavya OR Khushi OR Komal OR Kritika OR Kusum) OR (Lakshmi OR Lavanya OR Laxmi OR Leena OR Lily) OR (Madhuri OR Mahima OR Manisha OR Manjeet OR Manju OR Mansi OR Manya OR Maya OR Mayuri OR Meena OR Meenakshi OR Megha OR Meghana OR Mehak OR Mili OR Mira OR Mishka OR Mishti OR Mitali OR Mohini OR Mona OR Monika OR Mridula OR Muskan OR Myra) OR (Naina OR Nalini OR Namita OR Nandini OR Navya OR Neela OR Neelam OR Neha OR Nidhi OR Niharika OR Nikita OR Nirmala OR Nisha OR Nishita OR Nita OR Nitya OR Nivedita OR Noor) OR (Padma OR Pallavi OR Pari OR Parul OR Parvati OR Payal OR Pihu OR Pooja OR Poonam OR Prachi OR Pragati OR Pratibha OR Pratima OR Preeti OR Priya OR Priyanka OR Priyanshi OR Puja OR Purnima OR Purva OR Pushpa) OR (Rachana OR Radhika OR Ragini OR Rajani OR Rajni OR Rakhi OR Ramya OR Rashmi OR Raveena OR Rekha OR Renu OR Renuka OR Reshma OR Rhea OR Ria OR Richa OR Riddhi OR Ritika OR Ritu OR Riya OR Rohini OR Ruchi OR Rutuja) OR (Saanvi OR Sakshi OR Saloni OR Sameera OR Sandhya OR Sangeeta OR Sanjana OR Sanvi OR Sapna OR Sara OR Saraswati OR Sarita OR Saumya OR Savita OR Seema OR Shalini OR Shanaya OR Sharda OR Sharmila OR Sheetal OR Shefali OR Shikha OR Shilpa OR Shivangi OR Shivani OR Shreya OR Shruti OR Shweta OR Simran OR Sita OR Siya OR Smita OR Smriti OR Sneha OR Sona OR Sonali OR Sonam OR Sonia OR Suha OR Suhani OR Suhasini OR Sunaina OR Sunita OR Supriya OR Surabhi OR Swapna OR Swara OR Swati) OR (Tanishka OR Tanvi OR Tanya OR Tara OR Tejal OR Tejaswini OR Tina OR Trisha OR Tulsi) OR (Vaishnavi OR Vani OR Vanya OR Varsha OR Vijaya) OR (Zara OR Zoya)`;
+// ── DIVERSITY SOURCING RESOURCES - name lists + signal booleans ──────
+// India: 300+ curated first names (unchanged from the old in-Builder female filter).
+const indiaFemaleNamesBoolean = `(Aabha OR Aadarshini OR Aaddhya OR Aadhaya OR Aadhya OR Aadya OR Aahana OR Aairah OR Aakaanksha OR Aalia OR Aanchal OR Aaniya OR Aanya OR Aaradhya OR Aarati OR Aarna OR Aarohi OR Aarti OR Aarushi OR Aasha OR Aashna OR Aashvi OR Aastha OR Aayushi OR Abha OR Abhilasha OR Aditi OR Advika OR Aesha OR Afreen OR Aisha OR Aiswarya OR Akanksha OR Akhila OR Akshara OR Alisha OR Alka OR Alpana OR Amaira OR Amaya OR Ambika OR Amisha OR Amrita OR Ananya OR Anaya OR Anchal OR Anika OR Anisha OR Anita OR Anjali OR Anjana OR Ankita OR Anshula OR Antara OR Anu OR Anupama OR Anuradha OR Anusha OR Anushka OR Anvi OR Anvitha OR Aparna OR Arpita OR Arti OR Aruna OR Arundhati OR Arushi OR Arya OR Asha OR Asmita OR Aswini OR Athira OR Avani OR Avantika OR Avni OR Ayesha OR Ayushi) OR (Babita OR Barkha OR Beena OR Bela OR Bhagyashri OR Bhairavi OR Bhanu OR Bharati OR Bharti OR Bhavana OR Bhavika OR Bhavna OR Bhoomika OR Bhumika OR Bijoya OR Bimala OR Bina OR Bindu OR Binita OR Bipasha OR Brinda) OR (Chaaya OR Chameli OR Champa OR Chanchal OR Chandani OR Chandni OR Chandralekha OR Charu OR Chetana OR Chetna OR Chhavi OR Chhaya OR Chitra) OR (Damini OR Darshita OR Deepa OR Deepali OR Deepika OR Deepti OR Devangi OR Devanshi OR Devi OR Devika OR Devyani OR Dhanvi OR Dhara OR Diksha OR Dimple OR Dipali OR Dipika OR Disha OR Divya OR Diya OR Drashti OR Drishti OR Durga) OR (Esha OR Ekta) OR (Falak OR Falguni OR Farah OR Farida OR Fatima) OR (Ganga OR Garima OR Gauri OR Gayatri OR Geet OR Geeta OR Geetanjali OR Girija) OR (Heema OR Heena OR Heer OR Hema OR Himani OR Hina) OR (Indira OR Ira OR Isha OR Ishani OR Ishika OR Ishita) OR (Jahnavi OR Janaki OR Jasmin OR Jasmine OR Jaspreet OR Jayalaxmi OR Jayanti OR Jhanvi OR Jiya OR Juhi OR Jyoti OR Jyotika) OR (Kajal OR Kalpana OR Kalyani OR Kamala OR Kamini OR Kanchan OR Kanika OR Karishma OR Karuna OR Kashish OR Kashmira OR Kavita OR Kavya OR Khushi OR Komal OR Kritika OR Kusum) OR (Lakshmi OR Lavanya OR Laxmi OR Leena OR Lily) OR (Madhuri OR Mahima OR Manisha OR Manjeet OR Manju OR Mansi OR Manya OR Maya OR Mayuri OR Meena OR Meenakshi OR Megha OR Meghana OR Mehak OR Mili OR Mira OR Mishka OR Mishti OR Mitali OR Mohini OR Mona OR Monika OR Mridula OR Muskan OR Myra) OR (Naina OR Nalini OR Namita OR Nandini OR Navya OR Neela OR Neelam OR Neha OR Nidhi OR Niharika OR Nikita OR Nirmala OR Nisha OR Nishita OR Nita OR Nitya OR Nivedita OR Noor) OR (Padma OR Pallavi OR Pari OR Parul OR Parvati OR Payal OR Pihu OR Pooja OR Poonam OR Prachi OR Pragati OR Pratibha OR Pratima OR Preeti OR Priya OR Priyanka OR Priyanshi OR Puja OR Purnima OR Purva OR Pushpa) OR (Rachana OR Radhika OR Ragini OR Rajani OR Rajni OR Rakhi OR Ramya OR Rashmi OR Raveena OR Rekha OR Renu OR Renuka OR Reshma OR Rhea OR Ria OR Richa OR Riddhi OR Ritika OR Ritu OR Riya OR Rohini OR Ruchi OR Rutuja) OR (Saanvi OR Sakshi OR Saloni OR Sameera OR Sandhya OR Sangeeta OR Sanjana OR Sanvi OR Sapna OR Sara OR Saraswati OR Sarita OR Saumya OR Savita OR Seema OR Shalini OR Shanaya OR Sharda OR Sharmila OR Sheetal OR Shefali OR Shikha OR Shilpa OR Shivangi OR Shivani OR Shreya OR Shruti OR Shweta OR Simran OR Sita OR Siya OR Smita OR Smriti OR Sneha OR Sona OR Sonali OR Sonam OR Sonia OR Suha OR Suhani OR Suhasini OR Sunaina OR Sunita OR Supriya OR Surabhi OR Swapna OR Swara OR Swati) OR (Tanishka OR Tanvi OR Tanya OR Tara OR Tejal OR Tejaswini OR Tina OR Trisha OR Tulsi) OR (Vaishnavi OR Vani OR Vanya OR Varsha OR Vijaya) OR (Zara OR Zoya)`;
+
+// US: 400+ names - the proven SSA-decade list (top 200 female first names of the
+// 1950s-90s, de-duped) from Glen Cathey's "Diversity Sourcing: Boolean Search
+// Strings for LinkedIn" (booleanblackbelt.com) - field-tested to cover ~68% of
+// US women on LinkedIn in a single search.
+const usFemaleNamesBoolean = `(Abigail OR Adriana OR Adrienne OR Aimee OR Alejandra OR Alexa OR Alexandra OR Alexandria OR Alexis OR Alice OR Alicia OR Alisha OR Alison OR Allison OR Alyssa OR Amanda OR Amber OR Amy OR Ana OR Andrea OR Angel OR Angela OR Angelica OR Angie OR Anita OR Ann OR Anna OR Anne OR Annette OR Annie OR April OR Ariana OR Ariel OR Arlene OR Ashlee OR Ashley OR Audrey OR Autumn) OR (Bailey OR Barbara OR Becky OR Belinda OR Beth OR Bethany OR Betty OR Beverly OR Bianca OR Bonnie OR Brandi OR Brandy OR Breanna OR Brenda OR Briana OR Brianna OR Bridget OR Brittany OR Brittney OR Brooke) OR (Caitlin OR Caitlyn OR Candace OR Candice OR Carla OR Carly OR Carmen OR Carol OR Carole OR Caroline OR Carolyn OR Carrie OR Casey OR Cassandra OR Cassidy OR Cassie OR Catherine OR Cathy OR Charlene OR Charlotte OR Chelsea OR Chelsey OR Cheryl OR Cheyenne OR Chloe OR Christie OR Christina OR Christine OR Christy OR Cindy OR Claire OR Claudia OR Colleen OR Connie OR Constance OR Courtney OR Cristina OR Crystal OR Cynthia) OR (Daisy OR Dana OR Danielle OR Darlene OR Dawn OR Deanna OR Debbie OR Deborah OR Debra OR Delores OR Denise OR Desiree OR Destiny OR Diamond OR Diana OR Diane OR Dianne OR Dolores OR Dominique OR Donna OR Doreen OR Doris OR Dorothy) OR (Ebony OR Eileen OR Elaine OR Elizabeth OR Ellen OR Emily OR Emma OR Erica OR Erika OR Erin OR Eva OR Evelyn) OR (Faith OR Felicia OR Frances) OR (Gabriela OR Gabriella OR Gabrielle OR Gail OR Gayle OR Geraldine OR Gina OR Glenda OR Gloria OR Grace OR Gwendolyn) OR (Hailey OR Haley OR Hannah OR Hayley OR Heather OR Heidi OR Helen OR Holly) OR (Irene OR Isabel OR Isabella) OR (Jackie OR Jaclyn OR Jacqueline OR Jade OR Jaime OR Jamie OR Jan OR Jane OR Janet OR Janice OR Janis OR Jasmin OR Jasmine OR Jean OR Jeanette OR Jeanne OR Jenna OR Jennifer OR Jenny OR Jessica OR Jill OR Jillian OR Jo OR Joan OR Joann OR Joanna OR Joanne OR Jocelyn OR Jodi OR Jody OR Jordan OR Josephine OR Joy OR Joyce OR Juanita OR Judith OR Judy OR Julia OR Julie OR June) OR (Kaitlin OR Kaitlyn OR Kara OR Karen OR Kari OR Karina OR Karla OR Katelyn OR Katherine OR Kathleen OR Kathryn OR Kathy OR Katie OR Katrina OR Kay OR Kayla OR Kaylee OR Kelli OR Kellie OR Kelly OR Kelsey OR Kendra OR Kerri OR Kerry OR Kiara OR Kim OR Kimberly OR Kirsten OR Krista OR Kristen OR Kristi OR Kristie OR Kristin OR Kristina OR Kristine OR Kristy OR Krystal OR Kylie) OR (Lacey OR Latasha OR Latoya OR Laura OR Lauren OR Laurie OR Leah OR Leslie OR Lillian OR Linda OR Lindsay OR Lindsey OR Lisa OR Lois OR Loretta OR Lori OR Lorraine OR Louise OR Lydia OR Lynda OR Lynn OR Lynne) OR (Mackenzie OR Madeline OR Madison OR Makayla OR Mallory OR Mandy OR Marcia OR Margaret OR Maria OR Mariah OR Marianne OR Marie OR Marilyn OR Marisa OR Marissa OR Marjorie OR Marlene OR Marsha OR Martha OR Mary OR Maureen OR Mckenzie OR Meagan OR Megan OR Meghan OR Melanie OR Melinda OR Melissa OR Melody OR Mercedes OR Meredith OR Mia OR Michaela OR Michele OR Michelle OR Mikayla OR Mildred OR Mindy OR Miranda OR Misty OR Molly OR Monica OR Monique OR Morgan) OR (Nancy OR Natalie OR Natasha OR Nichole OR Nicole OR Nina OR Norma) OR (Olivia) OR (Paige OR Pam OR Pamela OR Patricia OR Patsy OR Patti OR Patty OR Paula OR Peggy OR Penny OR Phyllis OR Priscilla) OR (Rachael OR Rachel OR Raven OR Rebecca OR Rebekah OR Regina OR Renee OR Rhonda OR Rita OR Roberta OR Robin OR Robyn OR Rosa OR Rose OR Rosemary OR Roxanne OR Ruby OR Ruth) OR (Sabrina OR Sally OR Samantha OR Sandra OR Sandy OR Sara OR Sarah OR Savannah OR Selena OR Shannon OR Shari OR Sharon OR Shawna OR Sheena OR Sheila OR Shelby OR Shelia OR Shelley OR Shelly OR Sheri OR Sherri OR Sherry OR Sheryl OR Shirley OR Sierra OR Sonia OR Sonya OR Sophia OR Stacey OR Stacie OR Stacy OR Stefanie OR Stephanie OR Sue OR Summer OR Susan OR Suzanne OR Sydney OR Sylvia) OR (Tabitha OR Tamara OR Tami OR Tammie OR Tammy OR Tanya OR Tara OR Tasha OR Taylor OR Teresa OR Terri OR Terry OR Theresa OR Tiffany OR Tina OR Toni OR Tonya OR Tracey OR Traci OR Tracie OR Tracy OR Tricia) OR (Valerie OR Vanessa OR Veronica OR Vicki OR Vickie OR Vicky OR Victoria OR Virginia OR Vivian) OR (Wanda OR Wendy OR Whitney) OR (Yesenia OR Yolanda OR Yvette OR Yvonne) OR (Zoe)`;
+
+// Pronoun signal (modern) - bios that self-identify with she/her pronoun tags.
+const pronounSignalsBoolean = `"she/her" OR "she/hers" OR "her/hers" OR "(she/her)" OR "she - her"`;
+
+// Classic "(her OR she)" keyword search - Glen Cathey's original technique: run this as
+// a general keyword search (not a first/last-name field). It works because "her" and
+// "she" turn up disproportionately in the summary/recommendation text on women's
+// profiles - ~900K US LinkedIn profiles by his count, the single most inclusive
+// gender-diversity search there is, precisely because it isn't tied to any name list.
+const classicSheHerBoolean = `(her OR she)`;
+
+// Women-in-tech community / program affiliations - strong diversity-sourcing signal
+// when they show up in a LinkedIn "About" section, group memberships, or a resume.
+const womenInTechBoolean = `"Women Who Code" OR "Girls Who Code" OR "AnitaB.org" OR "Grace Hopper Celebration" OR "Women Techmakers" OR "SheCodes" OR "Women in Engineering" OR "WomenTech Network" OR "Lean In" OR "Girls in Tech" OR "SheThePeople" OR "Women in Data Science" OR "Systers"`;
+
+// US women's colleges (48) - source: booleanblackbelt.com. Same idea as the Boolean
+// Builder's Education Filter, but for diversity sourcing: a women's-college alma
+// mater is a strong, low-noise signal.
+const womensCollegesUSBoolean = `("Agnes Scott College" OR "Alverno College" OR "Barnard College" OR "Bay Path College" OR "Bennett College" OR "Brenau University" OR "Brescia University College" OR "Bryn Mawr College" OR "Carlow College" OR "Cedar Crest College" OR "Chatham University" OR "College of New Rochelle, The" OR "College of Saint Benedict" OR "College of Saint Elizabeth" OR "College of Saint Mary" OR "Columbia College" OR "Converse College" OR "Cottey College" OR "Douglass Residential College of Rutgers University" OR "Hollins University" OR "Judson College" OR "Mary Baldwin College" OR "Meredith College" OR "Midway College" OR "Mills College" OR "Moore College of Art & Design" OR "Mount Holyoke College" OR "Mount Mary College" OR "Mount St. Mary's College" OR "Notre Dame of Maryland University" OR "Pine Manor College" OR "Russell Sage College" OR "St. Catherine University" OR "Saint Joseph College" OR "Saint Mary-of-the-Woods College" OR "Saint Mary's College" OR "Salem College" OR "Scripps College" OR "Simmons College" OR "Smith College" OR "Spelman College" OR "Stephens College" OR "Sweet Briar College" OR "Trinity Washington University" OR "Wellesley College" OR "Wesleyan College" OR "Wilson College" OR "Women's College")`;
+
+// Women's sororities (91) - source: booleanblackbelt.com.
+const sororitiesUSBoolean = `("Alpha Chi Omega" OR "Alpha Delta Chi" OR "Alpha Delta Pi" OR "Alpha Epsilon Omega" OR "Alpha Epsilon Phi" OR "Alpha Gamma Delta" OR "Alpha Kappa Alpha" OR "alpha Kappa Delta Phi" OR "Alpha Phi Gamma" OR "Alpha Phi" OR "Alpha Pi Omega" OR "Alpha Pi Sigma" OR "Alpha Rho Lambda" OR "Alpha Sigma Alpha" OR "Alpha Sigma Kappa" OR "Alpha Sigma Omega" OR "Alpha Sigma Rho" OR "Alpha Sigma Tau" OR "Alpha Xi Delta" OR "Ceres" OR "Chi Omega" OR "Chi Upsilon Sigma" OR "Delta Chi Lambda" OR "Delta Delta Delta" OR "Delta Gamma" OR "Delta Gamma Pi" OR "Delta Kappa Delta" OR "Delta Phi Epsilon" OR "Delta Phi Lambda" OR "Delta Phi Mu" OR "Delta Phi Omega" OR "Delta Psi Delta" OR "Delta Sigma Chi" OR "Delta Sigma Theta" OR "Delta Tau Lambda" OR "Delta Xi Nu" OR "Delta Xi Phi" OR "Delta Zeta" OR "Gamma Alpha Omega" OR "Gamma Eta" OR "Gamma Phi Beta" OR "Gamma Phi Omega" OR "Gamma Rho Lambda" OR "Gamma Sigma Sigma" OR "Kappa Alpha Theta" OR "Kappa Beta Gamma" OR "Kappa Delta Chi" OR "Kappa Delta Phi" OR "Kappa Delta" OR "Kappa Kappa Gamma" OR "Kappa Phi Gamma" OR "Kappa Phi Lambda" OR "Kappa Phi Zeta" OR "Lambda Pi Chi" OR "Lambda Pi Upsilon" OR "Lambda Psi Delta" OR "Lambda Tau Omega" OR "Lambda Theta Alpha" OR "Lambda Theta Nu" OR "Mu Sigma Upsilon" OR "Omega Phi Beta" OR "Omega Phi Chi" OR "Phi Beta Chi" OR "Phi Mu" OR "Phi Sigma Rho" OR "Phi Sigma Sigma" OR "Pi Beta Phi" OR "Pi Lambda Chi" OR "Sigma Alpha Epsilon Pi" OR "Sigma Alpha Iota" OR "Sigma Delta Tau" OR "Sigma Gamma Rho" OR "Sigma Iota Alpha" OR "Sigma Kappa" OR "Sigma Lambda Alpha" OR "Sigma Lambda Gamma" OR "Sigma Lambda Upsilon" OR "Sigma Omega Nu" OR "Sigma Omega Phi" OR "Sigma Omicron Pi" OR "Sigma Phi Kappa" OR "Sigma Phi Omega" OR "Sigma Pi Alpha" OR "Sigma Psi Zeta" OR "Sigma Sigma Rho" OR "Sigma Sigma Sigma" OR "Tau Theta Pi" OR "Theta Nu Xi" OR "Theta Phi Alpha" OR "Zeta Phi Beta" OR "Zeta Tau Alpha")`;
+
+// Historically Black Colleges & Universities (105) - source: booleanblackbelt.com.
+// Racial/ethnic diversity signal, not gender-specific.
+const hbcuBoolean = `("Alabama A&M University" OR "Alabama State University" OR "Albany State University" OR "Alcorn State University" OR "Allen University" OR "University of Arkansas at Pine Bluff" OR "Arkansas Baptist College" OR "Barber-Scotia College" OR "Benedict College" OR "Bennett College" OR "Bethune-Cookman University" OR "Bishop State Community College" OR "Bluefield State College" OR "Bowie State University" OR "Central State University" OR "Cheyney University of Pennsylvania" OR "Claflin University" OR "Clark Atlanta University" OR "Clinton Junior College" OR "Coahoma Community College" OR "Concordia College, Selma" OR "Coppin State University" OR "Delaware State University" OR "Denmark Technical College" OR "Dillard University" OR "University of the District of Columbia" OR "Edward Waters College" OR "Elizabeth City State University" OR "Fayetteville State University" OR "Fisk University" OR "Florida A&M University" OR "Florida Memorial University" OR "Fort Valley State University" OR "Gadsden State Community College" OR "Grambling State University" OR "Hampton University" OR "Harris-Stowe State University" OR "Hinds Community College at Utica" OR "Howard University" OR "Huston-Tillotson University" OR "Interdenominational Theological Center" OR "J. F. Drake State Technical College" OR "Jackson State University" OR "Jarvis Christian College" OR "Johnson C. Smith University" OR "Kentucky State University" OR "Knoxville College" OR "Lane College" OR "Langston University" OR "Lawson State Community College" OR "LeMoyne-Owen College" OR "Lewis College of Business" OR "Lincoln University" OR "Lincoln University of Missouri" OR "Livingstone College" OR "University of Maryland Eastern Shore" OR "Meharry Medical College" OR "Miles College" OR "Mississippi Valley State University" OR "Morehouse College" OR "Morehouse School of Medicine" OR "Morgan State University" OR "Morris Brown College" OR "Morris College" OR "Norfolk State University" OR "North Carolina A&T State University" OR "North Carolina Central University" OR "Oakwood University" OR "Paine College" OR "Paul Quinn College" OR "Philander Smith College" OR "Prairie View A&M University" OR "Rust College" OR "Saint Paul's College" OR "Savannah State University" OR "Selma University" OR "Shaw University" OR "Shorter College" OR "Shelton State Community College" OR "South Carolina State University" OR "Southern University at New Orleans" OR "Southern University at Shreveport" OR "Southern University and A&M College" OR "Southwestern Christian College" OR "Spelman College" OR "St. Augustine's College" OR "St. Philip's College" OR "Stillman College" OR "Talladega College" OR "Tennessee State University" OR "Texas College" OR "Texas Southern University" OR "Tougaloo College" OR "Trenholm State Technical College" OR "Tuskegee University" OR "University of the Virgin Islands" OR "Virginia State University" OR "Virginia Union University" OR "Virginia University of Lynchburg" OR "Voorhees College" OR "West Virginia State University" OR "Wilberforce University" OR "Wiley College" OR "Winston-Salem State University" OR "Xavier University of Louisiana")`;
+
+// African American fraternities & sororities (23) - source: booleanblackbelt.com.
+const aaGreekBoolean = `("Sigma Pi Phi" OR "Alpha Phi Alpha" OR "Kappa Alpha Psi" OR "Omega Psi Phi" OR "Phi Beta Sigma" OR "Sigma Rhomeo" OR "Wine Psi Phi" OR "Iota Phi Theta" OR "Phi Delta Psi" OR "Delta Psi Chi" OR "Beta Phi Pi" OR "MALIK Fraternity" OR "Sigma Phi Rho" OR "Phi Rho Eta" OR "Gamma Psi Beta" OR "Alpha Kappa Alpha" OR "Delta Sigma Theta" OR "Zeta Phi Beta" OR "Sigma Gamma Rho" OR "Phi Delta Kappa" OR "Iota Phi Lambda" OR "Eta Phi Beta" OR "Gamma Phi Delta")`;
+
+// Native American / Tribal Colleges & Universities (36) - source: booleanblackbelt.com.
+const nativeCollegesBoolean = `("Bay Mills Community College" OR "Blackfeet Community College" OR "Cankdeska Cikana (Little Hoop) Community College" OR "Chief Dull Knife College" OR "College of Menominee Nation" OR "College of the Muscogee Nation" OR "Comanche Nation College" OR "Diné College" OR "Fond du Lac Tribal and Community College" OR "Fort Belknap College" OR "Fort Berthold Community College" OR "Fort Peck Community College" OR "Haskell Indian Nations University" OR "Ilisagvik College" OR "Institute of American Indian Arts" OR "Keweenaw Bay Ojibwa Community College" OR "Lac Courte Oreilles Ojibwa Community College" OR "Leech Lake Tribal College" OR "Little Big Horn College" OR "Little Priest Tribal College" OR "Navajo Technical College" OR "Nebraska Indian Community College" OR "Northwest Indian College" OR "Oglala Lakota College" OR "Saginaw Chippewa Tribal College" OR "Salish Kootenai College" OR "Sinte Gleska University" OR "Sisseton Wahpeton College" OR "Sitting Bull College" OR "Southwestern Indian Polytechnic Institute" OR "Stone Child College" OR "Tohono O'odham Community College" OR "Turtle Mountain Community College" OR "United Tribes Technical College" OR "White Earth Tribal and Community College" OR "Wind River Tribal College")`;
+
+function renderDiversityResources() {
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+  set('div-india-names', indiaFemaleNamesBoolean);
+  set('div-us-names', usFemaleNamesBoolean);
+  set('div-pronoun', pronounSignalsBoolean);
+  set('div-she-her', classicSheHerBoolean);
+  set('div-women-tech', womenInTechBoolean);
+  set('div-womens-colleges', womensCollegesUSBoolean);
+  set('div-sororities', sororitiesUSBoolean);
+  set('div-hbcu', hbcuBoolean);
+  set('div-aa-greek', aaGreekBoolean);
+  set('div-native-colleges', nativeCollegesBoolean);
+}
+renderDiversityResources();
 
 const talentClusters = {
   blrProduct:    '"Symantec" OR "Vmware" OR "Intuit" OR "Veritas" OR "Netapp" OR "Visa" OR "Paypal" OR "Amazon" OR "Flipkart" OR "Myntra" OR "Nvidia" OR "Qualcomm" OR "Adobe" OR "Cisco" OR "Oracle" OR "Intel" OR "Citrix" OR "Walmart"',
@@ -1771,16 +2228,16 @@ function switchTab(name, el) {
 }
 
 // ══════════════════════════════════════════════
-// TALENTDATA — direct search + enrichment (backed by the Crustdata API)
+// TALENTDATA - direct search + enrichment (backed by the Crustdata API)
 // Calls this app's own /api/crustdata-search and /api/crustdata-enrich (Vercel
 // serverless functions) instead of api.crustdata.com directly. Same-origin, so no
-// CORS problem, and the API key lives server-side only (CRUSTDATA_API_KEY env var) —
+// CORS problem, and the API key lives server-side only (CRUSTDATA_API_KEY env var) -
 // this page never sees it.
 // ══════════════════════════════════════════════
 let cdResults = [];
 
 // API error payloads are sometimes a string, sometimes a structured object (Crustdata
-// itself is inconsistent here) — never assume it's a string, or status messages end up
+// itself is inconsistent here) - never assume it's a string, or status messages end up
 // literally showing "[object Object]".
 function errText(err) {
   if (!err) return '';
@@ -1849,9 +2306,9 @@ async function searchTalentData() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title, location, limit,
-        mustSkills: mustHaves,        // real filter — server ORs across the list
-        currentCompany: companies     // real filter — server ORs across the list
-        // "Good to haves" and "other notes" are intentionally NOT sent as filters —
+        mustSkills: mustHaves,        // real filter - server ORs across the list
+        currentCompany: companies     // real filter - server ORs across the list
+        // "Good to haves" and "other notes" are intentionally NOT sent as filters -
         // they're preferences/context, not pass/fail criteria. Good-to-haves are
         // highlighted on results client-side in renderTalentDataResults() instead.
       })
@@ -1884,7 +2341,7 @@ function talentDataPersonToProfile(person) {
   const pn = person.professional_network || {};
   const sh = person.social_handles || {};
   const pnIdentifier = sh.professional_network_identifier || {};
-  // Crustdata's v2 (2025-11-01) response nests the LinkedIn URL here — verified
+  // Crustdata's v2 (2025-11-01) response nests the LinkedIn URL here - verified
   // against the API's own schema docs. Older fallbacks kept in case a differently
   // shaped response ever comes back from a legacy endpoint.
   const url = pnIdentifier.profile_url || pn.linkedin_profile_url || pn.profile_url || bp.linkedin_url ||
@@ -1979,7 +2436,7 @@ function renderTalentDataResults() {
     return;
   }
 
-  // Good-to-haves aren't filtered server-side (see searchTalentData) — instead we
+  // Good-to-haves aren't filtered server-side (see searchTalentData) - instead we
   // highlight them here, live, against whatever's currently in the field, so
   // enrichment updates (new snippet/title) get re-checked on every render too.
   const niceEl = document.getElementById('cd-nice');
@@ -1988,7 +2445,7 @@ function renderTalentDataResults() {
     : [];
 
   // Map first (so index i is a stable position in cdResults), THEN reverse the
-  // rendered cards for display — reversing cdResults itself would make i point
+  // rendered cards for display - reversing cdResults itself would make i point
   // at the wrong candidate when a card's onclick opens the detail modal.
   const cards = cdResults.map((p, i) => {
     const haystack = ((p.jobTitle || '') + ' ' + (p.snippet || '') + ' ' + (p.company || '')).toLowerCase();
@@ -2032,7 +2489,7 @@ async function exportTalentDataToSheet() {
   localStorage.setItem('tt_cd_exp', expRange);
 
   if (!webhookUrl) { showStatus('cd-export-status', 'error', '⚠ Please save your Apps Script Web App URL first.'); return; }
-  if (!cdResults.length) { showStatus('cd-export-status', 'error', '⚠ No results yet — search TalentData first.'); return; }
+  if (!cdResults.length) { showStatus('cd-export-status', 'error', '⚠ No results yet - search TalentData first.'); return; }
 
   const btn = document.getElementById('cd-export-btn');
   const txt = document.getElementById('cd-export-text');
@@ -2045,7 +2502,7 @@ async function exportTalentDataToSheet() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       // mustHaves/niceHaves/companies/notes are extra context for a future Apps
-      // Script version — today's v5 sheet only has columns for the fields it always
+      // Script version - today's v5 sheet only has columns for the fields it always
       // had, so it'll just ignore these until the sheet script is updated to use them.
       body: JSON.stringify({ profiles: cdResults, role: roleName, expRange, mustHaves, niceHaves, companies, notes })
     });
@@ -2066,8 +2523,8 @@ async function exportTalentDataToSheet() {
 loadTalentDataSettings();
 
 // ══════════════════════════════════════════════
-// GITHUB SEARCH — direct candidate search on GitHub
-// Calls this app's own /api/github-search (Vercel serverless function) — same
+// GITHUB SEARCH - direct candidate search on GitHub
+// Calls this app's own /api/github-search (Vercel serverless function) - same
 // server-side-key model as TalentData above: the token is GITHUB_TOKEN in Vercel
 // env vars and never reaches the browser.
 // ══════════════════════════════════════════════
@@ -2078,7 +2535,7 @@ function loadGitHubSettings() {
     const v = localStorage.getItem('tt_' + id);
     if (v) document.getElementById(id).value = v;
   });
-  // Falls back to the TalentData tab's saved webhook — it's the same sheet, so there's
+  // Falls back to the TalentData tab's saved webhook - it's the same sheet, so there's
   // no reason to make the user paste the URL twice.
   const hook = localStorage.getItem('tt_gh_webhook') || localStorage.getItem('tt_cd_webhook');
   if (hook) document.getElementById('gh-webhook').value = hook;
@@ -2088,7 +2545,7 @@ function loadGitHubSettings() {
   } catch(e) { /* ignore corrupt storage */ }
 }
 
-// Pagination state for the "Load More" button — the query that produced the current
+// Pagination state for the "Load More" button - the query that produced the current
 // page, and which page of it we're on. Reset on every fresh search.
 let ghPage = 1;
 let ghHasMore = false;
@@ -2130,11 +2587,11 @@ async function searchGitHub(page) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ keywords, language, location, minFollowers, minRepos, limit, page: isMore ? page : 1 })
     });
-    // A 404 here returns Vercel's HTML "page not found", not JSON — parse defensively
+    // A 404 here returns Vercel's HTML "page not found", not JSON - parse defensively
     // so the user sees a real message instead of "Unexpected token ... not valid JSON".
     let data = {};
     try { data = await res.json(); } catch (e) {
-      if (res.status === 404) throw new Error('/api/github-search not found — the app needs to be redeployed to Vercel so the new function exists.');
+      if (res.status === 404) throw new Error('/api/github-search not found - the app needs to be redeployed to Vercel so the new function exists.');
       throw new Error('Server returned a non-JSON response (HTTP ' + res.status + ').');
     }
     if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
@@ -2148,13 +2605,13 @@ async function searchGitHub(page) {
     localStorage.setItem('tt_gh_results', JSON.stringify(ghResults));
     renderGitHubResults();
 
-    // Echo how the boolean expression was parsed — otherwise a typo'd query silently
+    // Echo how the boolean expression was parsed - otherwise a typo'd query silently
     // returns "wrong" results and there's no way for the user to tell why.
     const bits = [`page ${ghPage}`, `${found.length} shown of ${data.totalCount ?? '?'} matching`];
     if (data.excludedByNot) bits.push(`${data.excludedByNot} excluded by NOT`);
     bits.push(`${newOnes.length} new`, `${ghResults.length} total`);
     showStatus('gh-search-status', 'success',
-      '✓ ' + bits.join(' · ') + (data.interpreted ? `  —  read as: ${data.interpreted}` : ''));
+      '✓ ' + bits.join(' · ') + (data.interpreted ? `  -  read as: ${data.interpreted}` : ''));
   } catch(err) {
     console.error('GitHub search error:', err);
     showStatus('gh-search-status', 'error', '⚠ ' + (err.message || 'GitHub search failed.'));
@@ -2204,7 +2661,7 @@ async function exportGitHubToSheet() {
   localStorage.setItem('tt_gh-exp', expRange);
 
   if (!webhookUrl) { showStatus('gh-export-status', 'error', '⚠ Please save your Apps Script Web App URL first.'); return; }
-  if (!ghResults.length) { showStatus('gh-export-status', 'error', '⚠ No results yet — search GitHub first.'); return; }
+  if (!ghResults.length) { showStatus('gh-export-status', 'error', '⚠ No results yet - search GitHub first.'); return; }
 
   const btn = document.getElementById('gh-export-btn');
   const txt = document.getElementById('gh-export-text');
@@ -2259,7 +2716,7 @@ async function findGitHubEmail(i) {
     });
     let data = {};
     try { data = await res.json(); } catch (e) {
-      if (res.status === 404) throw new Error('/api/github-email not found — redeploy the app so the new function exists.');
+      if (res.status === 404) throw new Error('/api/github-email not found - redeploy the app so the new function exists.');
       throw new Error('Server returned a non-JSON response (HTTP ' + res.status + ').');
     }
     if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
@@ -2274,7 +2731,7 @@ async function findGitHubEmail(i) {
     if (p.commitEmails.length) {
       showStatus('gh-search-status', 'success', `✓ Found ${p.commitEmails.length} email${p.commitEmails.length > 1 ? 's' : ''} for @${p.login}`);
     } else if (data.masked) {
-      showStatus('gh-search-status', 'info', `@${p.login} has GitHub's email privacy on — their commits store a noreply placeholder, so there's no real address to recover.`);
+      showStatus('gh-search-status', 'info', `@${p.login} has GitHub's email privacy on - their commits store a noreply placeholder, so there's no real address to recover.`);
     } else {
       showStatus('gh-search-status', 'info', `No public commits found for @${p.login} to pull an email from.`);
     }
@@ -2352,7 +2809,7 @@ function renderGitHubResults() {
   `;
   });
 
-  // Newest search's results first — same as the TalentData tab, so fresh hits
+  // Newest search's results first - same as the TalentData tab, so fresh hits
   // aren't buried under previously accumulated ones.
   wrap.innerHTML = '<div class="profile-cards">' + cards.slice().reverse().join('') + '</div>';
 }
@@ -2360,7 +2817,7 @@ function renderGitHubResults() {
 loadGitHubSettings();
 
 // ══════════════════════════════════════════════
-// CUSTOM ROLES — localStorage
+// CUSTOM ROLES - localStorage
 // ══════════════════════════════════════════════
 function getCustomRoles() {
   try { return JSON.parse(localStorage.getItem('customRoles') || '[]'); } catch(e) { return []; }
@@ -2391,7 +2848,7 @@ function renderSavedRoles() {
   const roles = getCustomRoles();
   const el = document.getElementById('saved-roles-list');
   if (!roles.length) {
-    el.innerHTML = '<div class="no-saved">No custom roles yet — add one below.</div>';
+    el.innerHTML = '<div class="no-saved">No custom roles yet - add one below.</div>';
     return;
   }
   el.innerHTML = roles.map((r, i) => `
@@ -2437,7 +2894,7 @@ function deleteCustomRole(idx) {
 function populateRoles() {
   const category = document.getElementById('category').value;
   const roleSelect = document.getElementById('role');
-  roleSelect.innerHTML = '<option value="">— Select Role —</option>';
+  roleSelect.innerHTML = '<option value="">- Select Role -</option>';
   if (!category) return;
 
   let roles = {};
@@ -2493,17 +2950,6 @@ function expLogic(min, max) {
 // MANDATORY KEYWORDS LOGIC
 // ══════════════════════════════════════════════
 let mandatoryLogicMode = 'OR';
-
-function updateFemaleFilter() {
-  const checked = document.getElementById('female-filter').checked;
-  const preview = document.getElementById('female-preview');
-  preview.style.display = checked ? 'block' : 'none';
-  // Reset results when toggling
-  document.getElementById('output').value = '';
-  document.getElementById('xray').value = '';
-  document.getElementById('so-query').value = '';
-  document.getElementById('gh-query').value = '';
-}
 
 function setLogic(mode) {
   mandatoryLogicMode = mode;
@@ -2564,65 +3010,12 @@ function generate() {
   if (cos)       q += ` AND ${cos}`;
   if (excl)      q += ` NOT ${excl}`;
 
-  const femaleChecked = document.getElementById('female-filter')?.checked;
-
-  if (femaleChecked) {
-    // Female mode — names + role skills + India location
-    // Extract top 3 skills from role data (quoted terms only)
-    const skillMatches = rd.skills.match(/"([^"]+)"/g) || [];
-    const topSkills = skillMatches.slice(0, 4).join(' OR ');
-
-    // Get role titles (top 2)
-    const titleMatches = rd.titles.match(/"([^"]+)"/g) || [];
-    const topTitles = titleMatches.slice(0, 2).join(' OR ');
-
-    // India location — always force India regardless of location dropdown
-    const indiaLoc = '"India" OR "Bangalore" OR "Mumbai" OR "Delhi" OR "Hyderabad" OR "Pune" OR "Chennai" OR "Noida" OR "Gurgaon"';
-
-    // Female X-Ray: Names block + Role titles + Skills + India
-    // Use 3 separate name batches — run each search separately for best coverage
-    const nameBatch1 = 'Aditi OR Anjali OR Priya OR Sneha OR Pooja OR Deepika OR Neha OR Shreya OR Divya OR Kavya OR Nisha OR Ritika OR Ankita OR Meghna OR Ishita OR Simran OR Sakshi OR Ananya OR Tanya OR Shruti OR Swati OR Mansi OR Shweta OR Gauri OR Amrita';
-    const nameBatch2 = 'Riya OR Sonal OR Tanvi OR Akanksha OR Rhea OR Avni OR Anika OR Trisha OR Khushi OR Isha OR Ruchi OR Pallavi OR Sanya OR Nikita OR Preeti OR Arushi OR Srishti OR Devanshi OR Navya OR Sanvi OR Bhavna OR Lavanya OR Aarohi OR Aayushi OR Nidhi';
-    const nameBatch3 = 'Aarti OR Aasha OR Aishwarya OR Akansha OR Akshara OR Alisha OR Amisha OR Amrita OR Anushka OR Aparna OR Aruna OR Asha OR Asmita OR Aswini OR Athira OR Avanti OR Ayesha OR Bhavika OR Chetna OR Damini OR Deepali OR Deepti OR Disha OR Ekta OR Falak';
-
-    // PROVEN APPROACH — same as your own example:
-    // site:linkedin.com/in "name" (role) (location)
-    // Quoted name must appear on the profile page — much cleaner than inurl
-    // Run 3 batches separately — each has different names
-
-    const role = topTitles || topSkills;
-
-    // Batch 1 — top 6 most common names (keep query short for Google)
-    const femaleXray  = `site:linkedin.com/in ("Priya" OR "Anjali" OR "Sneha" OR "Pooja" OR "Divya" OR "Neha" OR "Aditi" OR "Ananya" OR "Shreya" OR "Kavya") (${role}) (${indiaLoc})`;
-
-    // Batch 2
-    const femaleXray2 = `site:linkedin.com/in ("Simran" OR "Sakshi" OR "Ritika" OR "Ankita" OR "Shruti" OR "Swati" OR "Mansi" OR "Shweta" OR "Tanya" OR "Nidhi") (${role}) (${indiaLoc})`;
-
-    // Batch 3
-    const femaleXray3 = `site:linkedin.com/in ("Deepika" OR "Isha" OR "Nikita" OR "Pallavi" OR "Preeti" OR "Riya" OR "Tanvi" OR "Navya" OR "Bhavna" OR "Lavanya") (${role}) (${indiaLoc})`;
-
-    // Full boolean for copy
-    const femaleBoolean = `(${femaleNamesBoolean}) AND (${rd.titles}) AND (${rd.skills}) AND (${indiaLoc})`;
-
-    document.getElementById('output').value = femaleBoolean;
-    document.getElementById('xray').value   = femaleXray;
-
-    // Show all 3 batches in SO field so recruiter knows to run all 3
-    document.getElementById('so-query').value = '— Run these 3 X-Ray searches for full coverage —\n1. ' + femaleXray + '\n\n2. ' + femaleXray2 + '\n\n3. ' + femaleXray3;
-    document.getElementById('gh-query').value = femaleXray2;
-
-  } else {
-    document.getElementById('output').value = q;
-    document.getElementById('xray').value = `site:linkedin.com/in ${q}`;
-
-  // StackOverflow and GitHub only for non-female mode (else block)
+  document.getElementById('output').value = q;
+  document.getElementById('xray').value = `site:linkedin.com/in ${q}`;
   document.getElementById('so-query').value = `site:stackoverflow.com/users ${buildSOQuery(rd, mandatory)}`;
-
-  // GitHub X-Ray — searches GitHub profiles/readmes
   document.getElementById('gh-query').value = buildGHQuery(rd, mandatory, document.getElementById('location').value);
-  } // end else (non-female mode)
 
-  showStatus('builder-status','success','✓ Query generated — copy it above or open a source directly.');
+  showStatus('builder-status','success','✓ Query generated - copy it above or open a source directly.');
 }
 
 function buildSOQuery(rd, mandatory) {
@@ -2705,10 +3098,10 @@ function esc(s) {
 }
 
 // ══════════════════════════════════════════════════════════════
-// JD ANALYZER — AI POWERED
+// JD ANALYZER - AI POWERED
 // ══════════════════════════════════════════════════════════════
 
-// Company intelligence database — curated by role type
+// Company intelligence database - curated by role type
 const companyDB = {
   devops:    ["Flipkart","Swiggy","Zomato","CRED","Razorpay","PhonePe","Meesho","Groww","Zepto","Dream11","Dunzo","Ola","Nykaa","Sharechat","Freshworks","Zoho","Chargebee","Postman","Druva","Whatfix","Infosys","Wipro","TCS","Thoughtworks","Publicis Sapient","Nagarro"],
   sre:       ["Google","Microsoft","Amazon","Meta","Flipkart","Swiggy","CRED","Razorpay","PhonePe","Meesho","Groww","Zepto","Ola","Nykaa","Sharechat","Freshworks","Zoho","Chargebee","Postman","Druva","Infosys","Wipro","TCS"],
@@ -2898,7 +3291,7 @@ async function analyzeJD() {
   // Show loading
   document.getElementById('jd-loading').style.display = 'block';
   document.getElementById('jd-results').style.display = 'none';
-  document.getElementById('jd-loading-msg').textContent = 'Analyzing JD with Claude AI...';
+  document.getElementById('jd-loading-msg').textContent = 'Analyzing Job Description with Claude AI...';
 
   try {
     // Step 1: Extract skills/titles and generate boolean strings
@@ -2917,7 +3310,7 @@ Analyze this Job Description and return ONLY a JSON object (no markdown, no expl
   "booleanString": "full LinkedIn boolean search string using titles AND skills",
   "xrayLinkedIn": "site:linkedin.com/in boolean string",
   "xraySO": "site:stackoverflow.com/users boolean string with top tech skills only",
-  "xrayGitHub": "GitHub people search URL string — use this exact format: site:github.com/in OR just use GitHub people search: the string should target user profile pages NOT repos. Use format: site:github.com (\"followers\" OR \"repositories\") AND (skill1 OR skill2) — keep it short, max 3 skills"
+  "xrayGitHub": "GitHub people search URL string - use this exact format: site:github.com/in OR just use GitHub people search: the string should target user profile pages NOT repos. Use format: site:github.com (\"followers\" OR \"repositories\") AND (skill1 OR skill2) - keep it short, max 3 skills"
 }
 
 JD:
@@ -2956,11 +3349,11 @@ ${jd.substring(0, 2000)}`;
     const parsed = JSON.parse(jsonMatch1[0]);
 
     // Populate boolean results
-    document.getElementById('res-boolean').textContent = parsed.booleanString || '—';
-    document.getElementById('res-xray').textContent    = parsed.xrayLinkedIn  || '—';
-    document.getElementById('res-so').textContent      = parsed.xraySO        || '—';
+    document.getElementById('res-boolean').textContent = parsed.booleanString || '-';
+    document.getElementById('res-xray').textContent    = parsed.xrayLinkedIn  || '-';
+    document.getElementById('res-so').textContent      = parsed.xraySO        || '-';
 
-    // GitHub X-Ray — target INDIVIDUAL profile pages only
+    // GitHub X-Ray - target INDIVIDUAL profile pages only
     // Key insight: individual profile URLs = github.com/username (no sub-path)
     // Exclude: /orgs/ /repos/ /followers /gists /blob /tree /commit
     const ghSkillsArr = (parsed.mustSkills || []).slice(0, 3).filter(s => s && s.trim());
@@ -3115,7 +3508,7 @@ JD: ${jd.substring(0, 1200)}`;
       `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:11px;color:var(--text);">⚠️ ${f}</div>`
     ).join('');
 
-    // Step 4: Companies (no API needed — use our DB)
+    // Step 4: Companies (no API needed - use our DB)
     const companies = getCompanies(jd);
     renderCompanyChips(companies);
 
@@ -3128,15 +3521,15 @@ JD: ${jd.substring(0, 1200)}`;
     document.getElementById('jd-loading').style.display = 'none';
     let errMsg = err.message || 'Unknown error';
     if (errMsg.includes('invalid x-api-key') || errMsg.includes('authentication')) {
-      errMsg = '❌ Invalid API Key — please check your key at console.anthropic.com';
+      errMsg = '❌ Invalid API Key - please check your key at console.anthropic.com';
     } else if (errMsg.includes('credit') || errMsg.includes('billing')) {
-      errMsg = '❌ No credits — add credits at console.anthropic.com/settings/billing';
+      errMsg = '❌ No credits - add credits at console.anthropic.com/settings/billing';
     } else if (errMsg.includes('JSON') || errMsg.includes('Unterminated') || errMsg.includes('parse')) {
-      errMsg = '⚠️ Response parse error — try pasting a shorter JD (just the key requirements)';
+      errMsg = '⚠️ Response parse error - try pasting a shorter job description (just the key requirements)';
     } else if (errMsg.includes('fetch') || errMsg.includes('network') || errMsg.includes('Failed to fetch')) {
-      errMsg = '🌐 Network error — check internet connection and try again';
+      errMsg = '🌐 Network error - check internet connection and try again';
     } else if (errMsg.includes('Empty response')) {
-      errMsg = '❌ No response from API — your API key may be invalid or have no credits';
+      errMsg = '❌ No response from API - your API key may be invalid or have no credits';
     }
     showJdError('Analysis failed: ' + errMsg);
     console.error('Full error:', err);
@@ -3190,19 +3583,12 @@ function copyEl(id, btn) {
   });
 }
 
-function openFromEl(id) {
-  const q = document.getElementById(id).textContent.trim();
-  if (!q || q === '—') return;
-  // ALL platforms open via Google so Chrome Extension can scrape them
-  window.open('https://www.google.com/search?q=' + encodeURIComponent(q), '_blank');
-}
-
 
 // ══════════════════════════════════════════════════════════════
 // ROLE SEARCH WITH SPELL CORRECTION
 // ══════════════════════════════════════════════════════════════
 
-// Spell correction map — common typos → correct search terms
+// Spell correction map - common typos → correct search terms
 const spellCorrections = {
   'vetran': 'veteran', 'veteren': 'veteran', 'veterean': 'veteran',
   'vetern': 'veteran', 'veterin': 'veteran', 'vetaran': 'veteran',
@@ -3261,7 +3647,7 @@ function filterRoles(input) {
   );
 
   if (!matches.length) {
-    suggestions.innerHTML = '<div style="padding:10px 14px;font-size:11px;color:var(--muted);">No roles found — try a different spelling</div>';
+    suggestions.innerHTML = '<div style="padding:10px 14px;font-size:11px;color:var(--muted);">No roles found - try a different spelling</div>';
     suggestions.style.display = 'block';
     return;
   }
