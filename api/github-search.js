@@ -290,7 +290,18 @@ export default async function handler(req, res) {
         if (it && it.login && !seen.has(it.login)) { seen.add(it.login); merged.push(it); }
       });
     });
-    const items = merged.slice(0, safeLimit);
+    // When more than one GitHub query fed into this search (multiple OR-branches
+    // in the keyword expression, and/or the bio-aware fallback above), each query
+    // is individually sorted by GitHub, but the merge above is a plain
+    // concatenation — so the result is "query 1's top N, then query 2's top N",
+    // not one true global ranking. Left alone, the requested sort (e.g. "highest
+    // followers first") looks scrambled or even inverted once a later query's
+    // lower-ranked items get slotted in ahead of an earlier query's remainder.
+    // Enriching a bounded larger pool lets us re-sort by the *real* enriched
+    // numbers below and get a correct global order no matter how many queries
+    // contributed, at the cost of a few extra /users/{login} calls.
+    const enrichCap = allQueries.length > 1 ? Math.min(merged.length, safeLimit * 2, 60) : safeLimit;
+    const items = merged.slice(0, enrichCap);
     // Across multiple variants "total" is a ceiling, not an exact count (people can
     // match more than one keyword) — good enough for the "of N matching" hint.
     const totalCount = good.reduce((sum, r) => sum + (r.data.total_count || 0), 0);
@@ -298,7 +309,7 @@ export default async function handler(req, res) {
 
     // Enrich each hit with the full user profile (parallel; individual failures
     // degrade to the bare search result instead of failing the whole request).
-    const profiles = await Promise.all(items.map(async (item) => {
+    const enrichedProfiles = await Promise.all(items.map(async (item) => {
       let u = {};
       try {
         const uRes = await fetch(GITHUB_API + '/users/' + encodeURIComponent(item.login), { headers: ghHeaders });
@@ -316,9 +327,23 @@ export default async function handler(req, res) {
         blog: u.blog || '',
         followers: u.followers ?? null,
         publicRepos: u.public_repos ?? null,
+        joinedAt: u.created_at || null,
         hireable: u.hireable === true
       };
     }));
+
+    // Re-sort using the real enriched numbers — this is what actually fixes the
+    // ordering once results from more than one query are merged (see comment
+    // above). 'best' has no reliable client-side equivalent since it's GitHub's
+    // internal relevance score, which this endpoint doesn't return, so it's left
+    // in merge order.
+    const profiles = sortField === 'best' ? enrichedProfiles : [...enrichedProfiles].sort((a, b) => {
+      const key = sortField === 'followers' ? 'followers' : sortField === 'repositories' ? 'publicRepos' : 'joinedAt';
+      let av = a[key], bv = b[key];
+      if (sortField === 'joined') { av = av ? new Date(av).getTime() : 0; bv = bv ? new Date(bv).getTime() : 0; }
+      else { av = av ?? -1; bv = bv ?? -1; }
+      return sortDir === 'asc' ? av - bv : bv - av;
+    });
 
     // Apply the boolean expression against the full enriched profile text — GitHub
     // can't do this reliably on free text (bio/name/company aren't even indexed for
@@ -329,7 +354,7 @@ export default async function handler(req, res) {
     //     profiles pulled in by the qualifier-only bio fallback that don't really match).
     //   - negatives: drop if any NOT term is present.
     let excludedNoMatch = 0, excludedByNot = 0;
-    const kept = (positiveGroups.length || allNegatives.length)
+    const filtered = (positiveGroups.length || allNegatives.length)
       ? profiles.filter(p => {
           const hay = [p.login, p.name, p.bio, p.company, p.location, p.email].filter(Boolean).join(' ').toLowerCase();
           if (positiveGroups.length && !positiveGroups.some(g => g.pos.every(t => hay.includes(t.toLowerCase())))) {
@@ -343,6 +368,10 @@ export default async function handler(req, res) {
           return true;
         })
       : profiles;
+    // We may have enriched more than safeLimit candidates above (see enrichCap)
+    // so the sort could re-rank correctly — trim back to the requested page size
+    // now that sorting and filtering are both done.
+    const kept = filtered.slice(0, safeLimit);
 
     res.status(200).json({
       totalCount,
