@@ -2316,9 +2316,18 @@ async function searchTalentData() {
     const data = await res.json();
     if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
 
+    if (data.profiles && data.profiles[0]) console.log('TalentData raw profile sample:', data.profiles[0]);
     const found = (data.profiles || []).map(talentDataPersonToProfile);
-    const existingUrls = new Set(cdResults.map(p => p.url));
-    const newOnes = found.filter(p => p.url && !existingUrls.has(p.url));
+    // Dedupe key: prefer the profile URL, but Crustdata doesn't always return one
+    // (schema drift, or the person just has no linked profile field) - falling back
+    // to url-only here used to silently drop every such candidate from the results
+    // list even though the search legitimately found them (the "found" count and the
+    // rendered list would disagree, like the built-for-Akamai example: "2 found" but
+    // 0 candidates shown). personId, then name+company, keep them from vanishing.
+    const cdKey = p => p.url || (p.personId ? 'pid:' + p.personId : '') ||
+      'nc:' + (p.name || '').toLowerCase() + '|' + (p.company || '').toLowerCase();
+    const existingKeys = new Set(cdResults.map(cdKey));
+    const newOnes = found.filter(p => !existingKeys.has(cdKey(p)));
     cdResults = [...cdResults, ...newOnes];
     persistCdResults();
     renderTalentDataResults();
@@ -2355,6 +2364,10 @@ function talentDataPersonToProfile(person) {
     company: currentRole.company || currentRole.company_name || '',
     location: (bp.location && (bp.location.raw || bp.location)) || '',
     url,
+    // Used as a dedupe fallback when Crustdata doesn't return a resolvable profile
+    // URL for this person (see searchTalentData) - without this, such candidates
+    // would be found by the search but silently excluded from the results list.
+    personId: person.crustdata_person_id || '',
     snippet: bp.headline || '',
     scrapedAt: new Date().toISOString()
   };
