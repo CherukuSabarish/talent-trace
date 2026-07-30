@@ -1544,79 +1544,105 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
     <div class="page-badge live">● Live data</div>
   </div>
 
-  <div class="card" style="margin-bottom:16px;">
-    <div class="card-head">
-      <div class="card-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2);"></div>
-      <div class="card-title" style="color:var(--accent2);">Search</div>
-      <span style="margin-left:auto;font-size:10px;color:var(--muted);" id="gh-search-subtitle">GitHub Users API · sorted by followers</span>
-    </div>
-    <div class="grid-2" style="gap:12px;">
-      <div>
-        <label>Keywords <span style="color:var(--muted);text-transform:none;font-weight:400;">(boolean - matches bio, name, company &amp; login)</span></label>
-        <input id="gh-keywords" placeholder='e.g. (SRE OR "site reliability") AND python NOT recruiter'>
-        <div style="font-size:10px;color:var(--muted);margin-top:-10px;line-height:1.5;">
-          Supports <b>AND</b> · <b>OR</b> · <b>NOT</b> · <b>( )</b> · <b>"exact phrases"</b>. A space means AND, a comma means OR, and <b>-word</b> is short for NOT. Add a language or location below so we can also check bios GitHub itself doesn't index.
+  <div class="grid-2" style="gap:16px;align-items:start;">
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-head">
+          <div class="card-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2);"></div>
+          <div class="card-title" style="color:var(--accent2);">Search</div>
+          <span style="margin-left:auto;font-size:10px;color:var(--muted);" id="gh-search-subtitle">GitHub Users API · sorted by followers</span>
+        </div>
+        <div class="grid-2" style="gap:12px;">
+          <div>
+            <label>Keywords <span style="color:var(--muted);text-transform:none;font-weight:400;">(boolean - matches bio, name, company &amp; login)</span></label>
+            <input id="gh-keywords" placeholder='e.g. (SRE OR "site reliability") AND python NOT recruiter'>
+            <div style="font-size:10px;color:var(--muted);margin-top:-10px;line-height:1.5;">
+              Supports <b>AND</b> · <b>OR</b> · <b>NOT</b> · <b>( )</b> · <b>"exact phrases"</b>. A space means AND, a comma means OR, and <b>-word</b> is short for NOT. Add a language or location below so we can also check bios GitHub itself doesn't index.
+            </div>
+          </div>
+          <div>
+            <label>Languages <span style="color:var(--muted);text-transform:none;font-weight:400;">(comma separated - must have all · programming languages only, put tools like AWS in Keywords)</span></label>
+            <input id="gh-language" placeholder="e.g. Go, Python">
+          </div>
+        </div>
+        <div class="grid-2" style="gap:12px;">
+          <div>
+            <label>Location <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional)</span></label>
+            <input id="gh-location" placeholder="e.g. Bangalore">
+          </div>
+          <div>
+            <label>Result Limit <span style="color:var(--muted);text-transform:none;font-weight:400;">(max 30 per search)</span></label>
+            <input id="gh-limit" type="number" min="1" max="30" value="20" style="max-width:140px;">
+          </div>
+        </div>
+        <div class="grid-2" style="gap:12px;">
+          <div>
+            <label>Minimum Followers <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional - signal of visibility)</span></label>
+            <input id="gh-min-followers" type="number" min="0" placeholder="e.g. 50">
+          </div>
+          <div>
+            <label>Minimum Public Repos <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional - signal of activity)</span></label>
+            <input id="gh-min-repos" type="number" min="0" placeholder="e.g. 10">
+          </div>
+        </div>
+        <div class="grid-2" style="gap:12px;">
+          <div>
+            <label>Sort by <span style="color:var(--muted);text-transform:none;font-weight:400;">(GitHub ranking)</span></label>
+            <select id="gh-sort-by" onchange="updateGitHubSortSubtitle()">
+              <option value="followers">Followers</option>
+              <option value="repositories">Public repos</option>
+              <option value="joined">Join date</option>
+              <option value="best">Best match</option>
+            </select>
+          </div>
+          <div>
+            <label>Order <span style="color:var(--muted);text-transform:none;font-weight:400;">(ignored for Best match)</span></label>
+            <select id="gh-sort-order" onchange="updateGitHubSortSubtitle()">
+              <option value="desc">Highest / most recent first</option>
+              <option value="asc">Lowest / oldest first</option>
+            </select>
+          </div>
         </div>
       </div>
-      <div>
-        <label>Languages <span style="color:var(--muted);text-transform:none;font-weight:400;">(comma separated - must have all · programming languages only, put tools like AWS in Keywords)</span></label>
-        <input id="gh-language" placeholder="e.g. Go, Python">
-      </div>
-    </div>
-    <div class="grid-2" style="gap:12px;">
-      <div>
-        <label>Location <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional)</span></label>
-        <input id="gh-location" placeholder="e.g. Bangalore">
-      </div>
-      <div>
-        <label>Result Limit <span style="color:var(--muted);text-transform:none;font-weight:400;">(max 30 per search)</span></label>
-        <input id="gh-limit" type="number" min="1" max="30" value="20" style="max-width:140px;">
-      </div>
-    </div>
-    <div class="grid-2" style="gap:12px;">
-      <div>
-        <label>Minimum Followers <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional - signal of visibility)</span></label>
-        <input id="gh-min-followers" type="number" min="0" placeholder="e.g. 50">
-      </div>
-      <div>
-        <label>Minimum Public Repos <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional - signal of activity)</span></label>
-        <input id="gh-min-repos" type="number" min="0" placeholder="e.g. 10">
-      </div>
-    </div>
-    <div class="grid-2" style="gap:12px;">
-      <div>
-        <label>Sort by <span style="color:var(--muted);text-transform:none;font-weight:400;">(GitHub ranking)</span></label>
-        <select id="gh-sort-by" onchange="updateGitHubSortSubtitle()">
-          <option value="followers">Followers</option>
-          <option value="repositories">Public repos</option>
-          <option value="joined">Join date</option>
-          <option value="best">Best match</option>
-        </select>
-      </div>
-      <div>
-        <label>Order <span style="color:var(--muted);text-transform:none;font-weight:400;">(ignored for Best match)</span></label>
-        <select id="gh-sort-order" onchange="updateGitHubSortSubtitle()">
-          <option value="desc">Highest / most recent first</option>
-          <option value="asc">Lowest / oldest first</option>
-        </select>
-      </div>
-    </div>
-  </div>
 
-  <div class="btn-row">
-    <button class="btn btn-primary" onclick="searchGitHub()" id="gh-search-btn">
-      <span id="gh-search-text">🐙 Search GitHub</span>
-      <div class="spinner" id="gh-search-spinner"></div>
-    </button>
-    <button class="btn btn-danger" onclick="clearGitHubResults()">🗑 Clear</button>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="searchGitHub()" id="gh-search-btn">
+          <span id="gh-search-text">🐙 Search GitHub</span>
+          <div class="spinner" id="gh-search-spinner"></div>
+        </button>
+        <button class="btn btn-danger" onclick="clearGitHubResults()">🗑 Clear</button>
+      </div>
+      <div class="status" id="gh-search-status" style="margin-bottom:16px;"></div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-dot" style="background:var(--warn);box-shadow:0 0 6px var(--warn);"></div>
+          <div class="card-title" style="color:var(--warn);">Repo Search</div>
+          <span style="margin-left:auto;font-size:10px;color:var(--muted);">Source from a repo's contributors</span>
+        </div>
+        <div class="section-hint">Find a repository by name, owner/name, or topic, then pull its top contributors straight into Candidates below - useful for "who actually builds this" sourcing instead of keyword guessing.</div>
+        <label>Repository <span style="color:var(--muted);text-transform:none;font-weight:400;">(name, topic, or owner/name)</span></label>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <input id="gh-repo-query" placeholder='e.g. kubernetes, or facebook/react' style="margin-bottom:0;">
+          <button class="btn btn-primary" onclick="searchGitHubRepos()" id="gh-repo-search-btn" style="white-space:nowrap;">
+            <span id="gh-repo-search-text">🔍 Search</span>
+            <div class="spinner" id="gh-repo-search-spinner"></div>
+          </button>
+        </div>
+        <div class="status" id="gh-repo-status" style="margin-bottom:10px;"></div>
+        <div id="gh-repo-results"></div>
+      </div>
+    </div>
   </div>
-  <div class="status" id="gh-search-status" style="margin-bottom:16px;"></div>
 
   <div class="card">
     <div class="card-head">
       <div class="card-dot"></div>
       <div class="card-title">Candidates</div>
-      <span style="margin-left:auto;font-size:10px;color:var(--muted);" id="gh-count">0 candidates</span>
+      <button class="btn btn-ghost btn-sm" id="gh-find-all-emails-btn" onclick="findAllGitHubEmails()" style="margin-left:auto;white-space:nowrap;">🔎 Find All Emails</button>
+      <span style="font-size:10px;color:var(--muted);margin-left:10px;" id="gh-count">0 candidates</span>
     </div>
     <div id="gh-results">
       <div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">Search above to see candidates here.</div>
@@ -2562,7 +2588,7 @@ loadTalentDataSettings();
 let ghResults = [];
 
 function loadGitHubSettings() {
-  ['gh-keywords','gh-language','gh-location','gh-min-followers','gh-min-repos','gh-role','gh-exp','gh-sort-by','gh-sort-order'].forEach(id => {
+  ['gh-keywords','gh-language','gh-location','gh-min-followers','gh-min-repos','gh-role','gh-exp','gh-sort-by','gh-sort-order','gh-repo-query'].forEach(id => {
     const v = localStorage.getItem('tt_' + id);
     if (v) document.getElementById(id).value = v;
   });
@@ -2749,7 +2775,9 @@ function renderGitHubMoreBtn() {
 
 // Digs a candidate's email out of their public commit history (see api/github-email.js).
 // Results are cached onto the candidate object so a repeat click costs nothing.
-async function findGitHubEmail(i) {
+// `silent` is set by the bulk "Find All Emails" runner below so one candidate's
+// result doesn't overwrite the shared progress message after every single lookup.
+async function findGitHubEmail(i, silent) {
   const p = ghResults[i];
   if (!p) return;
 
@@ -2778,6 +2806,7 @@ async function findGitHubEmail(i) {
     localStorage.setItem('tt_gh_results', JSON.stringify(ghResults));
     renderGitHubResults();
 
+    if (silent) return;
     if (p.commitEmails.length) {
       showStatus('gh-search-status', 'success', `✓ Found ${p.commitEmails.length} email${p.commitEmails.length > 1 ? 's' : ''} for @${p.login}`);
     } else if (data.masked) {
@@ -2790,20 +2819,195 @@ async function findGitHubEmail(i) {
     }
   } catch (err) {
     console.error('GitHub email lookup error:', err);
-    showStatus('gh-search-status', 'error', '⚠ ' + (err.message || 'Email lookup failed.'));
+    if (!silent) showStatus('gh-search-status', 'error', '⚠ ' + (err.message || 'Email lookup failed.'));
     if (btn) { btn.disabled = false; btn.textContent = '✉️ Find Email'; }
   }
+}
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+// Runs findGitHubEmail() over every candidate that doesn't already have a known
+// email, one at a time with a delay between each - GitHub's search-family endpoints
+// (which api/github-email.js's commit-search step uses) share a tight 30 req/min
+// rate limit, so firing all of these in parallel would just trip that limit and
+// leave most candidates "incomplete". The button doubles as a pause/resume toggle
+// while a run is in progress.
+let ghBulkEmailRunning = false;
+let ghBulkEmailPaused = false;
+
+function updateBulkEmailBtn() {
+  const btn = document.getElementById('gh-find-all-emails-btn');
+  if (!btn) return;
+  btn.textContent = ghBulkEmailRunning ? (ghBulkEmailPaused ? '▶ Resume' : '⏸ Pause') : '🔎 Find All Emails';
+}
+
+async function findAllGitHubEmails() {
+  // A click while a run is already going just toggles pause/resume instead of
+  // starting a second overlapping run.
+  if (ghBulkEmailRunning) {
+    ghBulkEmailPaused = !ghBulkEmailPaused;
+    updateBulkEmailBtn();
+    return;
+  }
+
+  const targets = ghResults
+    .map((p, i) => i)
+    .filter(i => {
+      const p = ghResults[i];
+      const hasEmail = p.email || (p.commitEmails && p.commitEmails.length);
+      return !hasEmail && !p.emailMasked; // already known-private candidates have nothing left to find
+    });
+
+  if (!targets.length) {
+    showStatus('gh-search-status', 'info', 'Every candidate already has an email on file, or is marked private on GitHub.');
+    return;
+  }
+
+  ghBulkEmailRunning = true;
+  ghBulkEmailPaused = false;
+  updateBulkEmailBtn();
+
+  let done = 0;
+  for (const i of targets) {
+    if (!ghBulkEmailRunning) break; // cancelled (e.g. Clear was pressed)
+    while (ghBulkEmailPaused && ghBulkEmailRunning) await sleep(400);
+    if (!ghBulkEmailRunning) break;
+
+    await findGitHubEmail(i, true);
+    done++;
+    showStatus('gh-search-status', 'info',
+      `⏳ Finding emails... ${done}/${targets.length} checked (rate-limited to stay under GitHub's search limit)`);
+    await sleep(2500); // ~24/min, comfortably under GitHub's 30 req/min search-family limit
+  }
+
+  ghBulkEmailRunning = false;
+  updateBulkEmailBtn();
+  if (done) showStatus('gh-search-status', 'success', `✓ Finished checking ${done} candidate${done > 1 ? 's' : ''} for emails.`);
 }
 
 function clearGitHubResults() {
   if (!ghResults.length) return;
   if (!confirm('Clear all ' + ghResults.length + ' GitHub results?')) return;
+  ghBulkEmailRunning = false; // stop any in-progress bulk email run
+  updateBulkEmailBtn();
   ghResults = [];
   ghPage = 1; ghHasMore = false;
   localStorage.setItem('tt_gh_results', '[]');
   renderGitHubResults();
   renderGitHubMoreBtn();
   hideStatus('gh-search-status');
+}
+
+// ══════════════════════════════════════════════
+// REPO SEARCH - find a repo, then pull its contributors as candidates
+// Calls this app's own /api/github-repo-search and /api/github-repo-contributors
+// (Vercel serverless functions) - same server-side-key model as everything else here.
+// ══════════════════════════════════════════════
+let ghRepoResults = [];
+
+async function searchGitHubRepos() {
+  const query = document.getElementById('gh-repo-query').value.trim();
+  if (!query) { showStatus('gh-repo-status', 'error', '⚠ Enter a repo name, owner/name, or topic.'); return; }
+  localStorage.setItem('tt_gh-repo-query', query);
+
+  const btn = document.getElementById('gh-repo-search-btn');
+  const sp = document.getElementById('gh-repo-search-spinner');
+  btn.disabled = true; sp.classList.add('on');
+  showStatus('gh-repo-status', 'info', '⏳ Searching repositories...');
+
+  try {
+    const res = await fetch('/api/github-repo-search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, limit: 15, page: 1 })
+    });
+    let data = {};
+    try { data = await res.json(); } catch (e) {
+      if (res.status === 404) throw new Error('/api/github-repo-search not found - the app needs to be redeployed to Vercel so the new function exists.');
+      throw new Error('Server returned a non-JSON response (HTTP ' + res.status + ').');
+    }
+    if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
+
+    ghRepoResults = data.repos || [];
+    renderGitHubRepoResults();
+    const totalLabel = typeof data.totalCount === 'number' ? data.totalCount.toLocaleString() : (data.totalCount ?? '?');
+    showStatus('gh-repo-status', 'success', `✓ ${ghRepoResults.length} shown of ${totalLabel} matching repositories`);
+  } catch (err) {
+    console.error('GitHub repo search error:', err);
+    showStatus('gh-repo-status', 'error', '⚠ ' + (err.message || 'Repo search failed.'));
+  } finally {
+    btn.disabled = false; sp.classList.remove('on');
+  }
+}
+
+function renderGitHubRepoResults() {
+  const wrap = document.getElementById('gh-repo-results');
+  if (!wrap) return;
+  if (!ghRepoResults.length) { wrap.innerHTML = ''; return; }
+
+  wrap.innerHTML = ghRepoResults.map((r, i) => `
+    <div class="profile-card" style="align-items:flex-start;">
+      <div class="profile-card-main">
+        <div class="profile-card-top">
+          <div style="flex:1;min-width:0;">
+            <div class="profile-name"><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer" style="color:inherit;">${esc(r.fullName)}</a></div>
+            <div class="profile-headline">${esc(r.description) || 'No description'}</div>
+          </div>
+        </div>
+        <div class="profile-skills" style="margin-top:6px;">
+          <span class="skill-tag">⭐ ${(r.stars || 0).toLocaleString()}</span>
+          <span class="skill-tag">🔀 ${(r.forks || 0).toLocaleString()}</span>
+          ${r.language ? `<span class="skill-tag">${esc(r.language)}</span>` : ''}
+        </div>
+        <div class="btn-row" style="margin-top:10px;">
+          <button class="btn btn-ghost btn-sm" id="gh-repo-extract-btn-${i}" onclick="extractRepoContributors(${i})" style="white-space:nowrap;">👥 Extract Contributors</button>
+        </div>
+        <div class="status" id="gh-repo-extract-status-${i}" style="margin-top:6px;"></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Pulls the repo's top contributors (capped server-side, see api/github-repo-contributors.js)
+// and merges them straight into the same ghResults/Candidates list the user-search
+// side fills - same dedupe-by-url pattern searchGitHub() already uses, so contributors
+// already present from an earlier search or extraction aren't duplicated.
+async function extractRepoContributors(i) {
+  const r = ghRepoResults[i];
+  if (!r) return;
+  const btn = document.getElementById('gh-repo-extract-btn-' + i);
+  const statusId = 'gh-repo-extract-status-' + i;
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Extracting...'; }
+  showStatus(statusId, 'info', '⏳ Pulling contributors...');
+
+  try {
+    const res = await fetch('/api/github-repo-contributors', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ owner: r.owner, repo: r.name })
+    });
+    let data = {};
+    try { data = await res.json(); } catch (e) {
+      if (res.status === 404) throw new Error('/api/github-repo-contributors not found - redeploy the app so the new function exists.');
+      throw new Error('Server returned a non-JSON response (HTTP ' + res.status + ').');
+    }
+    if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
+
+    const found = data.profiles || [];
+    const existing = new Set(ghResults.map(p => p.url));
+    const newOnes = found.filter(p => p.url && !existing.has(p.url));
+    ghResults = [...ghResults, ...newOnes];
+    localStorage.setItem('tt_gh_results', JSON.stringify(ghResults));
+    renderGitHubResults();
+
+    const capNote = data.hasMore ? ` (capped at ${data.cappedAt} - ${r.fullName} has more contributors than that)` : '';
+    showStatus(statusId, 'success', `✓ ${newOnes.length} new · ${found.length - newOnes.length} already in Candidates${capNote}`);
+  } catch (err) {
+    console.error('Extract contributors error:', err);
+    showStatus(statusId, 'error', '⚠ ' + (err.message || 'Extraction failed.'));
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '👥 Extract Contributors'; }
+  }
 }
 
 function renderGitHubResults() {
@@ -2831,7 +3035,8 @@ function renderGitHubResults() {
     const stats = [
       p.followers != null ? `👥 ${p.followers} followers` : '',
       p.publicRepos != null ? `📦 ${p.publicRepos} repos` : '',
-      p.hireable ? '✅ Hireable' : ''
+      p.hireable ? '✅ Hireable' : '',
+      p.sourceRepo ? `🔨 via ${esc(p.sourceRepo)}${p.contributions != null ? ' (' + p.contributions + ' commits)' : ''}` : ''
     ].filter(Boolean);
     allEmails.forEach(e => stats.push(`✉️ ${esc(e)}`));
     if (p.emailSearched && !allEmails.length) {
