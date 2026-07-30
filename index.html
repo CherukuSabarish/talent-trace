@@ -1688,11 +1688,13 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
   </div>
 
   <div class="card">
-    <div class="card-head">
+    <div class="card-head" style="flex-wrap:wrap;row-gap:8px;">
       <div class="card-dot"></div>
       <div class="card-title">Candidates</div>
-      <button class="btn btn-ghost btn-sm" id="gh-find-all-emails-btn" onclick="findAllGitHubEmails()" style="margin-left:auto;white-space:nowrap;">🔎 Find All Emails</button>
-      <span style="font-size:10px;color:var(--muted);margin-left:10px;" id="gh-count">0 candidates</span>
+      <input id="gh-location-filter" placeholder="Filter by location..." oninput="renderGitHubResults()" style="margin-left:auto;margin-bottom:0;max-width:160px;font-size:11.5px;padding:6px 10px;">
+      <button class="btn btn-ghost btn-sm" id="gh-enrich-all-btn" onclick="enrichAllGitHubProfiles()" style="white-space:nowrap;">👥 Enrich Profiles</button>
+      <button class="btn btn-ghost btn-sm" id="gh-find-all-emails-btn" onclick="findAllGitHubEmails()" style="white-space:nowrap;">✉️ Find All Emails</button>
+      <span style="font-size:10px;color:var(--muted);" id="gh-count">0 candidates</span>
     </div>
     <div id="gh-results">
       <div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">Search above to see candidates here.</div>
@@ -2948,11 +2950,90 @@ async function findAllGitHubEmails() {
   if (done) showStatus('gh-search-status', 'success', `✓ Finished checking ${done} candidate${done > 1 ? 's' : ''} for emails.`);
 }
 
+// Fills in name/company/location/bio/public email/etc. for candidates that came in
+// "bare" from a repo extraction (see api/github-repo-contributors.js - it deliberately
+// doesn't enrich inline). Runs GH_ENRICH_BATCH_SIZE at a time in parallel, sequential
+// across batches, pausable the same way Find All Emails is. This hits the plain REST
+// /users/{login} endpoint (5,000 req/hour budget), not the tight search-family limit,
+// so a batch of 10 in parallel is safe - the pacing here is about visibility and
+// control for the user, not rate-limit survival like the email lookup is.
+const GH_ENRICH_BATCH_SIZE = 10;
+let ghBulkEnrichRunning = false;
+let ghBulkEnrichPaused = false;
+
+function updateBulkEnrichBtn() {
+  const btn = document.getElementById('gh-enrich-all-btn');
+  if (!btn) return;
+  btn.textContent = ghBulkEnrichRunning ? (ghBulkEnrichPaused ? '▶ Resume' : '⏸ Pause') : '👥 Enrich Profiles';
+}
+
+async function enrichOneGitHubProfile(i) {
+  const p = ghResults[i];
+  if (!p || !p.login) return;
+  try {
+    const res = await fetch('/api/github-user-profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login: p.login })
+    });
+    let data = {};
+    try { data = await res.json(); } catch (e) {
+      if (res.status === 404) throw new Error('/api/github-user-profile not found - redeploy the app so the new function exists.');
+      throw new Error('Server returned a non-JSON response (HTTP ' + res.status + ').');
+    }
+    if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
+    Object.assign(p, data, { enriched: true });
+  } catch (err) {
+    console.error('Enrich profile error for @' + p.login + ':', err);
+    p.enriched = true; // stop retrying automatically - the row still has Find Email available
+    p.enrichError = err.message || 'Enrich failed';
+  }
+}
+
+async function enrichAllGitHubProfiles() {
+  if (ghBulkEnrichRunning) {
+    ghBulkEnrichPaused = !ghBulkEnrichPaused;
+    updateBulkEnrichBtn();
+    return;
+  }
+
+  const targets = ghResults.map((p, i) => i).filter(i => ghResults[i].enriched === false);
+  if (!targets.length) {
+    showStatus('gh-search-status', 'info', 'Every candidate is already enriched.');
+    return;
+  }
+
+  ghBulkEnrichRunning = true;
+  ghBulkEnrichPaused = false;
+  updateBulkEnrichBtn();
+
+  let done = 0;
+  for (let b = 0; b < targets.length; b += GH_ENRICH_BATCH_SIZE) {
+    if (!ghBulkEnrichRunning) break;
+    while (ghBulkEnrichPaused && ghBulkEnrichRunning) await sleep(400);
+    if (!ghBulkEnrichRunning) break;
+
+    const batch = targets.slice(b, b + GH_ENRICH_BATCH_SIZE);
+    await Promise.all(batch.map(i => enrichOneGitHubProfile(i)));
+    done += batch.length;
+    localStorage.setItem('tt_gh_results', JSON.stringify(ghResults));
+    renderGitHubResults();
+    showStatus('gh-search-status', 'info', `⏳ Enriching profiles... ${done}/${targets.length} (batch of ${GH_ENRICH_BATCH_SIZE})`);
+    await sleep(300);
+  }
+
+  ghBulkEnrichRunning = false;
+  updateBulkEnrichBtn();
+  if (done) showStatus('gh-search-status', 'success', `✓ Enriched ${done} profile${done > 1 ? 's' : ''}.`);
+}
+
 function clearGitHubResults() {
   if (!ghResults.length) return;
   if (!confirm('Clear all ' + ghResults.length + ' GitHub results?')) return;
   ghBulkEmailRunning = false; // stop any in-progress bulk email run
+  ghBulkEnrichRunning = false; // and any in-progress bulk enrich run
   updateBulkEmailBtn();
+  updateBulkEnrichBtn();
   ghResults = [];
   ghPage = 1; ghHasMore = false;
   localStorage.setItem('tt_gh_results', '[]');
@@ -3071,7 +3152,8 @@ async function extractRepoContributors(i) {
     renderGitHubResults();
 
     const capNote = data.hasMore ? ` (capped at ${data.cappedAt} - ${r.fullName} has more contributors than that)` : '';
-    showStatus(statusId, 'success', `✓ ${newOnes.length} new · ${found.length - newOnes.length} already in Candidates${capNote}`);
+    const enrichHint = newOnes.length ? ' · click "👥 Enrich Profiles" below to fill in their details' : '';
+    showStatus(statusId, 'success', `✓ ${newOnes.length} new · ${found.length - newOnes.length} already in Candidates${capNote}${enrichHint}`);
   } catch (err) {
     console.error('Extract contributors error:', err);
     showStatus(statusId, 'error', '⚠ ' + (err.message || 'Extraction failed.'));
@@ -3084,11 +3166,11 @@ function renderGitHubResults() {
   const wrap  = document.getElementById('gh-results');
   const count = document.getElementById('gh-count');
   const n = ghResults.length;
-  count.textContent = n + ' candidate' + (n !== 1 ? 's' : '');
   const expBtn = document.getElementById('gh-export-btn');
   if (expBtn) expBtn.disabled = n === 0;
 
   if (!n) {
+    count.textContent = '0 candidates';
     wrap.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">Search above to see candidates here.</div>';
     return;
   }
@@ -3138,7 +3220,7 @@ function renderGitHubResults() {
           <div style="min-width:0;">
             <div class="gh-cand-name">${esc(displayName)}</div>
             <div class="gh-cand-login">@${esc(p.login)}${roleLine ? ' · ' + esc(roleLine) : ''}</div>
-            <div class="gh-cand-bio" title="${esc(p.bio)}">${esc(p.bio) || 'No bio'}</div>
+            <div class="gh-cand-bio" title="${esc(p.bio || '')}">${p.enriched === false ? 'Not enriched yet - click "Enrich Profiles"' : (esc(p.bio) || 'No bio')}</div>
           </div>
         </div>
       </td>
@@ -3154,13 +3236,29 @@ function renderGitHubResults() {
   // contributed the most" - rather than by when they were added. Candidates with
   // no commit count (plain user-search hits) have nothing to rank by, so they fall
   // back to newest-added-first, same behavior as before this table existed.
-  const order = ghResults.map((p, i) => i).sort((a, b) => {
+  let order = ghResults.map((p, i) => i).sort((a, b) => {
     const ca = ghResults[a].contributions, cb = ghResults[b].contributions;
     if (ca != null && cb != null) return cb - ca;
     if (ca != null) return -1;
     if (cb != null) return 1;
     return b - a;
   });
+
+  // Client-side "Filter by location" - instant, no API call, since it's just
+  // narrowing what's already been fetched. An unenriched candidate has no location
+  // yet, so it's excluded once a filter is typed until Enrich Profiles fills it in.
+  const locFilter = (document.getElementById('gh-location-filter').value || '').trim().toLowerCase();
+  if (locFilter) order = order.filter(i => (ghResults[i].location || '').toLowerCase().includes(locFilter));
+
+  count.textContent = locFilter
+    ? `${order.length} of ${n} candidate${n !== 1 ? 's' : ''} (filtered)`
+    : n + ' candidate' + (n !== 1 ? 's' : '');
+
+  if (!order.length) {
+    wrap.innerHTML = `<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">No candidates match "${esc(locFilter)}".</div>`;
+    return;
+  }
+
   wrap.innerHTML = `<div class="gh-cand-table-wrap"><table class="gh-cand-table">
     <thead><tr><th>Candidate</th><th>Activity</th><th>Email</th><th></th></tr></thead>
     <tbody>${order.map(i => rows[i]).join('')}</tbody>
