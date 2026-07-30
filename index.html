@@ -1153,21 +1153,21 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
     <div class="page-icon"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#phin)"/><defs><linearGradient id="phin" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><path d="M8 11a3 3 0 0 1 3-3h18a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H16l-6 6v-6h-.01A3 3 0 0 1 8 21V11Z" fill="white" opacity="0.95"/><circle cx="15" cy="16" r="1.6" fill="#002F6C" opacity="0.6"/><circle cx="20" cy="16" r="1.6" fill="#002F6C" opacity="0.6"/><circle cx="25" cy="16" r="1.6" fill="#002F6C" opacity="0.6"/></svg></div>
     <div class="page-title">Intake</div>
     <div class="page-desc">Chat through the role with the hiring manager to nail down the Ideal Candidate Profile (ICP) before sourcing begins - must-haves, level, location and deal-breakers.</div>
-    <div class="page-badge ai">✨ Claude AI</div>
+    <div class="page-badge ai">✨ Trace AI</div>
   </div>
 
   <div class="card">
     <div class="card-head">
       <div class="card-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2);"></div>
       <div class="card-title" style="color:var(--accent2);">Intake Conversation</div>
-      <span style="margin-left:auto;font-size:10px;color:var(--muted);">Claude stands in for the hiring-manager interview</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted);">Trace stands in for the hiring-manager interview</span>
     </div>
     <div id="intake-chat-log" class="chat-log">
       <div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">Describe the open role below to start the intake conversation.</div>
     </div>
     <div class="status" id="intake-chat-status" style="margin-top:10px;"></div>
     <div style="display:flex;gap:8px;margin-top:12px;">
-      <input id="intake-chat-input" placeholder="Describe the role, or answer Claude's last question..." style="margin-bottom:0;" onkeydown="if(event.key==='Enter'){event.preventDefault();sendIntakeMessage();}">
+      <input id="intake-chat-input" placeholder="Describe the role, or answer Trace's last question..." style="margin-bottom:0;" onkeydown="if(event.key==='Enter'){event.preventDefault();sendIntakeMessage();}">
       <button class="btn btn-primary" onclick="sendIntakeMessage()" id="intake-send-btn" style="white-space:nowrap;">
         <span id="intake-send-text">Send</span>
         <div class="spinner" id="intake-send-spinner"></div>
@@ -1201,8 +1201,8 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
   <div class="page-header">
     <div class="page-icon"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#phmi)"/><defs><linearGradient id="phmi" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#3ab8f5"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="8" y="21" width="6" height="11" rx="1.5" fill="white" opacity="0.95"/><rect x="17" y="14" width="6" height="18" rx="1.5" fill="white" opacity="0.75"/><rect x="26" y="8" width="6" height="24" rx="1.5" fill="white" opacity="0.95"/></svg></div>
     <div class="page-title">Market Intelligence</div>
-    <div class="page-desc">Talk through compensation bands, demand signal and comparable companies for the role - Claude's general market knowledge, not a live salary feed.</div>
-    <div class="page-badge ai">✨ Claude AI</div>
+    <div class="page-desc">Talk through compensation bands, demand signal and comparable companies for the role - Trace's general market knowledge, not a live salary feed.</div>
+    <div class="page-badge ai">✨ Trace AI</div>
   </div>
 
   <div class="card" id="mi-icp-banner" style="margin-bottom:16px;display:none;">
@@ -1526,7 +1526,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
   <div class="page-header">
     <div class="page-icon"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#phjd)"/><defs><linearGradient id="phjd" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#3ab8f5"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="9" y="7" width="18" height="22" rx="3" fill="white" opacity="0.95"/><line x1="13" y1="13" x2="23" y2="13" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="13" y1="17" x2="23" y2="17" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="13" y1="21" x2="19" y2="21" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><path d="M28 22 L29.4 26 L33 27 L29.4 28 L28 32 L26.6 28 L23 27 L26.6 26 Z" fill="white" opacity="0.95"/></svg></div>
     <div class="page-title">Job Description Analyzer</div>
-    <div class="page-desc">Paste a job description and Claude turns it into a full sourcing kit - boolean strings, companies likely to have this talent, screening questions, and what to look for on a profile.</div>
+    <div class="page-desc">Paste a job description and Trace turns it into a full sourcing kit - boolean strings, companies likely to have this talent, screening questions, and what to look for on a profile.</div>
     <div class="page-badge ai">✦ AI-powered</div>
   </div>
 
@@ -1634,7 +1634,7 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
   <div id="jd-loading" style="display:none;">
     <div class="ai-loading">
       <div class="ai-spinner"></div>
-      <span id="jd-loading-msg">Analyzing Job Description with Claude AI...</span>
+      <span id="jd-loading-msg">Analyzing Job Description with Trace AI...</span>
     </div>
   </div>
 
@@ -3960,7 +3960,7 @@ async function analyzeJD() {
   // Show loading
   document.getElementById('jd-loading').style.display = 'block';
   document.getElementById('jd-results').style.display = 'none';
-  document.getElementById('jd-loading-msg').textContent = 'Analyzing Job Description with Claude AI...';
+  document.getElementById('jd-loading-msg').textContent = 'Analyzing Job Description with Trace AI...';
 
   try {
     // Step 1: Extract skills/titles and generate boolean strings
@@ -4523,7 +4523,7 @@ function renderIntakeChat() {
     const isUser = m.role === 'user';
     const isRegen = regeneratingIntakeIndex === i;
     const kind = isUser ? 'user' : 'bot';
-    const name = isUser ? 'You' : 'Claude';
+    const name = isUser ? 'You' : 'Trace';
     const body = isRegen
       ? `<div class="ic-typing"><span></span><span></span><span></span></div>`
       : `<div class="ic-msg-text">${esc(m.content)}</div>`;
@@ -4549,7 +4549,7 @@ function renderIntakeChat() {
     <div class="ic-msg">
       <div class="ic-avatar bot"></div>
       <div class="ic-msg-body">
-        <div class="ic-msg-head"><span class="ic-msg-name bot">Claude</span><span class="ic-msg-time">just now</span></div>
+        <div class="ic-msg-head"><span class="ic-msg-name bot">Trace</span><span class="ic-msg-time">just now</span></div>
         <div class="ic-typing"><span></span><span></span><span></span></div>
       </div>
     </div>` : '';
@@ -4658,7 +4658,7 @@ If something wasn't discussed, use your best inference from context or leave it 
     );
     const clean = reply.replace(/```json|```/g, '').trim();
     const match = clean.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error("Could not parse the ICP from Claude's response.");
+    if (!match) throw new Error("Could not parse the ICP from Trace's response.");
     const icp = JSON.parse(match[0]);
     localStorage.setItem('tt_icp', JSON.stringify(icp));
     renderICPSummary();
@@ -4752,7 +4752,7 @@ function renderMIChat() {
   }
   log.innerHTML = miMessages.map(m => `
     <div class="chat-msg ${m.role === 'user' ? 'user' : 'assistant'}">
-      <span class="chat-msg-role">${m.role === 'user' ? 'You' : 'Claude'}</span>${esc(m.content)}
+      <span class="chat-msg-role">${m.role === 'user' ? 'You' : 'Trace'}</span>${esc(m.content)}
     </div>
   `).join('');
   log.scrollTop = log.scrollHeight;
@@ -4812,7 +4812,7 @@ async function finalizeMarketIntel() {
     );
     const clean = reply.replace(/```json|```/g, '').trim();
     const match = clean.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error("Could not parse the market intelligence summary from Claude's response.");
+    if (!match) throw new Error("Could not parse the market intelligence summary from Trace's response.");
     const intel = JSON.parse(match[0]);
     localStorage.setItem('tt_market_intel', JSON.stringify(intel));
     renderMISummary();
