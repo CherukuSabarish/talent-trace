@@ -2723,15 +2723,20 @@ async function findGitHubEmail(i) {
 
     p.commitEmails = data.emails || [];
     p.emailSearched = true;
+    p.emailMasked = !!data.masked;
+    p.emailIncomplete = !!data.incomplete;
+    p.reposChecked = data.reposChecked || 0;
+    p.reposTotal = data.reposTotal || 0;
     localStorage.setItem('tt_gh_results', JSON.stringify(ghResults));
     renderGitHubResults();
-
-    p.emailMasked = !!data.masked;
 
     if (p.commitEmails.length) {
       showStatus('gh-search-status', 'success', `✓ Found ${p.commitEmails.length} email${p.commitEmails.length > 1 ? 's' : ''} for @${p.login}`);
     } else if (data.masked) {
       showStatus('gh-search-status', 'info', `@${p.login} has GitHub's email privacy on - their commits store a noreply placeholder, so there's no real address to recover.`);
+    } else if (data.incomplete) {
+      const coverage = p.reposTotal ? ` (checked ${p.reposChecked} of ${p.reposTotal} public repos)` : '';
+      showStatus('gh-search-status', 'warn', `No email found yet for @${p.login}${coverage} - GitHub's search rate limit may have cut the check short. Try "Retry email" again in a minute for a deeper pass.`);
     } else {
       showStatus('gh-search-status', 'info', `No public commits found for @${p.login} to pull an email from.`);
     }
@@ -2782,7 +2787,14 @@ function renderGitHubResults() {
     ].filter(Boolean);
     allEmails.forEach(e => stats.push(`✉️ ${esc(e)}`));
     if (p.emailSearched && !allEmails.length) {
-      stats.push(p.emailMasked ? '🔒 Email private on GitHub' : '✉️ No public email found');
+      if (p.emailMasked) {
+        stats.push('🔒 Email private on GitHub');
+      } else if (p.emailIncomplete) {
+        const coverage = p.reposTotal ? ` (${p.reposChecked}/${p.reposTotal} repos)` : '';
+        stats.push(`✉️ Not found yet${coverage} - retry for a deeper check`);
+      } else {
+        stats.push('✉️ No public email found');
+      }
     }
     return `
     <div class="profile-card">
