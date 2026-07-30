@@ -606,16 +606,18 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 .repo-result-lang{padding:1px 7px;border-radius:4px;background:var(--accent-glow);color:var(--accent2);font-weight:600;}
 .repo-result-actions{display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0;}
 
-/* Post-extraction preview strip - appears directly under a repo's row once its
-   contributors have been pulled in, before the user scrolls down to Candidates. */
+/* Post-extraction preview - appears directly under a repo's row once its
+   contributors have been pulled in, showing every one of them right there (not
+   just a handful), pushing any other repo rows further down the page. */
 .repo-extract-preview{
-  display:flex;flex-wrap:wrap;gap:10px;align-items:center;
-  padding:10px 14px;margin:-4px 0 8px;border:1px dashed var(--border2);
+  padding:12px 14px;margin:-4px 0 8px;border:1px dashed var(--border2);
   border-radius:8px;background:rgba(223,171,1,0.04);
 }
-.repo-extract-preview-row{display:flex;align-items:center;gap:7px;}
-.repo-extract-preview-row .gh-cand-avatar{width:26px;height:26px;font-size:11px;}
-.repo-extract-preview-more{font-size:11px;color:var(--muted);white-space:nowrap;}
+.repo-extract-preview-count{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.repo-extract-preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px 14px;}
+.repo-extract-preview-row{display:flex;align-items:center;gap:7px;min-width:0;}
+.repo-extract-preview-row .gh-cand-avatar{width:26px;height:26px;font-size:11px;flex-shrink:0;}
+.repo-extract-preview-row .gh-cand-login{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 /* ── CANDIDATE TABLE (compact list for GitHub Candidates, matching the reference
    tool's contributor-table screenshot). Kept separate from .profile-card, which
@@ -3356,29 +3358,32 @@ async function extractRepoContributors(i) {
   }
 }
 
-// Small read-only preview shown directly under the repo row that was just
-// extracted, so the user gets immediate visual confirmation without having to
-// scroll down - the full, interactive version (Enrich/Find Email/etc.) lives in
-// the shared Candidates table below, which already has everything from this pull.
+// Full read-only list shown directly under the repo row that was just extracted -
+// every contributor pulled from this repo, sorted by commits, right where the user
+// is already looking, instead of a truncated preview that makes them scroll down
+// to the shared Candidates table for the rest. Naturally pushes any other repo
+// rows further down the page since it's regular document flow, not an overlay.
 function renderRepoExtractPreview(i, profiles) {
   const el = document.getElementById('gh-repo-extract-preview-' + i);
   if (!el) return;
   if (!profiles.length) { el.innerHTML = ''; return; }
 
-  const shown = profiles.slice(0, 8);
+  const sorted = [...profiles].sort((a, b) => (b.contributions ?? -1) - (a.contributions ?? -1));
   el.innerHTML = `<div class="repo-extract-preview">
-    ${shown.map(p => `
-      <div class="repo-extract-preview-row">
-        ${p.avatar
-          ? `<img class="gh-cand-avatar" src="${esc(p.avatar)}" alt="">`
-          : `<div class="gh-cand-avatar">${esc((p.login || '?')[0].toUpperCase())}</div>`}
-        <div style="min-width:0;">
-          <div class="gh-cand-login" style="color:var(--text);">@${esc(p.login)}</div>
-          ${p.contributions != null ? `<div class="gh-cand-stats">${p.contributions} commits</div>` : ''}
+    <div class="repo-extract-preview-count">${sorted.length} contributor${sorted.length === 1 ? '' : 's'} extracted from this repo</div>
+    <div class="repo-extract-preview-grid">
+      ${sorted.map(p => `
+        <div class="repo-extract-preview-row">
+          ${p.avatar
+            ? `<img class="gh-cand-avatar" src="${esc(p.avatar)}" alt="">`
+            : `<div class="gh-cand-avatar">${esc((p.login || '?')[0].toUpperCase())}</div>`}
+          <div style="min-width:0;">
+            <div class="gh-cand-login" style="color:var(--text);">@${esc(p.login)}</div>
+            ${p.contributions != null ? `<div class="gh-cand-stats">${p.contributions} commits</div>` : ''}
+          </div>
         </div>
-      </div>
-    `).join('')}
-    <div class="repo-extract-preview-more">${profiles.length > shown.length ? '+' + (profiles.length - shown.length) + ' more · ' : ''}see all in Candidates below ↓</div>
+      `).join('')}
+    </div>
   </div>`;
 }
 
