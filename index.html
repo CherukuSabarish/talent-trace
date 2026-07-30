@@ -606,18 +606,6 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 .repo-result-lang{padding:1px 7px;border-radius:4px;background:var(--accent-glow);color:var(--accent2);font-weight:600;}
 .repo-result-actions{display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0;}
 
-/* Post-extraction preview - appears directly under a repo's row once its
-   contributors have been pulled in, showing every one of them right there (not
-   just a handful), pushing any other repo rows further down the page. */
-.repo-extract-preview{
-  padding:12px 14px;margin:-4px 0 8px;border:1px dashed var(--border2);
-  border-radius:8px;background:rgba(223,171,1,0.04);
-}
-.repo-extract-preview-count{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
-.repo-extract-preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px 14px;}
-.repo-extract-preview-row{display:flex;align-items:center;gap:7px;min-width:0;}
-.repo-extract-preview-row .gh-cand-avatar{width:26px;height:26px;font-size:11px;flex-shrink:0;}
-.repo-extract-preview-row .gh-cand-login{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 /* ── CANDIDATE TABLE (compact list for GitHub Candidates, matching the reference
    tool's contributor-table screenshot). Kept separate from .profile-card, which
@@ -3203,9 +3191,10 @@ async function enrichAllGitHubProfiles() {
   if (done) showStatus('gh-candidates-status', 'success', `✓ Enriched ${done} profile${done > 1 ? 's' : ''}.`);
 }
 
-function clearGitHubResults() {
-  if (!ghResults.length) return;
-  if (!confirm('Clear all ' + ghResults.length + ' GitHub results?')) return;
+// Actual clearing logic, with no confirm dialog - used both by the manual "Clear"
+// button below (after confirming) and by an automatic clear that shouldn't
+// interrupt the user with a popup (e.g. firing a new repo search).
+function clearGitHubResultsSilent() {
   ghBulkEmailRunning = false; // stop any in-progress bulk email run
   ghBulkEnrichRunning = false; // and any in-progress bulk enrich run
   updateBulkEmailBtn();
@@ -3219,6 +3208,12 @@ function clearGitHubResults() {
   hideStatus('gh-candidates-status');
 }
 
+function clearGitHubResults() {
+  if (!ghResults.length) return;
+  if (!confirm('Clear all ' + ghResults.length + ' GitHub results?')) return;
+  clearGitHubResultsSilent();
+}
+
 // ══════════════════════════════════════════════
 // REPO SEARCH - find a repo, then pull its contributors as candidates
 // Calls this app's own /api/github-repo-search and /api/github-repo-contributors
@@ -3230,6 +3225,13 @@ async function searchGitHubRepos() {
   const query = document.getElementById('gh-repo-query').value.trim();
   if (!query) { showStatus('gh-repo-status', 'error', '⚠ Enter a repo name, owner/name, or topic.'); return; }
   localStorage.setItem('tt_gh-repo-query', query);
+
+  // Firing a new repo search starts clean: last search's repo cards AND everything
+  // already pulled into Candidates get cleared first (no confirm popup here - this
+  // is an automatic reset, not the user explicitly clicking "Clear"), so there's no
+  // stale/duplicate state left over from whatever was searched or extracted before.
+  clearGitHubRepoResults();
+  clearGitHubResultsSilent();
 
   const btn = document.getElementById('gh-repo-search-btn');
   const sp = document.getElementById('gh-repo-search-spinner');
@@ -3293,7 +3295,6 @@ function renderGitHubRepoResults() {
       </div>
     </div>
     <div class="status" id="gh-repo-extract-status-${i}" style="font-size:10.5px;padding:6px 10px;margin:6px 0 0;"></div>
-    <div id="gh-repo-extract-preview-${i}"></div>
   `).join('') + '</div>';
 }
 
@@ -3349,7 +3350,6 @@ async function extractRepoContributors(i) {
     } else {
       showStatus(statusId, 'success', `✓ ${newOnes.length} new · ${found.length - newOnes.length} already in Candidates${capNote}${enrichHint}`);
     }
-    renderRepoExtractPreview(i, found);
   } catch (err) {
     console.error('Extract contributors error:', err);
     showStatus(statusId, 'error', '⚠ ' + (err.message || 'Extraction failed.'));
@@ -3358,34 +3358,6 @@ async function extractRepoContributors(i) {
   }
 }
 
-// Full read-only list shown directly under the repo row that was just extracted -
-// every contributor pulled from this repo, sorted by commits, right where the user
-// is already looking, instead of a truncated preview that makes them scroll down
-// to the shared Candidates table for the rest. Naturally pushes any other repo
-// rows further down the page since it's regular document flow, not an overlay.
-function renderRepoExtractPreview(i, profiles) {
-  const el = document.getElementById('gh-repo-extract-preview-' + i);
-  if (!el) return;
-  if (!profiles.length) { el.innerHTML = ''; return; }
-
-  const sorted = [...profiles].sort((a, b) => (b.contributions ?? -1) - (a.contributions ?? -1));
-  el.innerHTML = `<div class="repo-extract-preview">
-    <div class="repo-extract-preview-count">${sorted.length} contributor${sorted.length === 1 ? '' : 's'} extracted from this repo</div>
-    <div class="repo-extract-preview-grid">
-      ${sorted.map(p => `
-        <div class="repo-extract-preview-row">
-          ${p.avatar
-            ? `<img class="gh-cand-avatar" src="${esc(p.avatar)}" alt="">`
-            : `<div class="gh-cand-avatar">${esc((p.login || '?')[0].toUpperCase())}</div>`}
-          <div style="min-width:0;">
-            <div class="gh-cand-login" style="color:var(--text);">@${esc(p.login)}</div>
-            ${p.contributions != null ? `<div class="gh-cand-stats">${p.contributions} commits</div>` : ''}
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  </div>`;
-}
 
 function renderGitHubResults() {
   const wrap  = document.getElementById('gh-results');
