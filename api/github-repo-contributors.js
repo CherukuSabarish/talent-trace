@@ -1,9 +1,13 @@
 // api/github-repo-contributors.js — TalentTrace
 // Pulls a repository's contributor list (GitHub already sorts it by contribution
-// count) and enriches each contributor with their full public profile, the same way
-// api/github-search.js does for a direct user search — so "who actually built this
-// repo" becomes a candidate pool with the same fields the Candidates list already
-// knows how to render.
+// count) — login, avatar, contribution count, nothing more. Deliberately NOT
+// enriched here: enriching up to 100 contributors inline would mean up to 100
+// parallel /users/{login} calls inside a single serverless invocation, which risks
+// a slow response or an outright timeout on a big repo, and gives the recruiter no
+// visibility into that work happening. Instead the frontend's "Enrich Profiles"
+// button calls api/github-user-profile.js per contributor in small batches, at the
+// user's own pace, with a visible pause control — same idea as the reference
+// contributor-extraction tool this was modeled after.
 //
 // Capped at MAX_CONTRIBUTORS (GitHub's own per_page ceiling) rather than paginating
 // through every contributor on a mega-repo — kubernetes/kubernetes alone has 5,800+,
@@ -71,32 +75,16 @@ export default async function handler(req, res) {
     const items = Array.isArray(data) ? data.filter(c => c && c.login && c.type === 'User') : [];
     const hasMore = hasNextLink(r.headers.get('link'));
 
-    // Enrich each contributor with their full profile — identical shape to
-    // github-search.js's profiles, plus contributions/sourceRepo, so the merged
-    // Candidates list renders these exactly like a direct user-search hit.
-    const profiles = await Promise.all(items.map(async (item) => {
-      let u = {};
-      try {
-        const uRes = await fetch(GITHUB_API + '/users/' + encodeURIComponent(item.login), { headers: ghHeaders });
-        if (uRes.ok) u = await uRes.json();
-      } catch (e) { /* keep bare result */ }
-      return {
-        login: item.login,
-        name: u.name || '',
-        url: item.html_url,
-        avatar: item.avatar_url,
-        company: u.company || '',
-        location: u.location || '',
-        bio: u.bio || '',
-        email: u.email || '',           // only if the user made it public
-        blog: u.blog || '',
-        followers: u.followers ?? null,
-        publicRepos: u.public_repos ?? null,
-        joinedAt: u.created_at || null,
-        hireable: u.hireable === true,
-        contributions: item.contributions ?? null,
-        sourceRepo: owner + '/' + repo
-      };
+    // Bare shape only - no /users/{login} call here (see header comment). The
+    // frontend fills in name/company/location/bio/email/etc. later via the
+    // Enrich Profiles action, one small batch at a time.
+    const profiles = items.map((item) => ({
+      login: item.login,
+      url: item.html_url,
+      avatar: item.avatar_url,
+      contributions: item.contributions ?? null,
+      sourceRepo: owner + '/' + repo,
+      enriched: false
     }));
 
     res.status(200).json({
