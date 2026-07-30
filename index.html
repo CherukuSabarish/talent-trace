@@ -2819,6 +2819,17 @@ let ghHasMore = false;
 
 function loadMoreGitHub() { searchGitHub(ghPage + 1); }
 
+// Shared identity key for de-duplicating GitHub candidates across searches/
+// extractions. Prefers the profile URL (stable, unique per account), but falls
+// back to the login so a candidate is never silently dropped or wrongly treated
+// as brand new just because one field is missing from a given response - and
+// never lets a bad/missing url make every single candidate collide together.
+function ghDedupeKey(p) {
+  if (p && p.url) return 'u:' + p.url;
+  if (p && p.login) return 'l:' + p.login.toLowerCase();
+  return null;
+}
+
 async function searchGitHub(page) {
   const isMore = !!page && page > 1;
   const language     = document.getElementById('gh-language').value.trim();
@@ -2866,8 +2877,11 @@ async function searchGitHub(page) {
     if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
 
     const found = data.profiles || [];
-    const existing = new Set(ghResults.map(p => p.url));
-    const newOnes = found.filter(p => p.url && !existing.has(p.url));
+    const existing = new Set(ghResults.map(ghDedupeKey).filter(Boolean));
+    const newOnes = found.filter(p => {
+      const key = ghDedupeKey(p);
+      return key && !existing.has(key);
+    });
     ghResults = [...ghResults, ...newOnes];
     ghPage = data.page || (isMore ? page : 1);
     ghHasMore = !!data.hasMore;
@@ -3285,15 +3299,26 @@ async function extractRepoContributors(i) {
     if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
 
     const found = data.profiles || [];
-    const existing = new Set(ghResults.map(p => p.url));
-    const newOnes = found.filter(p => p.url && !existing.has(p.url));
+    const existing = new Set(ghResults.map(ghDedupeKey).filter(Boolean));
+    const newOnes = found.filter(p => {
+      const key = ghDedupeKey(p);
+      return key && !existing.has(key);
+    });
     ghResults = [...ghResults, ...newOnes];
     localStorage.setItem('tt_gh_results', JSON.stringify(ghResults));
     renderGitHubResults();
 
     const capNote = data.hasMore ? ` (capped at ${data.cappedAt} - ${r.fullName} has more contributors than that)` : '';
     const enrichHint = newOnes.length ? ' · click "👥 Enrich Profiles" below to fill in their details' : '';
-    showStatus(statusId, 'success', `✓ ${newOnes.length} new · ${found.length - newOnes.length} already in Candidates${capNote}${enrichHint}`);
+    // If GitHub genuinely returned contributors but every single one got flagged as a
+    // dupe, that's very unlikely to be real overlap - almost always means the response
+    // is missing both url and login (a stale/mismatched deployment of the contributors
+    // API), so say so plainly instead of a misleading "already in Candidates".
+    if (found.length && newOnes.length === 0 && found.every(p => !ghDedupeKey(p))) {
+      showStatus(statusId, 'error', '⚠ Got contributor data back with no usable login/url - the deployed api/github-repo-contributors.js may be out of date. Re-upload it and redeploy.');
+    } else {
+      showStatus(statusId, 'success', `✓ ${newOnes.length} new · ${found.length - newOnes.length} already in Candidates${capNote}${enrichHint}`);
+    }
     renderRepoExtractPreview(i, found);
   } catch (err) {
     console.error('Extract contributors error:', err);
