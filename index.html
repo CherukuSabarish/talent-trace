@@ -1126,16 +1126,6 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
     <div class="page-badge ai">✨ Claude AI</div>
   </div>
 
-  <div class="card" style="margin-bottom:16px;">
-    <div class="card-head">
-      <div class="card-dot"></div>
-      <div class="card-title">Anthropic API Key</div>
-    </div>
-    <div class="section-hint">Same key used by every AI feature in TalentTrace (JD Analyzer, Market Intelligence) - stored only in your browser, sent only to Anthropic.</div>
-    <input id="intake-api-key-input" type="password" placeholder="sk-ant-..."
-      oninput="localStorage.setItem('tt_api_key', this.value); this.style.borderColor = this.value.startsWith('sk-ant') ? 'var(--accent)' : 'rgba(217,115,13,0.5)';">
-  </div>
-
   <div class="card">
     <div class="card-head">
       <div class="card-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2);"></div>
@@ -1191,15 +1181,6 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
       <div class="card-title" style="color:var(--accent2);">Using ICP from Intake</div>
     </div>
     <div id="mi-icp-banner-body" style="font-size:12.5px;color:var(--text);line-height:1.6;"></div>
-  </div>
-
-  <div class="card" style="margin-bottom:16px;">
-    <div class="card-head">
-      <div class="card-dot"></div>
-      <div class="card-title">Anthropic API Key</div>
-    </div>
-    <input id="mi-api-key-input" type="password" placeholder="sk-ant-..."
-      oninput="localStorage.setItem('tt_api_key', this.value); this.style.borderColor = this.value.startsWith('sk-ant') ? 'var(--accent)' : 'rgba(217,115,13,0.5)';">
   </div>
 
   <div class="card">
@@ -1530,26 +1511,6 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 
 Example: We are looking for a Senior DevOps Engineer with 5+ years experience in Kubernetes, Terraform, AWS or GCP. The candidate should have strong scripting skills in Python or Bash, experience with CI/CD pipelines, and exposure to observability tools like Datadog or Prometheus. Prior experience in a fast-paced product startup is preferred..."></textarea>
 
-    <div style="margin-top:12px;margin-bottom:10px;">
-      <!-- API KEY FIELD - STEP 1 -->
-      <div style="background:rgba(217,115,13,0.08);border:1.5px solid rgba(217,115,13,0.4);border-radius:10px;padding:14px 16px;margin-bottom:4px;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          <span style="font-size:18px;">🔑</span>
-          <div>
-            <div style="font-size:11.5px;font-weight:700;color:var(--ai);">STEP 1 - Enter your Anthropic API Key</div>
-            <div style="font-size:10px;color:var(--muted);">Get a free key at <strong style="color:var(--ai);">console.anthropic.com</strong> → API Keys → Create Key</div>
-          </div>
-        </div>
-        <input id="api-key-input" type="password"
-          placeholder="Paste your key here → sk-ant-api03-xxxxxxxxxxxx"
-          style="width:100%;background:var(--surface2);border:1px solid rgba(217,115,13,0.5);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:12px;padding:10px 14px;outline:none;box-sizing:border-box;"
-          oninput="localStorage.setItem('tt_api_key', this.value); this.style.borderColor = this.value.startsWith('sk-ant') ? 'var(--accent)' : 'rgba(217,115,13,0.5)';"
-        />
-        <div style="font-size:10px;color:var(--muted);margin-top:6px;">🔒 Saved in your browser only - never shared anywhere else</div>
-      </div>
-      <!-- JOB DESCRIPTION FIELD - STEP 2 -->
-      <div style="font-size:11px;font-weight:700;color:var(--accent);margin:14px 0 6px;">📋 STEP 2 - Paste your Job Description below</div>
-    </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
       <button class="btn btn-primary" onclick="analyzeJD()">🧠 Analyze Job Description</button>
       <button class="btn btn-ghost" onclick="clearJD()">✕ Clear</button>
@@ -3936,11 +3897,6 @@ async function analyzeJD() {
     return;
   }
 
-  const apiKey = (document.getElementById('api-key-input')?.value || localStorage.getItem('tt_api_key') || '').trim();
-  if (!apiKey || !apiKey.startsWith('sk-ant')) {
-    showJdError('Please enter your Anthropic API key above. Get a free key at console.anthropic.com');
-    return;
-  }
   clearJdError();
 
   // Show loading
@@ -3971,16 +3927,10 @@ Analyze this Job Description and return ONLY a JSON object (no markdown, no expl
 JD:
 ${jd.substring(0, 2000)}`;
 
-    const r1 = await fetch('https://api.anthropic.com/v1/messages', {
+    const r1 = await fetch('/api/anthropic-chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-dangerous-direct-browser-access': 'true',
-        'anthropic-version': '2023-06-01'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-opus-4-5',
         max_tokens: 2000,
         messages: [{ role: 'user', content: booleanPrompt }]
       })
@@ -3990,13 +3940,13 @@ ${jd.substring(0, 2000)}`;
 
     // Check for API errors
     if (d1.error) {
-      throw new Error('API Error: ' + (d1.error.message || JSON.stringify(d1.error)));
+      throw new Error('API Error: ' + d1.error);
     }
-    if (!d1.content || !d1.content[0]) {
-      throw new Error('Empty response from API. Check your API key is valid and has credits.');
+    if (!d1.text) {
+      throw new Error('Empty response from API. Please try again.');
     }
 
-    const raw1 = d1.content[0].text || '{}';
+    const raw1 = d1.text || '{}';
     const clean1 = raw1.replace(/```json|```/g, '').trim();
     // Extract JSON object even if response has extra text around it
     const jsonMatch1 = clean1.match(/\{[\s\S]*\}/);
@@ -4037,24 +3987,18 @@ Return ONLY a JSON array (no markdown):
 
 JD: ${jd.substring(0, 1500)}`;
 
-    const r2 = await fetch('https://api.anthropic.com/v1/messages', {
+    const r2 = await fetch('/api/anthropic-chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-dangerous-direct-browser-access': 'true',
-        'anthropic-version': '2023-06-01'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-opus-4-5',
         max_tokens: 1500,
         messages: [{ role: 'user', content: iqPrompt }]
       })
     });
     const d2 = await r2.json();
     console.log('API Response 2:', JSON.stringify(d2).substring(0, 200));
-    if (d2.error) throw new Error('API Error (Q): ' + d2.error.message);
-    const raw2 = d2.content?.[0]?.text || '[]';
+    if (d2.error) throw new Error('API Error (Q): ' + d2.error);
+    const raw2 = d2.text || '[]';
     const clean2 = raw2.replace(/```json|```/g, '').trim();
     const jsonMatch2 = clean2.match(/\[[\s\S]*\]/);
     const questions = JSON.parse(jsonMatch2 ? jsonMatch2[0] : clean2);
@@ -4118,24 +4062,18 @@ Return ONLY a JSON object (no markdown):
 
 JD: ${jd.substring(0, 1200)}`;
 
-    const r3 = await fetch('https://api.anthropic.com/v1/messages', {
+    const r3 = await fetch('/api/anthropic-chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-dangerous-direct-browser-access': 'true',
-        'anthropic-version': '2023-06-01'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-opus-4-5',
         max_tokens: 1500,
         messages: [{ role: 'user', content: profilePrompt }]
       })
     });
     const d3 = await r3.json();
     console.log('API Response 3:', JSON.stringify(d3).substring(0, 200));
-    if (d3.error) throw new Error('API Error (Profile): ' + d3.error.message);
-    const raw3 = d3.content?.[0]?.text || '{}';
+    if (d3.error) throw new Error('API Error (Profile): ' + d3.error);
+    const raw3 = d3.text || '{}';
     const clean3 = raw3.replace(/```json|```/g, '').trim();
     const jsonMatch3 = clean3.match(/\{[\s\S]*\}/);
     const checklist = JSON.parse(jsonMatch3 ? jsonMatch3[0] : clean3);
@@ -4175,16 +4113,16 @@ JD: ${jd.substring(0, 1200)}`;
   } catch(err) {
     document.getElementById('jd-loading').style.display = 'none';
     let errMsg = err.message || 'Unknown error';
-    if (errMsg.includes('invalid x-api-key') || errMsg.includes('authentication')) {
-      errMsg = '❌ Invalid API Key - please check your key at console.anthropic.com';
+    if (errMsg.includes('ANTHROPIC_API_KEY') || errMsg.includes('invalid x-api-key') || errMsg.includes('authentication')) {
+      errMsg = '❌ Server-side API key issue - contact your admin to check ANTHROPIC_API_KEY in Vercel.';
     } else if (errMsg.includes('credit') || errMsg.includes('billing')) {
-      errMsg = '❌ No credits - add credits at console.anthropic.com/settings/billing';
+      errMsg = '❌ No credits on the shared Anthropic account - contact your admin.';
     } else if (errMsg.includes('JSON') || errMsg.includes('Unterminated') || errMsg.includes('parse')) {
       errMsg = '⚠️ Response parse error - try pasting a shorter job description (just the key requirements)';
     } else if (errMsg.includes('fetch') || errMsg.includes('network') || errMsg.includes('Failed to fetch')) {
       errMsg = '🌐 Network error - check internet connection and try again';
     } else if (errMsg.includes('Empty response')) {
-      errMsg = '❌ No response from API - your API key may be invalid or have no credits';
+      errMsg = '❌ No response from API - please try again in a moment.';
     }
     showJdError('Analysis failed: ' + errMsg);
     console.error('Full error:', err);
@@ -4210,15 +4148,6 @@ function clearJD() {
   clearJdError();
   selectedCompanies = [];
 }
-
-// Load saved API key from localStorage
-(function loadSavedKey() {
-  const saved = localStorage.getItem('tt_api_key');
-  if (saved) {
-    const el = document.getElementById('api-key-input');
-    if (el) el.value = saved;
-  }
-})();
 
 function showJdError(msg) {
   const el = document.getElementById('jd-error');
@@ -4463,41 +4392,24 @@ function switchSourcingSubTab(name) {
 switchSourcingSubTab(localStorage.getItem('tt_sourcing_subtab') || 'builder');
 
 // ══════════════════════════════════════════════
-// SHARED CLAUDE CHAT HELPER - used by Intake and Market Intelligence, same
-// browser-side-key pattern as JD Analyzer (see analyzeJD() above): the key is
-// read from whichever tab's own input has it, falling back to the shared
-// tt_api_key in localStorage, and is sent only to Anthropic, never to this app's
-// own server.
+// SHARED CLAUDE CHAT HELPER - used by Intake and Market Intelligence. Calls the
+// server-side proxy (api/anthropic-chat.js), which holds ANTHROPIC_API_KEY in
+// Vercel env vars - no key ever touches the browser.
 // ══════════════════════════════════════════════
-async function callClaudeChat(messages, systemPrompt, apiKeyInputIds) {
-  const apiKey = (
-    (apiKeyInputIds || []).map(id => document.getElementById(id)?.value).find(v => v && v.trim())
-    || localStorage.getItem('tt_api_key')
-    || ''
-  ).trim();
-  if (!apiKey || !apiKey.startsWith('sk-ant')) {
-    throw new Error('Please enter your Anthropic API key above. Get a free key at console.anthropic.com');
-  }
-
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+async function callClaudeChat(messages, systemPrompt) {
+  const res = await fetch('/api/anthropic-chat', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-dangerous-direct-browser-access': 'true',
-      'anthropic-version': '2023-06-01'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'claude-opus-4-5',
       max_tokens: 1200,
       system: systemPrompt,
       messages
     })
   });
   const data = await res.json();
-  if (data.error) throw new Error('API Error: ' + (data.error.message || JSON.stringify(data.error)));
-  if (!data.content || !data.content[0]) throw new Error('Empty response from API. Check your API key is valid and has credits.');
-  return data.content[0].text || '';
+  if (data.error) throw new Error('API Error: ' + data.error);
+  if (!data.text) throw new Error('Empty response from API. Please try again.');
+  return data.text;
 }
 
 // ══════════════════════════════════════════════
@@ -4514,11 +4426,6 @@ function loadIntakeSettings() {
   try { intakeMessages = JSON.parse(localStorage.getItem('tt_intake_messages') || '[]'); } catch (e) { intakeMessages = []; }
   renderIntakeChat();
   renderICPSummary();
-  const key = localStorage.getItem('tt_api_key');
-  if (key) {
-    const el = document.getElementById('intake-api-key-input');
-    if (el) { el.value = key; el.style.borderColor = key.startsWith('sk-ant') ? 'var(--accent)' : 'rgba(217,115,13,0.5)'; }
-  }
 }
 
 function renderIntakeChat() {
@@ -4552,7 +4459,7 @@ async function sendIntakeMessage() {
   hideStatus('intake-chat-status');
 
   try {
-    const reply = await callClaudeChat(intakeMessages, INTAKE_SYSTEM_PROMPT, ['intake-api-key-input']);
+    const reply = await callClaudeChat(intakeMessages, INTAKE_SYSTEM_PROMPT);
     intakeMessages.push({ role: 'assistant', content: reply });
     localStorage.setItem('tt_intake_messages', JSON.stringify(intakeMessages));
     renderIntakeChat();
@@ -4593,8 +4500,7 @@ If something wasn't discussed, use your best inference from context or leave it 
   try {
     const reply = await callClaudeChat(
       [...intakeMessages, { role: 'user', content: finalizePrompt }],
-      INTAKE_SYSTEM_PROMPT,
-      ['intake-api-key-input']
+      INTAKE_SYSTEM_PROMPT
     );
     const clean = reply.replace(/```json|```/g, '').trim();
     const match = clean.match(/\{[\s\S]*\}/);
@@ -4670,11 +4576,6 @@ function loadMarketIntelSettings() {
   renderMIChat();
   renderMISummary();
   renderMIIcpBanner();
-  const key = localStorage.getItem('tt_api_key');
-  if (key) {
-    const el = document.getElementById('mi-api-key-input');
-    if (el) { el.value = key; el.style.borderColor = key.startsWith('sk-ant') ? 'var(--accent)' : 'rgba(217,115,13,0.5)'; }
-  }
 }
 
 function renderMIIcpBanner() {
@@ -4719,7 +4620,7 @@ async function sendMarketIntelMessage() {
   hideStatus('mi-chat-status');
 
   try {
-    const reply = await callClaudeChat(miMessages, marketIntelSystemPrompt(), ['mi-api-key-input']);
+    const reply = await callClaudeChat(miMessages, marketIntelSystemPrompt());
     miMessages.push({ role: 'assistant', content: reply });
     localStorage.setItem('tt_mi_messages', JSON.stringify(miMessages));
     renderMIChat();
@@ -4753,8 +4654,7 @@ async function finalizeMarketIntel() {
   try {
     const reply = await callClaudeChat(
       [...miMessages, { role: 'user', content: finalizePrompt }],
-      marketIntelSystemPrompt(),
-      ['mi-api-key-input']
+      marketIntelSystemPrompt()
     );
     const clean = reply.replace(/```json|```/g, '').trim();
     const match = clean.match(/\{[\s\S]*\}/);
