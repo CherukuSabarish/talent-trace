@@ -549,25 +549,29 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 .chat-msg.assistant{align-self:flex-start;background:var(--surface2);color:var(--text);border:1px solid var(--border);}
 .chat-msg-role{font-size:9.5px;text-transform:uppercase;letter-spacing:0.6px;font-weight:700;opacity:0.6;margin-bottom:4px;display:block;}
 
-/* Intake chat - dedicated avatar-bubble UI (kept separate from .chat-msg above,
-   which Market Intelligence still uses, so this restyle can't leak elsewhere). */
-.ic-row{display:flex;align-items:flex-start;gap:9px;margin-bottom:16px;}
-.ic-row.sent{flex-direction:row-reverse;}
-.ic-avatar{flex:0 0 auto;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:10px;font-weight:700;color:#fff;letter-spacing:0.2px;}
-.ic-avatar.bot{background:linear-gradient(135deg,var(--accent),var(--accent2));}
-.ic-avatar.user{background:linear-gradient(135deg,var(--accent2),#141b33);}
-.ic-bubble-wrap{display:flex;flex-direction:column;max-width:78%;min-width:0;}
-.ic-row.sent .ic-bubble-wrap{align-items:flex-end;}
-.ic-bubble{padding:10px 14px;border-radius:14px;font-size:12.5px;line-height:1.65;white-space:pre-wrap;word-break:break-word;}
-.ic-row.received .ic-bubble{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-top-left-radius:4px;}
-.ic-row.sent .ic-bubble{background:var(--accent);color:#fff;border-top-right-radius:4px;}
-.ic-actions{display:flex;gap:3px;margin-top:5px;}
+/* Intake chat - modern flat "channel feed" UI (Slack/Discord-style rows: solid
+   avatar circle, colored name + timestamp on one line, message below, no bubble
+   background). Dedicated classes, kept separate from .chat-msg above which
+   Market Intelligence still uses, so this restyle can't leak elsewhere. */
+.ic-msg{display:flex;gap:12px;align-items:flex-start;padding:8px 6px;border-radius:8px;transition:background 0.12s;}
+.ic-msg:hover{background:var(--surface2);}
+.ic-msg:hover .ic-actions{opacity:1;}
+.ic-avatar{flex:0 0 auto;width:34px;height:34px;border-radius:50%;margin-top:2px;}
+.ic-avatar.bot{background:#ffe3b0;}
+.ic-avatar.user{background:#cdd6fb;}
+.ic-msg-body{flex:1;min-width:0;}
+.ic-msg-head{display:flex;align-items:baseline;gap:8px;margin-bottom:2px;}
+.ic-msg-name{font-weight:700;font-size:13px;}
+.ic-msg-name.bot{color:#c98a1c;}
+.ic-msg-name.user{color:var(--accent2);}
+.ic-msg-time{font-size:11px;color:var(--muted);}
+.ic-msg-text{font-size:13px;line-height:1.65;color:var(--text);white-space:pre-wrap;word-break:break-word;}
+.ic-actions{display:flex;gap:3px;margin-top:4px;opacity:0;transition:opacity 0.12s;}
 .ic-action-btn{display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;
   border:none;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.12s;padding:0;}
-.ic-action-btn:hover{background:var(--surface2);color:var(--accent2);}
+.ic-action-btn:hover{background:var(--surface);color:var(--accent2);}
 .ic-action-btn svg{width:12px;height:12px;}
-.ic-typing{display:flex;align-items:center;gap:4px;padding:2px 2px;}
+.ic-typing{display:flex;align-items:center;gap:4px;padding:4px 0;}
 .ic-typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:0.5;animation:icBounce 1.2s infinite ease-in-out both;}
 .ic-typing span:nth-child(2){animation-delay:0.15s;}
 .ic-typing span:nth-child(3){animation-delay:0.3s;}
@@ -4446,13 +4450,17 @@ switchSourcingSubTab(localStorage.getItem('tt_sourcing_subtab') || 'builder');
 // Vercel env vars - no key ever touches the browser.
 // ══════════════════════════════════════════════
 async function callClaudeChat(messages, systemPrompt) {
+  // Strip any extra bookkeeping fields (e.g. the "ts" timestamp the chat UI
+  // stores on each message) before sending - Anthropic's Messages API only
+  // wants {role, content} per message.
+  const cleanMessages = messages.map(m => ({ role: m.role, content: m.content }));
   const res = await fetch('/api/anthropic-chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       max_tokens: 1200,
       system: systemPrompt,
-      messages
+      messages: cleanMessages
     })
   });
   const data = await res.json();
@@ -4483,6 +4491,21 @@ function loadIntakeSettings() {
   renderICPSummary();
 }
 
+// Coarse relative time for the channel-feed header line ("just now", "5m ago",
+// etc.) - messages don't need second-level precision, just a quick sense of age.
+function icRelTime(ts) {
+  if (!ts) return 'just now';
+  const diffMs = Date.now() - ts;
+  if (diffMs < 60000) return 'just now';
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return days + 'd ago';
+  return new Date(ts).toLocaleDateString();
+}
+
 function renderIntakeChat() {
   const log = document.getElementById('intake-chat-log');
   if (!log) return;
@@ -4494,25 +4517,36 @@ function renderIntakeChat() {
   const rows = intakeMessages.map((m, i) => {
     const isUser = m.role === 'user';
     const isRegen = regeneratingIntakeIndex === i;
-    const bubble = isRegen
-      ? `<div class="ic-bubble"><div class="ic-typing"><span></span><span></span><span></span></div></div>`
-      : `<div class="ic-bubble">${esc(m.content)}</div>`;
+    const kind = isUser ? 'user' : 'bot';
+    const name = isUser ? 'You' : 'Claude';
+    const body = isRegen
+      ? `<div class="ic-typing"><span></span><span></span><span></span></div>`
+      : `<div class="ic-msg-text">${esc(m.content)}</div>`;
     const actions = (!isUser && !isRegen) ? `
       <div class="ic-actions">
         <button class="ic-action-btn" title="Copy" onclick="copyIntakeMessage(${i}, this)">${IC_ICON_COPY}</button>
         <button class="ic-action-btn" title="Regenerate" onclick="regenerateIntakeMessage(${i})">${IC_ICON_REGEN}</button>
       </div>` : '';
     return `
-      <div class="ic-row ${isUser ? 'sent' : 'received'}">
-        <div class="ic-avatar ${isUser ? 'user' : 'bot'}">${isUser ? 'You' : 'AI'}</div>
-        <div class="ic-bubble-wrap">${bubble}${actions}</div>
+      <div class="ic-msg">
+        <div class="ic-avatar ${kind}"></div>
+        <div class="ic-msg-body">
+          <div class="ic-msg-head">
+            <span class="ic-msg-name ${kind}">${name}</span>
+            <span class="ic-msg-time">${icRelTime(m.ts)}</span>
+          </div>
+          ${body}${actions}
+        </div>
       </div>`;
   }).join('');
 
   const typingRow = intakeTyping ? `
-    <div class="ic-row received">
-      <div class="ic-avatar bot">AI</div>
-      <div class="ic-bubble-wrap"><div class="ic-bubble"><div class="ic-typing"><span></span><span></span><span></span></div></div></div>
+    <div class="ic-msg">
+      <div class="ic-avatar bot"></div>
+      <div class="ic-msg-body">
+        <div class="ic-msg-head"><span class="ic-msg-name bot">Claude</span><span class="ic-msg-time">just now</span></div>
+        <div class="ic-typing"><span></span><span></span><span></span></div>
+      </div>
     </div>` : '';
 
   log.innerHTML = rows + typingRow;
@@ -4545,7 +4579,7 @@ async function regenerateIntakeMessage(i) {
   renderIntakeChat();
   try {
     const reply = await callClaudeChat(prefix, INTAKE_SYSTEM_PROMPT);
-    intakeMessages[i] = { role: 'assistant', content: reply };
+    intakeMessages[i] = { role: 'assistant', content: reply, ts: Date.now() };
     localStorage.setItem('tt_intake_messages', JSON.stringify(intakeMessages));
   } catch (err) {
     console.error('Regenerate error:', err);
@@ -4561,7 +4595,7 @@ async function sendIntakeMessage() {
   const text = input.value.trim();
   if (!text) return;
 
-  intakeMessages.push({ role: 'user', content: text });
+  intakeMessages.push({ role: 'user', content: text, ts: Date.now() });
   input.value = '';
   intakeTyping = true;
   renderIntakeChat();
@@ -4574,7 +4608,7 @@ async function sendIntakeMessage() {
 
   try {
     const reply = await callClaudeChat(intakeMessages, INTAKE_SYSTEM_PROMPT);
-    intakeMessages.push({ role: 'assistant', content: reply });
+    intakeMessages.push({ role: 'assistant', content: reply, ts: Date.now() });
     localStorage.setItem('tt_intake_messages', JSON.stringify(intakeMessages));
   } catch (err) {
     console.error('Intake chat error:', err);
