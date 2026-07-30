@@ -1548,14 +1548,14 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
     <div class="card-head">
       <div class="card-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2);"></div>
       <div class="card-title" style="color:var(--accent2);">Search</div>
-      <span style="margin-left:auto;font-size:10px;color:var(--muted);">GitHub Users API · sorted by followers</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted);" id="gh-search-subtitle">GitHub Users API · sorted by followers</span>
     </div>
     <div class="grid-2" style="gap:12px;">
       <div>
-        <label>Keywords <span style="color:var(--muted);text-transform:none;font-weight:400;">(boolean - matches name &amp; bio)</span></label>
+        <label>Keywords <span style="color:var(--muted);text-transform:none;font-weight:400;">(boolean - matches bio, name, company &amp; login)</span></label>
         <input id="gh-keywords" placeholder='e.g. (SRE OR "site reliability") AND python NOT recruiter'>
         <div style="font-size:10px;color:var(--muted);margin-top:-10px;line-height:1.5;">
-          Supports <b>AND</b> · <b>OR</b> · <b>NOT</b> · <b>( )</b> · <b>"exact phrases"</b>. A space means AND, a comma means OR, and <b>-word</b> is short for NOT.
+          Supports <b>AND</b> · <b>OR</b> · <b>NOT</b> · <b>( )</b> · <b>"exact phrases"</b>. A space means AND, a comma means OR, and <b>-word</b> is short for NOT. Add a language or location below so we can also check bios GitHub itself doesn't index.
         </div>
       </div>
       <div>
@@ -1581,6 +1581,24 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
       <div>
         <label>Minimum Public Repos <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional - signal of activity)</span></label>
         <input id="gh-min-repos" type="number" min="0" placeholder="e.g. 10">
+      </div>
+    </div>
+    <div class="grid-2" style="gap:12px;">
+      <div>
+        <label>Sort by <span style="color:var(--muted);text-transform:none;font-weight:400;">(GitHub ranking)</span></label>
+        <select id="gh-sort-by" onchange="updateGitHubSortSubtitle()">
+          <option value="followers">Followers</option>
+          <option value="repositories">Public repos</option>
+          <option value="joined">Join date</option>
+          <option value="best">Best match</option>
+        </select>
+      </div>
+      <div>
+        <label>Order <span style="color:var(--muted);text-transform:none;font-weight:400;">(ignored for Best match)</span></label>
+        <select id="gh-sort-order" onchange="updateGitHubSortSubtitle()">
+          <option value="desc">Highest / most recent first</option>
+          <option value="asc">Lowest / oldest first</option>
+        </select>
       </div>
     </div>
   </div>
@@ -2544,7 +2562,7 @@ loadTalentDataSettings();
 let ghResults = [];
 
 function loadGitHubSettings() {
-  ['gh-keywords','gh-language','gh-location','gh-min-followers','gh-min-repos','gh-role','gh-exp'].forEach(id => {
+  ['gh-keywords','gh-language','gh-location','gh-min-followers','gh-min-repos','gh-role','gh-exp','gh-sort-by','gh-sort-order'].forEach(id => {
     const v = localStorage.getItem('tt_' + id);
     if (v) document.getElementById(id).value = v;
   });
@@ -2556,6 +2574,18 @@ function loadGitHubSettings() {
     const saved = JSON.parse(localStorage.getItem('tt_gh_results') || '[]');
     if (saved.length) { ghResults = saved; renderGitHubResults(); }
   } catch(e) { /* ignore corrupt storage */ }
+  updateGitHubSortSubtitle();
+}
+
+// Keeps the small "GitHub Users API · sorted by ..." header in sync with the
+// sort/order selects so it's never left saying "followers" when the user
+// picked something else.
+function updateGitHubSortSubtitle() {
+  const by = document.getElementById('gh-sort-by').value;
+  const order = document.getElementById('gh-sort-order').value;
+  const byLabel = { followers: 'followers', repositories: 'public repos', joined: 'join date', best: 'best match' }[by] || 'followers';
+  const suffix = by === 'best' ? '' : (order === 'asc' ? ' (ascending)' : ' (descending)');
+  document.getElementById('gh-search-subtitle').textContent = 'GitHub Users API · sorted by ' + byLabel + suffix;
 }
 
 // Pagination state for the "Load More" button - the query that produced the current
@@ -2572,6 +2602,8 @@ async function searchGitHub(page) {
   const location     = document.getElementById('gh-location').value.trim();
   const minFollowers = document.getElementById('gh-min-followers').value.trim();
   const minRepos     = document.getElementById('gh-min-repos').value.trim();
+  const sortBy       = document.getElementById('gh-sort-by').value;
+  const sortOrder    = document.getElementById('gh-sort-order').value;
   let limit = parseInt(document.getElementById('gh-limit').value, 10);
   if (!limit || limit < 1) limit = 20;
   limit = Math.min(limit, 30);
@@ -2583,9 +2615,10 @@ async function searchGitHub(page) {
   }
 
   // Persist inputs per-browser, same pattern as the TalentData tab.
-  ['gh-keywords','gh-language','gh-location','gh-min-followers','gh-min-repos'].forEach(id => {
+  ['gh-keywords','gh-language','gh-location','gh-min-followers','gh-min-repos','gh-sort-by','gh-sort-order'].forEach(id => {
     localStorage.setItem('tt_' + id, document.getElementById(id).value.trim());
   });
+  updateGitHubSortSubtitle();
 
   const btn = document.getElementById('gh-search-btn');
   const sp  = document.getElementById('gh-search-spinner');
@@ -2598,7 +2631,7 @@ async function searchGitHub(page) {
     const res = await fetch('/api/github-search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ keywords, language, location, minFollowers, minRepos, limit, page: isMore ? page : 1 })
+      body: JSON.stringify({ keywords, language, location, minFollowers, minRepos, limit, sortBy, sortOrder, page: isMore ? page : 1 })
     });
     // A 404 here returns Vercel's HTML "page not found", not JSON - parse defensively
     // so the user sees a real message instead of "Unexpected token ... not valid JSON".
@@ -2621,8 +2654,10 @@ async function searchGitHub(page) {
     // Echo how the boolean expression was parsed - otherwise a typo'd query silently
     // returns "wrong" results and there's no way for the user to tell why.
     const bits = [`page ${ghPage}`, `${found.length} shown of ${data.totalCount ?? '?'} matching`];
+    if (data.excludedNoMatch) bits.push(`${data.excludedNoMatch} excluded (no keyword match)`);
     if (data.excludedByNot) bits.push(`${data.excludedByNot} excluded by NOT`);
     bits.push(`${newOnes.length} new`, `${ghResults.length} total`);
+    if (data.bioAware) bits.push('bios checked too');
     showStatus('gh-search-status', 'success',
       '✓ ' + bits.join(' · ') + (data.interpreted ? `  -  read as: ${data.interpreted}` : ''));
   } catch(err) {
