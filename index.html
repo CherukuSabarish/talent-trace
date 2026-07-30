@@ -526,6 +526,29 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 /* ── SECTION HINT (short helper line under a card-head, before the fields) ── */
 .section-hint{font-size:11.5px;color:var(--muted);line-height:1.5;margin:-10px 0 16px;}
 
+/* ── SUBPANEL (Boolean Builder / JD Analyzer / TalentData / GitHub, nested inside
+   the Sourcing panel) - same show/hide behavior as .panel but without repeating
+   the outer padding/max-width/margin, since panel-sourcing already provides that. ── */
+.subpanel{display:none;animation:fadeUp 0.2s ease;}
+.subpanel.active{display:block;}
+.subpanel.active .card{animation:fadeSlideUp 0.4s ease both;}
+
+/* ── SOURCING SUB-TABS (Boolean Builder / JD Analyzer / TalentData / GitHub) ──
+   Same visual language as .jd-tab but its own class - switchJdTab() does a
+   page-wide querySelectorAll('.jd-tab') that would otherwise also grab these. */
+.src-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+.src-tab{font-size:12.5px;padding:8px 14px;border-radius:7px;cursor:pointer;
+  border:1px solid var(--border2);color:var(--muted);background:var(--surface);
+  font-weight:600;transition:all 0.12s;}
+.src-tab.active{background:var(--accent-glow);border-color:rgba(91,113,224,0.35);color:var(--accent2);}
+
+/* ── AI CHAT (Intake / Market Intelligence) ── */
+.chat-log{max-height:440px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:2px;}
+.chat-msg{max-width:82%;padding:10px 14px;border-radius:10px;font-size:12.5px;line-height:1.6;white-space:pre-wrap;}
+.chat-msg.user{align-self:flex-end;background:var(--accent-glow);color:var(--accent2);border:1px solid rgba(91,113,224,0.25);}
+.chat-msg.assistant{align-self:flex-start;background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.chat-msg-role{font-size:9.5px;text-transform:uppercase;letter-spacing:0.6px;font-weight:700;opacity:0.6;margin-bottom:4px;display:block;}
+
 /* ── GITHUB SEARCH MODE TABS (Users / Repos toggle) ──
    Deliberately its own class rather than reusing .jd-tab: switchJdTab() does a
    page-wide querySelectorAll('.jd-tab') to manage active state, which would also
@@ -1048,25 +1071,21 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
     </button>
 
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('builder',this)" title="Boolean Builder">
-        <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#tbb)"/><defs><linearGradient id="tbb" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="7" y="7" width="10" height="10" rx="3" fill="white" opacity="0.95"/><rect x="23" y="7" width="10" height="10" rx="5" fill="white" opacity="0.6"/><rect x="15" y="23" width="10" height="10" rx="3" fill="white" opacity="0.9"/><line x1="12" y1="17" x2="20" y2="23" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/><line x1="28" y1="17" x2="20" y2="23" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/></svg></span>
-        <span class="tab-label">Boolean Builder</span>
+      <button class="tab active" onclick="switchTab('intake',this)" title="Intake">
+        <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#tin)"/><defs><linearGradient id="tin" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><path d="M8 11a3 3 0 0 1 3-3h18a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H16l-6 6v-6h-.01A3 3 0 0 1 8 21V11Z" fill="white" opacity="0.95"/><circle cx="15" cy="16" r="1.6" fill="#002F6C" opacity="0.6"/><circle cx="20" cy="16" r="1.6" fill="#002F6C" opacity="0.6"/><circle cx="25" cy="16" r="1.6" fill="#002F6C" opacity="0.6"/></svg></span>
+        <span class="tab-label">Intake</span>
       </button>
-      <button class="tab" onclick="switchTab('jd',this)" title="Job Description Analyzer">
-        <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#tjd)"/><defs><linearGradient id="tjd" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#3ab8f5"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="9" y="7" width="18" height="22" rx="3" fill="white" opacity="0.95"/><line x1="13" y1="13" x2="23" y2="13" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="13" y1="17" x2="23" y2="17" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="13" y1="21" x2="19" y2="21" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><path d="M28 22 L29.4 26 L33 27 L29.4 28 L28 32 L26.6 28 L23 27 L26.6 26 Z" fill="white" opacity="0.95"/></svg></span>
-        <span class="tab-label">Job Description Analyzer</span>
+      <button class="tab" onclick="switchTab('market-intel',this)" title="Market Intelligence">
+        <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#tmi)"/><defs><linearGradient id="tmi" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#3ab8f5"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="8" y="21" width="6" height="11" rx="1.5" fill="white" opacity="0.95"/><rect x="17" y="14" width="6" height="18" rx="1.5" fill="white" opacity="0.75"/><rect x="26" y="8" width="6" height="24" rx="1.5" fill="white" opacity="0.95"/></svg></span>
+        <span class="tab-label">Market Intelligence</span>
       </button>
-      <button class="tab" onclick="switchTab('crustdata',this)" title="TalentData Search">
-        <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#ttd)"/><defs><linearGradient id="ttd" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#477c65"/></linearGradient></defs><circle cx="15" cy="14" r="5" fill="white" opacity="0.95"/><path d="M6 30c0-5 4-9 9-9s9 4 9 9" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.95"/><circle cx="28" cy="22" r="4.5" stroke="white" stroke-width="1.8" fill="none" opacity="0.7"/><line x1="31.2" y1="25.2" x2="34.5" y2="28.5" stroke="white" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/></svg></span>
-        <span class="tab-label">TalentData Search</span>
+      <button class="tab" onclick="switchTab('sourcing',this)" title="Sourcing">
+        <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#tsr)"/><defs><linearGradient id="tsr" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#477c65"/></linearGradient></defs><circle cx="15" cy="14" r="5" fill="white" opacity="0.95"/><path d="M6 30c0-5 4-9 9-9s9 4 9 9" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.95"/><circle cx="28" cy="22" r="4.5" stroke="white" stroke-width="1.8" fill="none" opacity="0.7"/><line x1="31.2" y1="25.2" x2="34.5" y2="28.5" stroke="white" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/></svg></span>
+        <span class="tab-label">Sourcing</span>
       </button>
-      <button class="tab" onclick="switchTab('github',this)" title="GitHub Search">
-        <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#tgh)"/><defs><linearGradient id="tgh" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#30363d"/><stop offset="1" stop-color="#111827"/></linearGradient></defs><g transform="translate(8,8) scale(1)"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" fill="white" opacity="0.9"/></g></svg></span>
-        <span class="tab-label">GitHub Search</span>
-      </button>
-      <button class="tab" onclick="switchTab('diversity',this)" title="Diversity Sourcing Resources">
+      <button class="tab" onclick="switchTab('diversity',this)" title="Other Resources">
         <span class="tab-icon"><svg viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#tdv)"/><defs><linearGradient id="tdv" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#ff8b3d"/><stop offset="1" stop-color="#ff5da2"/></linearGradient></defs><rect x="7" y="7" width="14" height="14" rx="3" fill="white" opacity="0.95"/><rect x="19" y="19" width="14" height="14" rx="3" fill="white" opacity="0.6"/><rect x="17" y="17" width="6" height="6" rx="1.3" fill="white" opacity="0.95" transform="rotate(45 20 20)"/></svg></span>
-        <span class="tab-label">Diversity Sourcing Resources</span>
+        <span class="tab-label">Other Resources</span>
       </button>
     </div>
 
@@ -1096,9 +1115,153 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 <div class="main">
 
 <!-- ══════════════════════════════
+     TAB - INTAKE
+══════════════════════════════ -->
+<div class="panel active" id="panel-intake" style="display:block;">
+
+  <div class="page-header">
+    <div class="page-icon"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#phin)"/><defs><linearGradient id="phin" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><path d="M8 11a3 3 0 0 1 3-3h18a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H16l-6 6v-6h-.01A3 3 0 0 1 8 21V11Z" fill="white" opacity="0.95"/><circle cx="15" cy="16" r="1.6" fill="#002F6C" opacity="0.6"/><circle cx="20" cy="16" r="1.6" fill="#002F6C" opacity="0.6"/><circle cx="25" cy="16" r="1.6" fill="#002F6C" opacity="0.6"/></svg></div>
+    <div class="page-title">Intake</div>
+    <div class="page-desc">Chat through the role with the hiring manager to nail down the Ideal Candidate Profile (ICP) before sourcing begins - must-haves, level, location and deal-breakers.</div>
+    <div class="page-badge ai">✨ Claude AI</div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-head">
+      <div class="card-dot"></div>
+      <div class="card-title">Anthropic API Key</div>
+    </div>
+    <div class="section-hint">Same key used by every AI feature in TalentTrace (JD Analyzer, Market Intelligence) - stored only in your browser, sent only to Anthropic.</div>
+    <input id="intake-api-key-input" type="password" placeholder="sk-ant-..."
+      oninput="localStorage.setItem('tt_api_key', this.value); this.style.borderColor = this.value.startsWith('sk-ant') ? 'var(--accent)' : 'rgba(217,115,13,0.5)';">
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2);"></div>
+      <div class="card-title" style="color:var(--accent2);">Intake Conversation</div>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted);">Claude stands in for the hiring-manager interview</span>
+    </div>
+    <div id="intake-chat-log" class="chat-log">
+      <div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">Describe the open role below to start the intake conversation.</div>
+    </div>
+    <div class="status" id="intake-chat-status" style="margin-top:10px;"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <input id="intake-chat-input" placeholder="Describe the role, or answer Claude's last question..." style="margin-bottom:0;" onkeydown="if(event.key==='Enter'){event.preventDefault();sendIntakeMessage();}">
+      <button class="btn btn-primary" onclick="sendIntakeMessage()" id="intake-send-btn" style="white-space:nowrap;">
+        <span id="intake-send-text">Send</span>
+        <div class="spinner" id="intake-send-spinner"></div>
+      </button>
+    </div>
+    <div class="btn-row" style="margin-top:12px;">
+      <button class="btn btn-primary" onclick="finalizeICP()" id="intake-finalize-btn">
+        <span id="intake-finalize-text">📋 Finalize ICP</span>
+        <div class="spinner" id="intake-finalize-spinner"></div>
+      </button>
+      <button class="btn btn-danger" onclick="clearIntakeChat()">🗑 Clear Conversation</button>
+    </div>
+  </div>
+
+  <div class="card" id="icp-summary-card" style="margin-top:16px;display:none;">
+    <div class="card-head">
+      <div class="card-dot" style="background:var(--green);box-shadow:0 0 6px var(--green);"></div>
+      <div class="card-title" style="color:var(--green);">Finalized ICP</div>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted);">Available in Market Intelligence and Sourcing</span>
+    </div>
+    <div id="icp-summary-body"></div>
+  </div>
+
+</div><!-- /panel-intake -->
+
+<!-- ══════════════════════════════
+     TAB - MARKET INTELLIGENCE
+══════════════════════════════ -->
+<div class="panel" id="panel-market-intel" style="display:none;">
+
+  <div class="page-header">
+    <div class="page-icon"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#phmi)"/><defs><linearGradient id="phmi" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#3ab8f5"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="8" y="21" width="6" height="11" rx="1.5" fill="white" opacity="0.95"/><rect x="17" y="14" width="6" height="18" rx="1.5" fill="white" opacity="0.75"/><rect x="26" y="8" width="6" height="24" rx="1.5" fill="white" opacity="0.95"/></svg></div>
+    <div class="page-title">Market Intelligence</div>
+    <div class="page-desc">Talk through compensation bands, demand signal and comparable companies for the role - Claude's general market knowledge, not a live salary feed.</div>
+    <div class="page-badge ai">✨ Claude AI</div>
+  </div>
+
+  <div class="card" id="mi-icp-banner" style="margin-bottom:16px;display:none;">
+    <div class="card-head">
+      <div class="card-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2);"></div>
+      <div class="card-title" style="color:var(--accent2);">Using ICP from Intake</div>
+    </div>
+    <div id="mi-icp-banner-body" style="font-size:12.5px;color:var(--text);line-height:1.6;"></div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-head">
+      <div class="card-dot"></div>
+      <div class="card-title">Anthropic API Key</div>
+    </div>
+    <input id="mi-api-key-input" type="password" placeholder="sk-ant-..."
+      oninput="localStorage.setItem('tt_api_key', this.value); this.style.borderColor = this.value.startsWith('sk-ant') ? 'var(--accent)' : 'rgba(217,115,13,0.5)';">
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2);"></div>
+      <div class="card-title" style="color:var(--accent2);">Market Intelligence Chat</div>
+    </div>
+    <div id="mi-chat-log" class="chat-log">
+      <div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">Ask about compensation, demand signal, or comparable companies for the role to get started.</div>
+    </div>
+    <div class="status" id="mi-chat-status" style="margin-top:10px;"></div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <input id="mi-chat-input" placeholder="Ask about comp, demand, or comparable companies for this role..." style="margin-bottom:0;" onkeydown="if(event.key==='Enter'){event.preventDefault();sendMarketIntelMessage();}">
+      <button class="btn btn-primary" onclick="sendMarketIntelMessage()" id="mi-send-btn" style="white-space:nowrap;">
+        <span id="mi-send-text">Send</span>
+        <div class="spinner" id="mi-send-spinner"></div>
+      </button>
+    </div>
+    <div class="btn-row" style="margin-top:12px;">
+      <button class="btn btn-primary" onclick="finalizeMarketIntel()" id="mi-finalize-btn">
+        <span id="mi-finalize-text">📊 Save Market Intel</span>
+        <div class="spinner" id="mi-finalize-spinner"></div>
+      </button>
+      <button class="btn btn-danger" onclick="clearMarketIntelChat()">🗑 Clear Conversation</button>
+    </div>
+  </div>
+
+  <div class="card" id="mi-summary-card" style="margin-top:16px;display:none;">
+    <div class="card-head">
+      <div class="card-dot" style="background:var(--green);box-shadow:0 0 6px var(--green);"></div>
+      <div class="card-title" style="color:var(--green);">Saved Market Intelligence</div>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted);">Available in Sourcing</span>
+    </div>
+    <div id="mi-summary-body"></div>
+  </div>
+
+</div><!-- /panel-market-intel -->
+
+<!-- ══════════════════════════════
+     TAB - SOURCING (wraps Boolean Builder, JD Analyzer, TalentData, GitHub)
+══════════════════════════════ -->
+<div class="panel" id="panel-sourcing" style="display:none;">
+
+  <div class="page-header">
+    <div class="page-icon"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#phsr)"/><defs><linearGradient id="phsr" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#477c65"/></linearGradient></defs><circle cx="15" cy="14" r="5" fill="white" opacity="0.95"/><path d="M6 30c0-5 4-9 9-9s9 4 9 9" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.95"/><circle cx="28" cy="22" r="4.5" stroke="white" stroke-width="1.8" fill="none" opacity="0.7"/><line x1="31.2" y1="25.2" x2="34.5" y2="28.5" stroke="white" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/></svg></div>
+    <div class="page-title">Sourcing</div>
+    <div class="page-desc">Every candidate-finding tool in one place - build a boolean string, parse a JD, or search TalentData and GitHub directly.</div>
+  </div>
+
+  <div id="sourcing-handoff-banner" style="display:none;margin-bottom:16px;"></div>
+
+  <div class="src-tabs">
+    <button class="src-tab active" id="src-tab-builder" onclick="switchSourcingSubTab('builder')">🔡 Boolean Builder</button>
+    <button class="src-tab" id="src-tab-jd" onclick="switchSourcingSubTab('jd')">📄 JD Analyzer</button>
+    <button class="src-tab" id="src-tab-crustdata" onclick="switchSourcingSubTab('crustdata')">🗂 TalentData Search</button>
+    <button class="src-tab" id="src-tab-github" onclick="switchSourcingSubTab('github')">🐙 GitHub Search</button>
+  </div>
+
+<!-- ══════════════════════════════
      TAB 1 - QUERY BUILDER
 ══════════════════════════════ -->
-<div class="panel active" id="panel-builder" style="display:block;">
+<div class="subpanel active" id="panel-builder" style="display:block;">
 
   <div class="page-header">
     <div class="page-icon"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#phbb)"/><defs><linearGradient id="phbb" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="7" y="7" width="10" height="10" rx="3" fill="white" opacity="0.95"/><rect x="23" y="7" width="10" height="10" rx="5" fill="white" opacity="0.6"/><rect x="15" y="23" width="10" height="10" rx="3" fill="white" opacity="0.9"/><line x1="12" y1="17" x2="20" y2="23" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/><line x1="28" y1="17" x2="20" y2="23" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/></svg></div>
@@ -1347,7 +1510,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 <!-- ══════════════════════════════
      TAB 2 - JOB DESCRIPTION ANALYZER
 ══════════════════════════════ -->
-<div class="panel" id="panel-jd" style="display:none;">
+<div class="subpanel" id="panel-jd" style="display:none;">
 
   <div class="page-header">
     <div class="page-icon"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#phjd)"/><defs><linearGradient id="phjd" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#3ab8f5"/><stop offset="1" stop-color="#002F6C"/></linearGradient></defs><rect x="9" y="7" width="18" height="22" rx="3" fill="white" opacity="0.95"/><line x1="13" y1="13" x2="23" y2="13" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="13" y1="17" x2="23" y2="17" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><line x1="13" y1="21" x2="19" y2="21" stroke="#002F6C" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/><path d="M28 22 L29.4 26 L33 27 L29.4 28 L28 32 L26.6 28 L23 27 L26.6 26 Z" fill="white" opacity="0.95"/></svg></div>
@@ -1494,7 +1657,7 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
      [Endpoint names, env var, and the api.crustdata.com domain are the real backing
      data provider and are left as-is; only the UI-facing name is "TalentData".]
 ══════════════════════════════ -->
-<div class="panel" id="panel-crustdata" style="display:none;">
+<div class="subpanel" id="panel-crustdata" style="display:none;">
 
   <div class="page-header">
     <div class="page-icon"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#phtd)"/><defs><linearGradient id="phtd" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#00A4EB"/><stop offset="1" stop-color="#477c65"/></linearGradient></defs><circle cx="15" cy="14" r="5" fill="white" opacity="0.95"/><path d="M6 30c0-5 4-9 9-9s9 4 9 9" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none" opacity="0.95"/><circle cx="28" cy="22" r="4.5" stroke="white" stroke-width="1.8" fill="none" opacity="0.7"/><line x1="31.2" y1="25.2" x2="34.5" y2="28.5" stroke="white" stroke-width="2.2" stroke-linecap="round" opacity="0.9"/></svg></div>
@@ -1600,7 +1763,7 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
 
 </div><!-- /panel-crustdata -->
 
-<div class="panel" id="panel-github" style="display:none;">
+<div class="subpanel" id="panel-github" style="display:none;">
 
   <div class="page-header">
     <div class="page-icon"><svg width="44" height="44" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="url(#phgh)"/><defs><linearGradient id="phgh" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#30363d"/><stop offset="1" stop-color="#111827"/></linearGradient></defs><g transform="translate(8,8) scale(1)"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" fill="white" opacity="0.9"/></g></svg></div>
@@ -1742,8 +1905,10 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
 
 </div><!-- /panel-github -->
 
+</div><!-- /panel-sourcing -->
+
 <!-- ══════════════════════════════
-     TAB 5 - DIVERSITY SOURCING RESOURCES
+     TAB 5 - OTHER RESOURCES (DIVERSITY SOURCING RESOURCES)
 ══════════════════════════════ -->
 <div class="panel" id="panel-diversity" style="display:none;">
 
@@ -4281,6 +4446,408 @@ populateRoles = function() {
   const cat = document.getElementById('category').value;
   showFresherPanel(cat === 'freshers');
 };
+
+// ══════════════════════════════════════════════
+// SOURCING SUB-TABS - Boolean Builder / JD Analyzer / TalentData / GitHub Search
+// all live inside the one Sourcing tab now; this just toggles which is visible.
+// ══════════════════════════════════════════════
+function switchSourcingSubTab(name) {
+  ['builder', 'jd', 'crustdata', 'github'].forEach(n => {
+    const panel = document.getElementById('panel-' + n);
+    const tab = document.getElementById('src-tab-' + n);
+    if (panel) { panel.classList.toggle('active', n === name); panel.style.display = n === name ? 'block' : 'none'; }
+    if (tab) tab.classList.toggle('active', n === name);
+  });
+  localStorage.setItem('tt_sourcing_subtab', name);
+}
+switchSourcingSubTab(localStorage.getItem('tt_sourcing_subtab') || 'builder');
+
+// ══════════════════════════════════════════════
+// SHARED CLAUDE CHAT HELPER - used by Intake and Market Intelligence, same
+// browser-side-key pattern as JD Analyzer (see analyzeJD() above): the key is
+// read from whichever tab's own input has it, falling back to the shared
+// tt_api_key in localStorage, and is sent only to Anthropic, never to this app's
+// own server.
+// ══════════════════════════════════════════════
+async function callClaudeChat(messages, systemPrompt, apiKeyInputIds) {
+  const apiKey = (
+    (apiKeyInputIds || []).map(id => document.getElementById(id)?.value).find(v => v && v.trim())
+    || localStorage.getItem('tt_api_key')
+    || ''
+  ).trim();
+  if (!apiKey || !apiKey.startsWith('sk-ant')) {
+    throw new Error('Please enter your Anthropic API key above. Get a free key at console.anthropic.com');
+  }
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-dangerous-direct-browser-access': 'true',
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-opus-4-5',
+      max_tokens: 1200,
+      system: systemPrompt,
+      messages
+    })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error('API Error: ' + (data.error.message || JSON.stringify(data.error)));
+  if (!data.content || !data.content[0]) throw new Error('Empty response from API. Check your API key is valid and has credits.');
+  return data.content[0].text || '';
+}
+
+// ══════════════════════════════════════════════
+// INTAKE - AI chat with the hiring manager to nail down the ICP before sourcing
+// begins. Same direct-to-Anthropic pattern as JD Analyzer - no server involved.
+// ══════════════════════════════════════════════
+let intakeMessages = [];
+
+const INTAKE_SYSTEM_PROMPT = `You are an expert technical recruiting intake specialist conducting an intake conversation with a hiring manager to define the Ideal Candidate Profile (ICP) for an open role.
+
+Ask clarifying questions one or two at a time, not a long list. Cover, over the course of the conversation: role title and seniority level, must-have skills/technologies, nice-to-have skills, years of experience, location and remote policy, team context, and any deal-breakers. Keep responses conversational, concise, and focused on one next step at a time. Once you believe you have enough information to define the ICP, say so explicitly and offer a brief summary, so the recruiter knows they can click "Finalize ICP".`;
+
+function loadIntakeSettings() {
+  try { intakeMessages = JSON.parse(localStorage.getItem('tt_intake_messages') || '[]'); } catch (e) { intakeMessages = []; }
+  renderIntakeChat();
+  renderICPSummary();
+  const key = localStorage.getItem('tt_api_key');
+  if (key) {
+    const el = document.getElementById('intake-api-key-input');
+    if (el) { el.value = key; el.style.borderColor = key.startsWith('sk-ant') ? 'var(--accent)' : 'rgba(217,115,13,0.5)'; }
+  }
+}
+
+function renderIntakeChat() {
+  const log = document.getElementById('intake-chat-log');
+  if (!log) return;
+  if (!intakeMessages.length) {
+    log.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">Describe the open role below to start the intake conversation.</div>';
+    return;
+  }
+  log.innerHTML = intakeMessages.map(m => `
+    <div class="chat-msg ${m.role === 'user' ? 'user' : 'assistant'}">
+      <span class="chat-msg-role">${m.role === 'user' ? 'You' : 'Claude'}</span>${esc(m.content)}
+    </div>
+  `).join('');
+  log.scrollTop = log.scrollHeight;
+}
+
+async function sendIntakeMessage() {
+  const input = document.getElementById('intake-chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  intakeMessages.push({ role: 'user', content: text });
+  input.value = '';
+  renderIntakeChat();
+  localStorage.setItem('tt_intake_messages', JSON.stringify(intakeMessages));
+
+  const btn = document.getElementById('intake-send-btn');
+  const sp = document.getElementById('intake-send-spinner');
+  btn.disabled = true; sp.classList.add('on');
+  hideStatus('intake-chat-status');
+
+  try {
+    const reply = await callClaudeChat(intakeMessages, INTAKE_SYSTEM_PROMPT, ['intake-api-key-input']);
+    intakeMessages.push({ role: 'assistant', content: reply });
+    localStorage.setItem('tt_intake_messages', JSON.stringify(intakeMessages));
+    renderIntakeChat();
+  } catch (err) {
+    console.error('Intake chat error:', err);
+    showStatus('intake-chat-status', 'error', '⚠ ' + (err.message || 'Message failed.'));
+  } finally {
+    btn.disabled = false; sp.classList.remove('on');
+  }
+}
+
+async function finalizeICP() {
+  if (!intakeMessages.length) {
+    showStatus('intake-chat-status', 'error', '⚠ Have at least part of the intake conversation first.');
+    return;
+  }
+  const btn = document.getElementById('intake-finalize-btn');
+  const sp = document.getElementById('intake-finalize-spinner');
+  btn.disabled = true; sp.classList.add('on');
+  showStatus('intake-chat-status', 'info', '⏳ Finalizing ICP...');
+
+  const finalizePrompt = `Based on the intake conversation so far, return ONLY a JSON object (no markdown, no explanation) summarizing the Ideal Candidate Profile:
+
+{
+  "roleTitle": "role title",
+  "seniority": "e.g. Mid-level, Senior, Staff",
+  "mustHaveSkills": ["3-6 must-have skills/technologies"],
+  "niceToHaveSkills": ["2-4 nice-to-have skills"],
+  "experienceRange": "e.g. 4-8 years",
+  "location": "location or remote policy",
+  "teamContext": "one sentence on team/reporting context, or empty string if not discussed",
+  "dealBreakers": "one sentence on deal-breakers, or empty string if not discussed",
+  "summary": "2-3 sentence plain-English summary of the ICP"
+}
+
+If something wasn't discussed, use your best inference from context or leave it as an empty string/array - don't invent specifics that weren't implied.`;
+
+  try {
+    const reply = await callClaudeChat(
+      [...intakeMessages, { role: 'user', content: finalizePrompt }],
+      INTAKE_SYSTEM_PROMPT,
+      ['intake-api-key-input']
+    );
+    const clean = reply.replace(/```json|```/g, '').trim();
+    const match = clean.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("Could not parse the ICP from Claude's response.");
+    const icp = JSON.parse(match[0]);
+    localStorage.setItem('tt_icp', JSON.stringify(icp));
+    renderICPSummary();
+    showStatus('intake-chat-status', 'success', '✓ ICP finalized - available in Market Intelligence and Sourcing.');
+    renderMIIcpBanner();
+    renderSourcingHandoffBanner();
+  } catch (err) {
+    console.error('Finalize ICP error:', err);
+    showStatus('intake-chat-status', 'error', '⚠ ' + (err.message || 'Could not finalize the ICP.'));
+  } finally {
+    btn.disabled = false; sp.classList.remove('on');
+  }
+}
+
+function renderICPSummary() {
+  const card = document.getElementById('icp-summary-card');
+  const body = document.getElementById('icp-summary-body');
+  if (!card || !body) return;
+  let icp = null;
+  try { icp = JSON.parse(localStorage.getItem('tt_icp') || 'null'); } catch (e) { icp = null; }
+  if (!icp) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  body.innerHTML = `
+    <div class="cand-field"><span>Role:</span> ${esc(icp.roleTitle || '—')}${icp.seniority ? ' · ' + esc(icp.seniority) : ''}</div>
+    <div class="cand-field"><span>Must-haves:</span> ${esc((icp.mustHaveSkills || []).join(', ')) || '—'}</div>
+    <div class="cand-field"><span>Nice-to-haves:</span> ${esc((icp.niceToHaveSkills || []).join(', ')) || '—'}</div>
+    <div class="cand-field"><span>Experience:</span> ${esc(icp.experienceRange || '—')}</div>
+    <div class="cand-field"><span>Location:</span> ${esc(icp.location || '—')}</div>
+    ${icp.teamContext ? `<div class="cand-field"><span>Team context:</span> ${esc(icp.teamContext)}</div>` : ''}
+    ${icp.dealBreakers ? `<div class="cand-field"><span>Deal-breakers:</span> ${esc(icp.dealBreakers)}</div>` : ''}
+    ${icp.summary ? `<div class="cand-field" style="margin-top:8px;font-style:italic;">${esc(icp.summary)}</div>` : ''}
+  `;
+}
+
+function clearIntakeChat() {
+  if (!intakeMessages.length) return;
+  if (!confirm('Clear the intake conversation? The finalized ICP (if any) stays saved.')) return;
+  intakeMessages = [];
+  localStorage.setItem('tt_intake_messages', '[]');
+  renderIntakeChat();
+  hideStatus('intake-chat-status');
+}
+
+// ══════════════════════════════════════════════
+// MARKET INTELLIGENCE - AI chat about compensation/demand for the role, seeded
+// with the finalized ICP from Intake if one exists. Same direct-to-Anthropic
+// pattern, no server involved.
+// ══════════════════════════════════════════════
+let miMessages = [];
+
+function marketIntelSystemPrompt() {
+  let icp = null;
+  try { icp = JSON.parse(localStorage.getItem('tt_icp') || 'null'); } catch (e) { icp = null; }
+  const icpContext = icp
+    ? `The role already defined in Intake: ${icp.roleTitle || 'unknown role'}${icp.seniority ? ', ' + icp.seniority : ''}${icp.location ? ', based in ' + icp.location : ''}${icp.experienceRange ? ', ' + icp.experienceRange + ' experience' : ''}. Must-haves: ${(icp.mustHaveSkills || []).join(', ') || 'not specified'}.`
+    : 'No ICP has been finalized in Intake yet - ask the recruiter for the role, level, and location if they do not provide it.';
+
+  return `You are a compensation and talent-market intelligence analyst helping a recruiter understand the market for a role.
+
+${icpContext}
+
+Discuss, as relevant to what the recruiter asks: typical compensation bands (base/bonus/equity ranges) for the role/level/location, current market demand and supply signal (hot/competitive/oversupplied), comparable companies hiring for similar roles, and relevant hiring trends.
+
+IMPORTANT: you do not have access to a live salary database or real-time market data - everything you say is a general estimate from training knowledge, not verified current figures. Always make this clear, and encourage cross-referencing with real sources like Levels.fyi, Glassdoor, or the company's own comp bands before using any number in an actual offer.`;
+}
+
+function loadMarketIntelSettings() {
+  try { miMessages = JSON.parse(localStorage.getItem('tt_mi_messages') || '[]'); } catch (e) { miMessages = []; }
+  renderMIChat();
+  renderMISummary();
+  renderMIIcpBanner();
+  const key = localStorage.getItem('tt_api_key');
+  if (key) {
+    const el = document.getElementById('mi-api-key-input');
+    if (el) { el.value = key; el.style.borderColor = key.startsWith('sk-ant') ? 'var(--accent)' : 'rgba(217,115,13,0.5)'; }
+  }
+}
+
+function renderMIIcpBanner() {
+  const card = document.getElementById('mi-icp-banner');
+  const body = document.getElementById('mi-icp-banner-body');
+  if (!card || !body) return;
+  let icp = null;
+  try { icp = JSON.parse(localStorage.getItem('tt_icp') || 'null'); } catch (e) { icp = null; }
+  if (!icp) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  body.innerHTML = `${esc(icp.roleTitle || 'Role')}${icp.seniority ? ' · ' + esc(icp.seniority) : ''}${icp.location ? ' · ' + esc(icp.location) : ''}${icp.experienceRange ? ' · ' + esc(icp.experienceRange) : ''}`;
+}
+
+function renderMIChat() {
+  const log = document.getElementById('mi-chat-log');
+  if (!log) return;
+  if (!miMessages.length) {
+    log.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">Ask about compensation, demand signal, or comparable companies for the role to get started.</div>';
+    return;
+  }
+  log.innerHTML = miMessages.map(m => `
+    <div class="chat-msg ${m.role === 'user' ? 'user' : 'assistant'}">
+      <span class="chat-msg-role">${m.role === 'user' ? 'You' : 'Claude'}</span>${esc(m.content)}
+    </div>
+  `).join('');
+  log.scrollTop = log.scrollHeight;
+}
+
+async function sendMarketIntelMessage() {
+  const input = document.getElementById('mi-chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  miMessages.push({ role: 'user', content: text });
+  input.value = '';
+  renderMIChat();
+  localStorage.setItem('tt_mi_messages', JSON.stringify(miMessages));
+
+  const btn = document.getElementById('mi-send-btn');
+  const sp = document.getElementById('mi-send-spinner');
+  btn.disabled = true; sp.classList.add('on');
+  hideStatus('mi-chat-status');
+
+  try {
+    const reply = await callClaudeChat(miMessages, marketIntelSystemPrompt(), ['mi-api-key-input']);
+    miMessages.push({ role: 'assistant', content: reply });
+    localStorage.setItem('tt_mi_messages', JSON.stringify(miMessages));
+    renderMIChat();
+  } catch (err) {
+    console.error('Market intel chat error:', err);
+    showStatus('mi-chat-status', 'error', '⚠ ' + (err.message || 'Message failed.'));
+  } finally {
+    btn.disabled = false; sp.classList.remove('on');
+  }
+}
+
+async function finalizeMarketIntel() {
+  if (!miMessages.length) {
+    showStatus('mi-chat-status', 'error', '⚠ Chat a bit about the role first.');
+    return;
+  }
+  const btn = document.getElementById('mi-finalize-btn');
+  const sp = document.getElementById('mi-finalize-spinner');
+  btn.disabled = true; sp.classList.add('on');
+  showStatus('mi-chat-status', 'info', '⏳ Saving market intelligence...');
+
+  const finalizePrompt = `Based on the conversation so far, return ONLY a JSON object (no markdown, no explanation) summarizing the market intelligence discussed:
+
+{
+  "compRangeNotes": "compensation band notes, as a plain string (e.g. base/bonus/equity ranges discussed)",
+  "demandSignal": "one of: Hot/Competitive, Balanced, Oversupplied, or Unclear",
+  "comparableCompanies": ["companies", "mentioned", "as", "comparable"],
+  "summary": "2-3 sentence plain-English summary, including the caveat that figures are estimates, not verified live data"
+}`;
+
+  try {
+    const reply = await callClaudeChat(
+      [...miMessages, { role: 'user', content: finalizePrompt }],
+      marketIntelSystemPrompt(),
+      ['mi-api-key-input']
+    );
+    const clean = reply.replace(/```json|```/g, '').trim();
+    const match = clean.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("Could not parse the market intelligence summary from Claude's response.");
+    const intel = JSON.parse(match[0]);
+    localStorage.setItem('tt_market_intel', JSON.stringify(intel));
+    renderMISummary();
+    showStatus('mi-chat-status', 'success', '✓ Saved - available in Sourcing.');
+    renderSourcingHandoffBanner();
+  } catch (err) {
+    console.error('Finalize market intel error:', err);
+    showStatus('mi-chat-status', 'error', '⚠ ' + (err.message || 'Could not save market intelligence.'));
+  } finally {
+    btn.disabled = false; sp.classList.remove('on');
+  }
+}
+
+function renderMISummary() {
+  const card = document.getElementById('mi-summary-card');
+  const body = document.getElementById('mi-summary-body');
+  if (!card || !body) return;
+  let intel = null;
+  try { intel = JSON.parse(localStorage.getItem('tt_market_intel') || 'null'); } catch (e) { intel = null; }
+  if (!intel) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  body.innerHTML = `
+    <div class="cand-field"><span>Compensation notes:</span> ${esc(intel.compRangeNotes || '—')}</div>
+    <div class="cand-field"><span>Demand signal:</span> ${esc(intel.demandSignal || '—')}</div>
+    <div class="cand-field"><span>Comparable companies:</span> ${esc((intel.comparableCompanies || []).join(', ')) || '—'}</div>
+    ${intel.summary ? `<div class="cand-field" style="margin-top:8px;font-style:italic;">${esc(intel.summary)}</div>` : ''}
+  `;
+}
+
+function clearMarketIntelChat() {
+  if (!miMessages.length) return;
+  if (!confirm('Clear the market intelligence conversation? Any saved summary stays.')) return;
+  miMessages = [];
+  localStorage.setItem('tt_mi_messages', '[]');
+  renderMIChat();
+  hideStatus('mi-chat-status');
+}
+
+// ══════════════════════════════════════════════
+// SOURCING HANDOFF - soft, non-blocking: shows what Intake/Market Intelligence
+// produced and offers to copy it into Sourcing's fields, but every Sourcing tool
+// stays fully usable on its own regardless of whether Intake ever ran.
+// ══════════════════════════════════════════════
+function renderSourcingHandoffBanner() {
+  const wrap = document.getElementById('sourcing-handoff-banner');
+  if (!wrap) return;
+  let icp = null, intel = null;
+  try { icp = JSON.parse(localStorage.getItem('tt_icp') || 'null'); } catch (e) {}
+  try { intel = JSON.parse(localStorage.getItem('tt_market_intel') || 'null'); } catch (e) {}
+  if (!icp && !intel) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+
+  wrap.style.display = 'block';
+  wrap.innerHTML = `
+    <div class="card" style="margin-bottom:16px;background:var(--accent-glow);border-color:rgba(91,113,224,0.3);">
+      <div class="card-head">
+        <div class="card-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2);"></div>
+        <div class="card-title" style="color:var(--accent2);">From Intake${intel ? ' &amp; Market Intelligence' : ''}</div>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="document.getElementById('sourcing-handoff-banner').style.display='none';">Dismiss</button>
+      </div>
+      <div style="font-size:12.5px;color:var(--text);line-height:1.6;margin-bottom:10px;">
+        ${icp ? `<b>${esc(icp.roleTitle || 'Role')}</b>${icp.seniority ? ' · ' + esc(icp.seniority) : ''}${icp.location ? ' · ' + esc(icp.location) : ''}${icp.experienceRange ? ' · ' + esc(icp.experienceRange) : ''}<br>Must-haves: ${esc((icp.mustHaveSkills || []).join(', ')) || '—'}` : ''}
+        ${intel ? `<br>Comp: ${esc(intel.compRangeNotes || '—')} · Demand: ${esc(intel.demandSignal || '—')}` : ''}
+      </div>
+      ${icp ? `<button class="btn btn-primary btn-sm" onclick="prefillSourcingFromICP()">↓ Prefill TalentData Search</button>` : ''}
+    </div>
+  `;
+}
+
+// Copies the finalized ICP's role/must-haves/experience into TalentData's search
+// fields - the one Sourcing tool whose fields are plain free text and map cleanly.
+// Boolean Builder's role picker is a curated dropdown (not free text) and GitHub
+// Search's fields don't map onto an ICP the same way, so those still need a
+// manual look - this covers the most common next step.
+function prefillSourcingFromICP() {
+  let icp = null;
+  try { icp = JSON.parse(localStorage.getItem('tt_icp') || 'null'); } catch (e) {}
+  if (!icp) return;
+  switchSourcingSubTab('crustdata');
+  const set = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
+  set('cd-role', icp.roleTitle || '');
+  set('cd-must', (icp.mustHaveSkills || []).join(', '));
+  set('cd-nice', (icp.niceToHaveSkills || []).join(', '));
+  set('cd-exp', icp.experienceRange || '');
+  showStatus('cd-search-status', 'info', '✓ Prefilled from your finalized ICP - review and search when ready.');
+}
+
+loadIntakeSettings();
+loadMarketIntelSettings();
+renderSourcingHandoffBanner();
 
 </script>
 </body>
