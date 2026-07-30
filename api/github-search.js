@@ -169,7 +169,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { keywords, language, location, minFollowers, minRepos, limit, page } = req.body || {};
+  const { keywords, language, location, minFollowers, minRepos, limit, page, sortBy, sortOrder } = req.body || {};
 
   // Build the qualifier string shared by every keyword variant (language, location, etc.).
   //
@@ -220,6 +220,35 @@ export default async function handler(req, res) {
     ? positiveGroups.map(g => g.pos.map(quote).join(' ') + ' ' + base)
     : [base];
 
+  // ────────────────────────────────────────────────────────────────────────
+  // BIO-AWARE FALLBACK
+  //
+  // GitHub's /search/users index only covers **login and public email** for
+  // bare keywords - bio, name, and company are never matched unless you use
+  // `in:name`, and there's no qualifier for bio at all. So a recruiter typing
+  // "kubernetes" or "site reliability" into Keywords will mostly get nothing
+  // from the queries above, even though plenty of matching users say exactly
+  // that in their bio.
+  //
+  // To fix this we run one extra, qualifier-only search (language/location/
+  // followers/repos, no keyword) whenever there's a real qualifier to scope it
+  // by - without one, "give me everyone on GitHub" is too broad to be useful.
+  // We then keyword-filter the enriched profiles ourselves further down
+  // (`hay`/`positiveGroups`), checking bio + name + company + login + email,
+  // which is the honest superset of what "keywords" should mean for a
+  // recruiting tool. Profiles that only satisfied GitHub's own login/email
+  // match pass this filter trivially, so nothing already-correct is lost.
+  const hasQualifiers = parts.length > 1; // more than the bare `type:user`
+  const bioFallbackQuery = (positiveGroups.length && hasQualifiers) ? base : null;
+  const allQueries = bioFallbackQuery ? [...queries, bioFallbackQuery] : queries;
+
+  // Sort control - GitHub's API only accepts these three, plus omitting `sort`
+  // entirely for its default best-match relevance ranking ('best' below).
+  const ALLOWED_SORT = ['followers', 'repositories', 'joined', 'best'];
+  const sortField = ALLOWED_SORT.includes(String(sortBy)) ? String(sortBy) : 'followers';
+  const sortDir = sortOrder === 'asc' ? 'asc' : 'desc';
+  const sortQuery = sortField === 'best' ? '' : ('&sort=' + sortField + '&order=' + sortDir);
+
   const ghHeaders = {
     'Authorization': 'Bearer ' + token,
     'Accept': 'application/vnd.github+json',
@@ -228,11 +257,12 @@ export default async function handler(req, res) {
   };
 
   try {
-    // Run every keyword variant, then merge. A single failing variant shouldn't sink
-    // the whole search, but if ALL of them fail we surface the first real error.
-    const runs = await Promise.all(queries.map(async (q) => {
+    // Run every keyword variant (plus the bio-aware fallback, if any), then merge.
+    // A single failing variant shouldn't sink the whole search, but if ALL of them
+    // fail we surface the first real error.
+    const runs = await Promise.all(allQueries.map(async (q) => {
       const searchUrl = GITHUB_API + '/search/users?q=' + encodeURIComponent(q) +
-        '&sort=followers&order=desc&per_page=' + safeLimit + '&page=' + safePage;
+        sortQuery + '&per_page=' + safeLimit + '&page=' + safePage;
       const r = await fetch(searchUrl, { headers: ghHeaders });
       const d = await r.json().catch(() => ({}));
       return { ok: r.ok, status: r.status, data: d };
@@ -290,19 +320,41 @@ export default async function handler(req, res) {
       };
     }));
 
-    // Apply NOT terms here, against the full enriched profile text — GitHub can't do
-    // this reliably on free text, so we do it ourselves.
-    const kept = allNegatives.length
+    // Apply the boolean expression against the full enriched profile text — GitHub
+    // can't do this reliably on free text (bio/name/company aren't even indexed for
+    // bare keywords, see the bio-aware fallback comment above), so we do it ourselves:
+    //   - positive groups: keep only if at least one OR-branch has ALL of its terms
+    //     present (this is a no-op for profiles GitHub already matched via login/email,
+    //     since those are part of the same haystack — it only actually filters out
+    //     profiles pulled in by the qualifier-only bio fallback that don't really match).
+    //   - negatives: drop if any NOT term is present.
+    let excludedNoMatch = 0, excludedByNot = 0;
+    const kept = (positiveGroups.length || allNegatives.length)
       ? profiles.filter(p => {
-          const hay = [p.login, p.name, p.bio, p.company, p.location].filter(Boolean).join(' ').toLowerCase();
-          return !allNegatives.some(n => hay.includes(n.toLowerCase()));
+          const hay = [p.login, p.name, p.bio, p.company, p.location, p.email].filter(Boolean).join(' ').toLowerCase();
+          if (positiveGroups.length && !positiveGroups.some(g => g.pos.every(t => hay.includes(t.toLowerCase())))) {
+            excludedNoMatch++;
+            return false;
+          }
+          if (allNegatives.length && allNegatives.some(n => hay.includes(n.toLowerCase()))) {
+            excludedByNot++;
+            return false;
+          }
+          return true;
         })
       : profiles;
 
     res.status(200).json({
       totalCount,
       page: safePage,
-      excludedByNot: profiles.length - kept.length,
+      excludedByNot,
+      excludedNoMatch,
+      // True when the qualifier-only bio/name/company fallback ran - lets the UI
+      // tell the recruiter their keywords were checked against more than just
+      // GitHub's own (login/email-only) index.
+      bioAware: !!bioFallbackQuery,
+      sortBy: sortField,
+      sortOrder: sortDir,
       // Echo back how the boolean expression was understood, so the UI can show the
       // user what actually ran instead of leaving them guessing.
       interpreted: positiveGroups.length
