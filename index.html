@@ -3284,9 +3284,9 @@ function renderGitHubRepoResults() {
       </div>
       <div class="repo-result-actions">
         <button class="btn btn-ghost btn-sm" id="gh-repo-extract-btn-${i}" onclick="extractRepoContributors(${i})" style="white-space:nowrap;">👥 Extract Contributors</button>
-        <div class="status" id="gh-repo-extract-status-${i}" style="font-size:10.5px;padding:4px 8px;"></div>
       </div>
     </div>
+    <div class="status" id="gh-repo-extract-status-${i}" style="font-size:10.5px;padding:6px 10px;margin:6px 0 0;"></div>
     <div id="gh-repo-extract-preview-${i}"></div>
   `).join('') + '</div>';
 }
