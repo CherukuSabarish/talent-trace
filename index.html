@@ -549,6 +549,30 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 .chat-msg.assistant{align-self:flex-start;background:var(--surface2);color:var(--text);border:1px solid var(--border);}
 .chat-msg-role{font-size:9.5px;text-transform:uppercase;letter-spacing:0.6px;font-weight:700;opacity:0.6;margin-bottom:4px;display:block;}
 
+/* Intake chat - dedicated avatar-bubble UI (kept separate from .chat-msg above,
+   which Market Intelligence still uses, so this restyle can't leak elsewhere). */
+.ic-row{display:flex;align-items:flex-start;gap:9px;margin-bottom:16px;}
+.ic-row.sent{flex-direction:row-reverse;}
+.ic-avatar{flex:0 0 auto;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:#fff;letter-spacing:0.2px;}
+.ic-avatar.bot{background:linear-gradient(135deg,var(--accent),var(--accent2));}
+.ic-avatar.user{background:linear-gradient(135deg,var(--accent2),#141b33);}
+.ic-bubble-wrap{display:flex;flex-direction:column;max-width:78%;min-width:0;}
+.ic-row.sent .ic-bubble-wrap{align-items:flex-end;}
+.ic-bubble{padding:10px 14px;border-radius:14px;font-size:12.5px;line-height:1.65;white-space:pre-wrap;word-break:break-word;}
+.ic-row.received .ic-bubble{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-top-left-radius:4px;}
+.ic-row.sent .ic-bubble{background:var(--accent);color:#fff;border-top-right-radius:4px;}
+.ic-actions{display:flex;gap:3px;margin-top:5px;}
+.ic-action-btn{display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;
+  border:none;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.12s;padding:0;}
+.ic-action-btn:hover{background:var(--surface2);color:var(--accent2);}
+.ic-action-btn svg{width:12px;height:12px;}
+.ic-typing{display:flex;align-items:center;gap:4px;padding:2px 2px;}
+.ic-typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:0.5;animation:icBounce 1.2s infinite ease-in-out both;}
+.ic-typing span:nth-child(2){animation-delay:0.15s;}
+.ic-typing span:nth-child(3){animation-delay:0.3s;}
+@keyframes icBounce{0%,80%,100%{transform:translateY(0);opacity:0.4;}40%{transform:translateY(-4px);opacity:1;}}
+
 /* ── GITHUB SEARCH MODE TABS (Users / Repos toggle) ──
    Deliberately its own class rather than reusing .jd-tab: switchJdTab() does a
    page-wide querySelectorAll('.jd-tab') to manage active state, which would also
@@ -4442,6 +4466,12 @@ async function callClaudeChat(messages, systemPrompt) {
 // begins. Same direct-to-Anthropic pattern as JD Analyzer - no server involved.
 // ══════════════════════════════════════════════
 let intakeMessages = [];
+let intakeTyping = false;              // shows the "..." bubble while awaiting a reply
+let regeneratingIntakeIndex = null;     // index of the assistant message currently being redone
+
+const IC_ICON_COPY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const IC_ICON_REGEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M8 16H3v5"/></svg>';
+const IC_ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
 
 const INTAKE_SYSTEM_PROMPT = `You are an expert technical recruiting intake specialist conducting an intake conversation with a hiring manager to define the Ideal Candidate Profile (ICP) for an open role.
 
@@ -4456,16 +4486,74 @@ function loadIntakeSettings() {
 function renderIntakeChat() {
   const log = document.getElementById('intake-chat-log');
   if (!log) return;
-  if (!intakeMessages.length) {
+  if (!intakeMessages.length && !intakeTyping) {
     log.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--muted);font-size:12px;">Describe the open role below to start the intake conversation.</div>';
     return;
   }
-  log.innerHTML = intakeMessages.map(m => `
-    <div class="chat-msg ${m.role === 'user' ? 'user' : 'assistant'}">
-      <span class="chat-msg-role">${m.role === 'user' ? 'You' : 'Claude'}</span>${esc(m.content)}
-    </div>
-  `).join('');
+
+  const rows = intakeMessages.map((m, i) => {
+    const isUser = m.role === 'user';
+    const isRegen = regeneratingIntakeIndex === i;
+    const bubble = isRegen
+      ? `<div class="ic-bubble"><div class="ic-typing"><span></span><span></span><span></span></div></div>`
+      : `<div class="ic-bubble">${esc(m.content)}</div>`;
+    const actions = (!isUser && !isRegen) ? `
+      <div class="ic-actions">
+        <button class="ic-action-btn" title="Copy" onclick="copyIntakeMessage(${i}, this)">${IC_ICON_COPY}</button>
+        <button class="ic-action-btn" title="Regenerate" onclick="regenerateIntakeMessage(${i})">${IC_ICON_REGEN}</button>
+      </div>` : '';
+    return `
+      <div class="ic-row ${isUser ? 'sent' : 'received'}">
+        <div class="ic-avatar ${isUser ? 'user' : 'bot'}">${isUser ? 'You' : 'AI'}</div>
+        <div class="ic-bubble-wrap">${bubble}${actions}</div>
+      </div>`;
+  }).join('');
+
+  const typingRow = intakeTyping ? `
+    <div class="ic-row received">
+      <div class="ic-avatar bot">AI</div>
+      <div class="ic-bubble-wrap"><div class="ic-bubble"><div class="ic-typing"><span></span><span></span><span></span></div></div></div>
+    </div>` : '';
+
+  log.innerHTML = rows + typingRow;
   log.scrollTop = log.scrollHeight;
+}
+
+// Copies one message's raw text (from the message array, not the rendered DOM,
+// so HTML-escaped characters come back out clean) to the clipboard.
+function copyIntakeMessage(i, btn) {
+  const m = intakeMessages[i];
+  if (!m) return;
+  navigator.clipboard.writeText(m.content).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = IC_ICON_CHECK;
+    setTimeout(() => { btn.innerHTML = orig; }, 1400);
+  });
+}
+
+// Re-asks Claude for just this one assistant reply, using everything said before
+// it as context, and swaps the result in place - lets the recruiter reroll a
+// single answer without losing or resending the rest of the conversation.
+async function regenerateIntakeMessage(i) {
+  if (regeneratingIntakeIndex !== null) return;
+  const m = intakeMessages[i];
+  if (!m || m.role !== 'assistant') return;
+  const prefix = intakeMessages.slice(0, i);
+  if (!prefix.length) return;
+
+  regeneratingIntakeIndex = i;
+  renderIntakeChat();
+  try {
+    const reply = await callClaudeChat(prefix, INTAKE_SYSTEM_PROMPT);
+    intakeMessages[i] = { role: 'assistant', content: reply };
+    localStorage.setItem('tt_intake_messages', JSON.stringify(intakeMessages));
+  } catch (err) {
+    console.error('Regenerate error:', err);
+    showStatus('intake-chat-status', 'error', '⚠ ' + (err.message || 'Could not regenerate that reply.'));
+  } finally {
+    regeneratingIntakeIndex = null;
+    renderIntakeChat();
+  }
 }
 
 async function sendIntakeMessage() {
@@ -4475,6 +4563,7 @@ async function sendIntakeMessage() {
 
   intakeMessages.push({ role: 'user', content: text });
   input.value = '';
+  intakeTyping = true;
   renderIntakeChat();
   localStorage.setItem('tt_intake_messages', JSON.stringify(intakeMessages));
 
@@ -4487,11 +4576,12 @@ async function sendIntakeMessage() {
     const reply = await callClaudeChat(intakeMessages, INTAKE_SYSTEM_PROMPT);
     intakeMessages.push({ role: 'assistant', content: reply });
     localStorage.setItem('tt_intake_messages', JSON.stringify(intakeMessages));
-    renderIntakeChat();
   } catch (err) {
     console.error('Intake chat error:', err);
     showStatus('intake-chat-status', 'error', '⚠ ' + (err.message || 'Message failed.'));
   } finally {
+    intakeTyping = false;
+    renderIntakeChat();
     btn.disabled = false; sp.classList.remove('on');
   }
 }
