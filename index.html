@@ -526,6 +526,60 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 /* ── SECTION HINT (short helper line under a card-head, before the fields) ── */
 .section-hint{font-size:11.5px;color:var(--muted);line-height:1.5;margin:-10px 0 16px;}
 
+/* ── GITHUB SEARCH MODE TABS (Users / Repos toggle) ──
+   Deliberately its own class rather than reusing .jd-tab: switchJdTab() does a
+   page-wide querySelectorAll('.jd-tab') to manage active state, which would also
+   grab these buttons if they shared the class name. Same visual language, separate
+   namespace. */
+.gh-mode-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+.gh-mode-tab{font-size:12px;padding:7px 13px;border-radius:7px;cursor:pointer;
+  border:1px solid var(--border2);color:var(--muted);background:var(--surface);
+  font-weight:600;transition:all 0.12s;}
+.gh-mode-tab.active{background:var(--accent-glow);border-color:rgba(91,113,224,0.35);color:var(--accent2);}
+
+/* ── REPO SEARCH RESULT ROWS (compact - distinct from the candidate profile cards,
+   modeled after the repo-list screenshot from the reference "Repo Extract" tool) ── */
+.repo-results{display:flex;flex-direction:column;gap:8px;}
+.repo-result-row{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:12px 14px;border:1px solid var(--border);border-radius:8px;
+  background:var(--surface);transition:border-color 0.12s,box-shadow 0.12s;
+}
+.repo-result-row:hover{border-color:var(--warn);box-shadow:0 8px 18px rgba(223,171,1,0.08);}
+.repo-result-main{flex:1;min-width:0;}
+.repo-result-name{font-weight:700;font-size:13.5px;color:var(--text);text-decoration:none;}
+.repo-result-name:hover{text-decoration:underline;}
+.repo-result-desc{font-size:11.5px;color:var(--muted);margin-top:2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.repo-result-stats{display:flex;gap:10px;font-size:11px;color:var(--muted);flex-shrink:0;white-space:nowrap;}
+.repo-result-lang{padding:1px 7px;border-radius:4px;background:var(--accent-glow);color:var(--accent2);font-weight:600;}
+.repo-result-actions{display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0;}
+
+/* ── CANDIDATE TABLE (compact list for GitHub Candidates, matching the reference
+   tool's contributor-table screenshot). Kept separate from .profile-card, which
+   TalentData's tab also uses for its bio-heavy cards - a dense table fits GitHub's
+   handful of stat fields better than it would fit a full LinkedIn-style profile. ── */
+.gh-cand-table-wrap{overflow-x:auto;}
+.gh-cand-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.gh-cand-table th{
+  text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.6px;
+  color:var(--muted);font-weight:700;padding:8px 10px;border-bottom:1.5px solid var(--border);
+  white-space:nowrap;
+}
+.gh-cand-table td{padding:10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.gh-cand-table tr:last-child td{border-bottom:none;}
+.gh-cand-table tr:hover td{background:rgba(91,113,224,0.03);}
+.gh-cand-user{display:flex;align-items:center;gap:10px;min-width:200px;}
+.gh-cand-avatar{width:34px;height:34px;border-radius:8px;flex-shrink:0;object-fit:cover;
+  background:linear-gradient(135deg,#00A4EB,#002F6C);color:#fff;font-weight:700;font-size:13px;
+  display:grid;place-items:center;}
+.gh-cand-name{font-weight:700;color:var(--text);}
+.gh-cand-login{font-size:11px;color:var(--muted);}
+.gh-cand-bio{font-size:11px;color:var(--muted);margin-top:1px;max-width:280px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.gh-cand-stats{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--muted);white-space:nowrap;}
+.gh-cand-email{font-size:11.5px;color:var(--text);}
+
 
 /* ── LANDING PAGE ── */
 .landing{
@@ -1544,67 +1598,70 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
     <div class="page-badge live">● Live data</div>
   </div>
 
-  <div class="grid-2" style="gap:16px;align-items:start;">
-    <div>
-      <div class="card" style="margin-bottom:16px;">
-        <div class="card-head">
-          <div class="card-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2);"></div>
-          <div class="card-title" style="color:var(--accent2);">Search</div>
-          <span style="margin-left:auto;font-size:10px;color:var(--muted);" id="gh-search-subtitle">GitHub Users API · sorted by followers</span>
-        </div>
-        <div class="grid-2" style="gap:12px;">
-          <div>
-            <label>Keywords <span style="color:var(--muted);text-transform:none;font-weight:400;">(boolean - matches bio, name, company &amp; login)</span></label>
-            <input id="gh-keywords" placeholder='e.g. (SRE OR "site reliability") AND python NOT recruiter'>
-            <div style="font-size:10px;color:var(--muted);margin-top:-10px;line-height:1.5;">
-              Supports <b>AND</b> · <b>OR</b> · <b>NOT</b> · <b>( )</b> · <b>"exact phrases"</b>. A space means AND, a comma means OR, and <b>-word</b> is short for NOT. Add a language or location below so we can also check bios GitHub itself doesn't index.
-            </div>
-          </div>
-          <div>
-            <label>Languages <span style="color:var(--muted);text-transform:none;font-weight:400;">(comma separated - must have all · programming languages only, put tools like AWS in Keywords)</span></label>
-            <input id="gh-language" placeholder="e.g. Go, Python">
-          </div>
-        </div>
-        <div class="grid-2" style="gap:12px;">
-          <div>
-            <label>Location <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional)</span></label>
-            <input id="gh-location" placeholder="e.g. Bangalore">
-          </div>
-          <div>
-            <label>Result Limit <span style="color:var(--muted);text-transform:none;font-weight:400;">(max 30 per search)</span></label>
-            <input id="gh-limit" type="number" min="1" max="30" value="20" style="max-width:140px;">
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-head">
+      <div class="card-dot" style="background:var(--accent2);box-shadow:0 0 6px var(--accent2);"></div>
+      <div class="card-title" style="color:var(--accent2);">Search</div>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted);" id="gh-search-subtitle">GitHub Users API · sorted by followers</span>
+    </div>
+
+    <div class="gh-mode-tabs">
+      <button class="gh-mode-tab active" id="gh-mode-tab-user" onclick="switchGithubMode('user')">👤 Users</button>
+      <button class="gh-mode-tab" id="gh-mode-tab-repo" onclick="switchGithubMode('repo')">📦 Repos</button>
+    </div>
+
+    <div id="gh-mode-user">
+      <div class="grid-2" style="gap:12px;">
+        <div>
+          <label>Keywords <span style="color:var(--muted);text-transform:none;font-weight:400;">(boolean - matches bio, name, company &amp; login)</span></label>
+          <input id="gh-keywords" placeholder='e.g. (SRE OR "site reliability") AND python NOT recruiter'>
+          <div style="font-size:10px;color:var(--muted);margin-top:-10px;line-height:1.5;">
+            Supports <b>AND</b> · <b>OR</b> · <b>NOT</b> · <b>( )</b> · <b>"exact phrases"</b>. A space means AND, a comma means OR, and <b>-word</b> is short for NOT. Add a language or location below so we can also check bios GitHub itself doesn't index.
           </div>
         </div>
-        <div class="grid-2" style="gap:12px;">
-          <div>
-            <label>Minimum Followers <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional - signal of visibility)</span></label>
-            <input id="gh-min-followers" type="number" min="0" placeholder="e.g. 50">
-          </div>
-          <div>
-            <label>Minimum Public Repos <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional - signal of activity)</span></label>
-            <input id="gh-min-repos" type="number" min="0" placeholder="e.g. 10">
-          </div>
-        </div>
-        <div class="grid-2" style="gap:12px;">
-          <div>
-            <label>Sort by <span style="color:var(--muted);text-transform:none;font-weight:400;">(GitHub ranking)</span></label>
-            <select id="gh-sort-by" onchange="updateGitHubSortSubtitle()">
-              <option value="followers">Followers</option>
-              <option value="repositories">Public repos</option>
-              <option value="joined">Join date</option>
-              <option value="best">Best match</option>
-            </select>
-          </div>
-          <div>
-            <label>Order <span style="color:var(--muted);text-transform:none;font-weight:400;">(ignored for Best match)</span></label>
-            <select id="gh-sort-order" onchange="updateGitHubSortSubtitle()">
-              <option value="desc">Highest / most recent first</option>
-              <option value="asc">Lowest / oldest first</option>
-            </select>
-          </div>
+        <div>
+          <label>Languages <span style="color:var(--muted);text-transform:none;font-weight:400;">(comma separated - must have all · programming languages only, put tools like AWS in Keywords)</span></label>
+          <input id="gh-language" placeholder="e.g. Go, Python">
         </div>
       </div>
-
+      <div class="grid-2" style="gap:12px;">
+        <div>
+          <label>Location <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional)</span></label>
+          <input id="gh-location" placeholder="e.g. Bangalore">
+        </div>
+        <div>
+          <label>Result Limit <span style="color:var(--muted);text-transform:none;font-weight:400;">(max 30 per search)</span></label>
+          <input id="gh-limit" type="number" min="1" max="30" value="20" style="max-width:140px;">
+        </div>
+      </div>
+      <div class="grid-2" style="gap:12px;">
+        <div>
+          <label>Minimum Followers <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional - signal of visibility)</span></label>
+          <input id="gh-min-followers" type="number" min="0" placeholder="e.g. 50">
+        </div>
+        <div>
+          <label>Minimum Public Repos <span style="color:var(--muted);text-transform:none;font-weight:400;">(optional - signal of activity)</span></label>
+          <input id="gh-min-repos" type="number" min="0" placeholder="e.g. 10">
+        </div>
+      </div>
+      <div class="grid-2" style="gap:12px;">
+        <div>
+          <label>Sort by <span style="color:var(--muted);text-transform:none;font-weight:400;">(GitHub ranking)</span></label>
+          <select id="gh-sort-by" onchange="updateGitHubSortSubtitle()">
+            <option value="followers">Followers</option>
+            <option value="repositories">Public repos</option>
+            <option value="joined">Join date</option>
+            <option value="best">Best match</option>
+          </select>
+        </div>
+        <div>
+          <label>Order <span style="color:var(--muted);text-transform:none;font-weight:400;">(ignored for Best match)</span></label>
+          <select id="gh-sort-order" onchange="updateGitHubSortSubtitle()">
+            <option value="desc">Highest / most recent first</option>
+            <option value="asc">Lowest / oldest first</option>
+          </select>
+        </div>
+      </div>
       <div class="btn-row">
         <button class="btn btn-primary" onclick="searchGitHub()" id="gh-search-btn">
           <span id="gh-search-text">🐙 Search GitHub</span>
@@ -1612,28 +1669,21 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
         </button>
         <button class="btn btn-danger" onclick="clearGitHubResults()">🗑 Clear</button>
       </div>
-      <div class="status" id="gh-search-status" style="margin-bottom:16px;"></div>
+      <div class="status" id="gh-search-status"></div>
     </div>
 
-    <div>
-      <div class="card">
-        <div class="card-head">
-          <div class="card-dot" style="background:var(--warn);box-shadow:0 0 6px var(--warn);"></div>
-          <div class="card-title" style="color:var(--warn);">Repo Search</div>
-          <span style="margin-left:auto;font-size:10px;color:var(--muted);">Source from a repo's contributors</span>
-        </div>
-        <div class="section-hint">Find a repository by name, owner/name, or topic, then pull its top contributors straight into Candidates below - useful for "who actually builds this" sourcing instead of keyword guessing.</div>
-        <label>Repository <span style="color:var(--muted);text-transform:none;font-weight:400;">(name, topic, or owner/name)</span></label>
-        <div style="display:flex;gap:8px;margin-bottom:10px;">
-          <input id="gh-repo-query" placeholder='e.g. kubernetes, or facebook/react' style="margin-bottom:0;">
-          <button class="btn btn-primary" onclick="searchGitHubRepos()" id="gh-repo-search-btn" style="white-space:nowrap;">
-            <span id="gh-repo-search-text">🔍 Search</span>
-            <div class="spinner" id="gh-repo-search-spinner"></div>
-          </button>
-        </div>
-        <div class="status" id="gh-repo-status" style="margin-bottom:10px;"></div>
-        <div id="gh-repo-results"></div>
+    <div id="gh-mode-repo" style="display:none;">
+      <div class="section-hint" style="margin-top:0;">Find a repository by name, owner/name, or topic, then pull its top contributors straight into Candidates below - useful for "who actually builds this" sourcing instead of keyword guessing.</div>
+      <label>Repository <span style="color:var(--muted);text-transform:none;font-weight:400;">(name, topic, or owner/name)</span></label>
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input id="gh-repo-query" placeholder='e.g. kubernetes, or facebook/react' style="margin-bottom:0;">
+        <button class="btn btn-primary" onclick="searchGitHubRepos()" id="gh-repo-search-btn" style="white-space:nowrap;">
+          <span id="gh-repo-search-text">🔍 Search</span>
+          <div class="spinner" id="gh-repo-search-spinner"></div>
+        </button>
       </div>
+      <div class="status" id="gh-repo-status" style="margin-bottom:10px;"></div>
+      <div id="gh-repo-results"></div>
     </div>
   </div>
 
@@ -2601,6 +2651,19 @@ function loadGitHubSettings() {
     if (saved.length) { ghResults = saved; renderGitHubResults(); }
   } catch(e) { /* ignore corrupt storage */ }
   updateGitHubSortSubtitle();
+  switchGithubMode(localStorage.getItem('tt_gh_mode') || 'user');
+}
+
+// Toggles between the "Users" and "Repos" search forms living in the same Search
+// card - only one is shown at a time so neither ends up cramped in a half-width
+// column, and the active tab makes it obvious which mode is live.
+function switchGithubMode(mode) {
+  const isRepo = mode === 'repo';
+  document.getElementById('gh-mode-user').style.display = isRepo ? 'none' : '';
+  document.getElementById('gh-mode-repo').style.display = isRepo ? '' : 'none';
+  document.getElementById('gh-mode-tab-user').classList.toggle('active', !isRepo);
+  document.getElementById('gh-mode-tab-repo').classList.toggle('active', isRepo);
+  localStorage.setItem('tt_gh_mode', mode);
 }
 
 // Keeps the small "GitHub Users API · sorted by ..." header in sync with the
@@ -2940,32 +3003,39 @@ async function searchGitHubRepos() {
   }
 }
 
+// Compact bordered rows (name/description on the left, stats + Extract action on
+// the right) - matches the reference tool's repo-list screenshot, and is
+// deliberately not .profile-card since a repo has nothing like a bio/headline to
+// justify that much vertical space per row.
 function renderGitHubRepoResults() {
   const wrap = document.getElementById('gh-repo-results');
   if (!wrap) return;
   if (!ghRepoResults.length) { wrap.innerHTML = ''; return; }
 
-  wrap.innerHTML = ghRepoResults.map((r, i) => `
-    <div class="profile-card" style="align-items:flex-start;">
-      <div class="profile-card-main">
-        <div class="profile-card-top">
-          <div style="flex:1;min-width:0;">
-            <div class="profile-name"><a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer" style="color:inherit;">${esc(r.fullName)}</a></div>
-            <div class="profile-headline">${esc(r.description) || 'No description'}</div>
-          </div>
+  const updatedLabel = (iso) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return isNaN(d) ? '' : d.toLocaleDateString();
+  };
+
+  wrap.innerHTML = '<div class="repo-results">' + ghRepoResults.map((r, i) => `
+    <div class="repo-result-row">
+      <div class="repo-result-main">
+        <a class="repo-result-name" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${esc(r.fullName)}</a>
+        <div class="repo-result-desc">${esc(r.description) || 'No description'}</div>
+        <div class="repo-result-stats" style="margin-top:5px;">
+          <span>⭐ ${(r.stars || 0).toLocaleString()}</span>
+          <span>🔀 ${(r.forks || 0).toLocaleString()}</span>
+          ${r.language ? `<span class="repo-result-lang">${esc(r.language)}</span>` : ''}
+          ${updatedLabel(r.updatedAt) ? `<span>🕐 ${updatedLabel(r.updatedAt)}</span>` : ''}
         </div>
-        <div class="profile-skills" style="margin-top:6px;">
-          <span class="skill-tag">⭐ ${(r.stars || 0).toLocaleString()}</span>
-          <span class="skill-tag">🔀 ${(r.forks || 0).toLocaleString()}</span>
-          ${r.language ? `<span class="skill-tag">${esc(r.language)}</span>` : ''}
-        </div>
-        <div class="btn-row" style="margin-top:10px;">
-          <button class="btn btn-ghost btn-sm" id="gh-repo-extract-btn-${i}" onclick="extractRepoContributors(${i})" style="white-space:nowrap;">👥 Extract Contributors</button>
-        </div>
-        <div class="status" id="gh-repo-extract-status-${i}" style="margin-top:6px;"></div>
+      </div>
+      <div class="repo-result-actions">
+        <button class="btn btn-ghost btn-sm" id="gh-repo-extract-btn-${i}" onclick="extractRepoContributors(${i})" style="white-space:nowrap;">👥 Extract Contributors</button>
+        <div class="status" id="gh-repo-extract-status-${i}" style="font-size:10.5px;padding:4px 8px;"></div>
       </div>
     </div>
-  `).join('');
+  `).join('') + '</div>';
 }
 
 // Pulls the repo's top contributors (capped server-side, see api/github-repo-contributors.js)
@@ -3023,7 +3093,11 @@ function renderGitHubResults() {
     return;
   }
 
-  const cards = ghResults.map((p, i) => {
+  // Compact table (avatar/name, activity stats, email, location, link) instead of
+  // the big LinkedIn-style profile cards - matches the reference tool's contributor
+  // table and fits GitHub's handful of stat fields far more densely. Deliberately
+  // not .profile-card, which TalentData's tab also uses for its bio-heavy cards.
+  const rows = ghResults.map((p, i) => {
     const displayName = p.name || p.login;
     const roleLine = [p.company ? p.company.replace(/^@/, '') : '', p.location].filter(Boolean).join(' · ');
     // Public profile email plus anything dug out of commit history, deduped.
@@ -3032,51 +3106,55 @@ function renderGitHubResults() {
     (p.commitEmails || []).forEach(e => {
       if (!allEmails.some(x => x.toLowerCase() === e.email.toLowerCase())) allEmails.push(e.email);
     });
-    const stats = [
+
+    const statLines = [
       p.followers != null ? `👥 ${p.followers} followers` : '',
       p.publicRepos != null ? `📦 ${p.publicRepos} repos` : '',
       p.hireable ? '✅ Hireable' : '',
-      p.sourceRepo ? `🔨 via ${esc(p.sourceRepo)}${p.contributions != null ? ' (' + p.contributions + ' commits)' : ''}` : ''
+      p.sourceRepo ? `🔨 ${esc(p.sourceRepo)}${p.contributions != null ? ' · ' + p.contributions + ' commits' : ''}` : ''
     ].filter(Boolean);
-    allEmails.forEach(e => stats.push(`✉️ ${esc(e)}`));
-    if (p.emailSearched && !allEmails.length) {
-      if (p.emailMasked) {
-        stats.push('🔒 Email private on GitHub');
-      } else if (p.emailIncomplete) {
-        const coverage = p.reposTotal ? ` (${p.reposChecked}/${p.reposTotal} repos)` : '';
-        stats.push(`✉️ Not found yet${coverage} - retry for a deeper check`);
-      } else {
-        stats.push('✉️ No public email found');
-      }
+
+    let emailCell;
+    if (allEmails.length) {
+      emailCell = allEmails.map(e => `<div class="gh-cand-email">✉️ ${esc(e)}</div>`).join('');
+    } else if (p.emailMasked) {
+      emailCell = `<span class="gh-cand-stats">🔒 Private on GitHub</span>`;
+    } else if (p.emailIncomplete) {
+      const coverage = p.reposTotal ? ` (${p.reposChecked}/${p.reposTotal})` : '';
+      emailCell = `<button class="btn btn-ghost btn-sm" id="gh-email-btn-${i}" onclick="findGitHubEmail(${i})" style="white-space:nowrap;">↻ Retry${coverage}</button>`;
+    } else if (p.emailSearched) {
+      emailCell = `<span class="gh-cand-stats">✉️ None found</span>`;
+    } else {
+      emailCell = `<button class="btn btn-ghost btn-sm" id="gh-email-btn-${i}" onclick="findGitHubEmail(${i})" style="white-space:nowrap;">✉️ Find Email</button>`;
     }
+
     return `
-    <div class="profile-card">
-      ${p.avatar
-        ? `<img class="profile-avatar" src="${esc(p.avatar)}" alt="" style="object-fit:cover;">`
-        : `<div class="profile-avatar">${esc((displayName || '?')[0].toUpperCase())}</div>`}
-      <div class="profile-card-main">
-        <div class="profile-card-top">
-          <div style="flex:1;min-width:0;">
-            <div class="profile-name">${esc(displayName)} <span style="color:var(--muted);font-weight:400;">@${esc(p.login)}</span></div>
-            <div class="profile-headline">${esc(p.bio) || 'No bio'}</div>
-            ${roleLine ? `<div class="profile-meta">${esc(roleLine)}</div>` : ''}
-          </div>
-          <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
-            <a class="profile-linkedin-btn" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">↗ GitHub</a>
-            ${allEmails.length ? '' : `<button class="btn btn-ghost btn-sm" id="gh-email-btn-${i}" onclick="findGitHubEmail(${i})" style="white-space:nowrap;">${p.emailSearched ? '↻ Retry email' : '✉️ Find Email'}</button>`}
+    <tr>
+      <td>
+        <div class="gh-cand-user">
+          ${p.avatar
+            ? `<img class="gh-cand-avatar" src="${esc(p.avatar)}" alt="">`
+            : `<div class="gh-cand-avatar">${esc((displayName || '?')[0].toUpperCase())}</div>`}
+          <div style="min-width:0;">
+            <div class="gh-cand-name">${esc(displayName)}</div>
+            <div class="gh-cand-login">@${esc(p.login)}${roleLine ? ' · ' + esc(roleLine) : ''}</div>
+            <div class="gh-cand-bio" title="${esc(p.bio)}">${esc(p.bio) || 'No bio'}</div>
           </div>
         </div>
-        ${stats.length ? `<div class="profile-skills">
-          ${stats.map(s => `<span class="skill-tag">${s}</span>`).join('')}
-        </div>` : ''}
-      </div>
-    </div>
+      </td>
+      <td><div class="gh-cand-stats">${statLines.length ? statLines.join('<br>') : '—'}</div></td>
+      <td>${emailCell}</td>
+      <td><a class="profile-linkedin-btn" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">↗ GitHub</a></td>
+    </tr>
   `;
   });
 
   // Newest search's results first - same as the TalentData tab, so fresh hits
   // aren't buried under previously accumulated ones.
-  wrap.innerHTML = '<div class="profile-cards">' + cards.slice().reverse().join('') + '</div>';
+  wrap.innerHTML = `<div class="gh-cand-table-wrap"><table class="gh-cand-table">
+    <thead><tr><th>Candidate</th><th>Activity</th><th>Email</th><th></th></tr></thead>
+    <tbody>${rows.slice().reverse().join('')}</tbody>
+  </table></div>`;
 }
 
 loadGitHubSettings();
