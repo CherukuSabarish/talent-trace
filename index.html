@@ -1501,6 +1501,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
       GitHub
     </button>
     <button class="btn btn-ghost" style="border-color:rgba(217,115,13,0.3);color:var(--ai);" onclick="openModal()">＋ Add Custom Role</button>
+    <button class="btn btn-danger" onclick="clearBooleanBuilder()">🗑 Clear</button>
   </div>
   <div class="status" id="builder-status"></div>
 
@@ -1740,7 +1741,7 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
       <span id="cd-search-text">🛰️ Search TalentData</span>
       <div class="spinner" id="cd-search-spinner"></div>
     </button>
-    <button class="btn btn-danger" onclick="clearTalentDataResults()">🗑 Clear</button>
+    <button class="btn btn-danger" onclick="clearTalentDataResults()" title="Clears the search fields and the candidates below">🗑 Clear</button>
   </div>
   <div class="status" id="cd-search-status" style="margin-bottom:16px;"></div>
 
@@ -1858,7 +1859,7 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
           <span id="gh-search-text">🐙 Search GitHub</span>
           <div class="spinner" id="gh-search-spinner"></div>
         </button>
-        <button class="btn btn-danger" onclick="clearGitHubResults()">🗑 Clear</button>
+        <button class="btn btn-danger" onclick="clearGitHubResults()" title="Clears the search fields and the candidates below">🗑 Clear</button>
       </div>
       <div class="status" id="gh-search-status"></div>
     </div>
@@ -2741,13 +2742,36 @@ function renderCandidateModal() {
   `;
 }
 
+// Clear wipes the search fields as well as the candidates, so the tab is ready
+// for the next role. The Google Sheet webhook is kept.
 function clearTalentDataResults() {
-  if (!cdResults.length) return;
-  if (!confirm('Clear all ' + cdResults.length + ' TalentData results?')) return;
+  if (cdResults.length && !confirm('Clear the search fields and all ' + cdResults.length + ' TalentData results?')) return;
+  clearTalentDataSilent();
+}
+function clearTalentDataSilent() {
   cdResults = [];
   persistCdResults();
   renderTalentDataResults();
+  resetFormFields(['cd-title','cd-location','cd-limit','cd-must','cd-nice','cd-target-companies','cd-notes','cd-role','cd-exp'],
+    ['tt_cd_role','tt_cd_exp','tt_cd_must','tt_cd_nice','tt_cd_companies','tt_cd_notes']);
   hideStatus('cd-search-status');
+  hideStatus('cd-export-status');
+}
+
+// Puts each field back to how the page first loaded it (empty, or its built-in
+// default such as a result limit of 20) and forgets the saved copy in storage.
+function resetFormFields(ids, storageKeys) {
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.tagName === 'SELECT') {
+      const def = Array.from(el.options).find(o => o.defaultSelected) || el.options[0];
+      el.value = def ? def.value : '';
+    } else {
+      el.value = el.defaultValue || '';
+    }
+  });
+  (storageKeys || []).forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
 }
 
 function persistCdResults() {
@@ -3297,9 +3321,18 @@ function clearGitHubResultsSilent() {
 }
 
 function clearGitHubResults() {
-  if (!ghResults.length) return;
-  if (!confirm('Clear all ' + ghResults.length + ' GitHub results?')) return;
+  if (ghResults.length && !confirm('Clear the search fields and all ' + ghResults.length + ' GitHub results?')) return;
+  clearGitHubAll();
+}
+// Search fields + candidates + repo cards. The Google Sheet webhook is kept.
+function clearGitHubAll() {
   clearGitHubResultsSilent();
+  clearGitHubRepoResults();
+  const ids = ['gh-language','gh-location','gh-limit','gh-min-followers','gh-min-repos','gh-sort-by','gh-sort-order','gh-repo-query','gh-location-filter','gh-role','gh-exp'];
+  resetFormFields(ids, ids.map(id => 'tt_' + id));
+  if (typeof updateGitHubSortSubtitle === 'function') updateGitHubSortSubtitle();
+  if (typeof renderGitHubResults === 'function') renderGitHubResults();
+  hideStatus('gh-export-status');
 }
 
 // ══════════════════════════════════════════════
@@ -3703,6 +3736,17 @@ function buildMandatory() {
   if (!terms.length) return '';
   const quoted = terms.map(t => t.startsWith('"') ? t : `"${t}"`);
   return '(' + quoted.join(` ${mandatoryLogicMode} `) + ')';
+}
+
+function clearBooleanBuilder() {
+  resetFormFields(['role','location','minExp','maxExp','cluster','talentCluster','education','companies','exclude','mandatory','output','xray','so-query']);
+  const roles = getCustomRoles();
+  if (roles.some(r => r.key === 'custom_prefill')) {
+    saveCustomRoles(roles.filter(r => r.key !== 'custom_prefill'));
+    populateRoles();
+  }
+  updateMandatoryPreview();
+  hideStatus('builder-status');
 }
 
 function updateMandatoryPreview() {
@@ -4757,19 +4801,12 @@ function renderICPSummary() {
   `;
 }
 
-// "Clear / New Role": wipes everything that came from this role's intake so the
-// next role starts clean - the chat, the finalized ICP, the Market Intelligence
-// inputs and report, the Sourcing banner, and whatever the prefill copied into
-// the JD Analyzer. Candidate results already found in TalentData/GitHub are left
-// alone (they have their own Clear buttons).
+// "Clear / New Role": wipes everything for the current role so the next one
+// starts clean - the chat, the finalized ICP, the Market Intelligence inputs and
+// report, and every Sourcing tool (fields and candidates). Only the Google Sheet
+// webhook and the recruiter's own saved custom roles are kept.
 function clearIntakeChat() {
-  let hasIcp = false, hasIntel = false;
-  try { hasIcp = !!localStorage.getItem('tt_icp'); hasIntel = !!localStorage.getItem('tt_market_intel'); } catch (e) {}
-  if (!intakeMessages.length && !hasIcp && !hasIntel && !localStorage.getItem('tt_mi_role_title')) {
-    showStatus('intake-chat-status', 'success', 'Nothing to clear - you are ready to start a new role.');
-    return;
-  }
-  if (!confirm('Start a new role? This clears the intake conversation, the finalized ICP, the Market Intelligence report, and the Sourcing prefill banner. Candidate search results are kept.')) return;
+  if (!confirm('Start a new role? This clears everything for the current role: the intake conversation, the finalized ICP, the Market Intelligence report, and all Sourcing tools (Boolean Builder, JD Analyzer, TalentData and GitHub fields and candidates). Your Google Sheet link is kept.')) return;
 
   intakeMessages = [];
   ['tt_intake_messages', 'tt_icp', 'tt_market_intel', 'tt_mi_role_title', 'tt_mi_level', 'tt_mi_location']
@@ -4784,17 +4821,13 @@ function clearIntakeChat() {
   if (typeof hideStatus === 'function') hideStatus('mi-status');
   renderMIIcpBanner();
 
-  // Sourcing: banner, the role the prefill added to the Boolean Builder, and the JD Analyzer
+  // Sourcing: the handoff banner plus every tool's fields and candidates
   renderSourcingHandoffBanner();
-  try {
-    const roles = getCustomRoles();
-    if (roles.some(r => r.key === 'custom_prefill')) {
-      saveCustomRoles(roles.filter(r => r.key !== 'custom_prefill'));
-      populateRoles();
-    }
-  } catch (e) {}
   if (typeof lastJdAnalysis !== 'undefined') lastJdAnalysis = null;
-  if (typeof clearJD === 'function') clearJD();
+  clearJD();
+  clearBooleanBuilder();
+  clearTalentDataSilent();
+  clearGitHubAll();
 
   showStatus('intake-chat-status', 'success', '✓ Cleared. Describe the next role to start a new intake.');
 }
