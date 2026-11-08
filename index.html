@@ -1195,7 +1195,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
         <span id="intake-finalize-text">📋 Finalize ICP</span>
         <div class="spinner" id="intake-finalize-spinner"></div>
       </button>
-      <button class="btn btn-danger" onclick="clearIntakeChat()">🗑 Clear Conversation</button>
+      <button class="btn btn-danger" onclick="clearIntakeChat()">🗑 Clear / New Role</button>
     </div>
   </div>
 
@@ -4757,13 +4757,46 @@ function renderICPSummary() {
   `;
 }
 
+// "Clear / New Role": wipes everything that came from this role's intake so the
+// next role starts clean - the chat, the finalized ICP, the Market Intelligence
+// inputs and report, the Sourcing banner, and whatever the prefill copied into
+// the JD Analyzer. Candidate results already found in TalentData/GitHub are left
+// alone (they have their own Clear buttons).
 function clearIntakeChat() {
-  if (!intakeMessages.length) return;
-  if (!confirm('Clear the intake conversation? The finalized ICP (if any) stays saved.')) return;
+  let hasIcp = false, hasIntel = false;
+  try { hasIcp = !!localStorage.getItem('tt_icp'); hasIntel = !!localStorage.getItem('tt_market_intel'); } catch (e) {}
+  if (!intakeMessages.length && !hasIcp && !hasIntel && !localStorage.getItem('tt_mi_role_title')) {
+    showStatus('intake-chat-status', 'success', 'Nothing to clear - you are ready to start a new role.');
+    return;
+  }
+  if (!confirm('Start a new role? This clears the intake conversation, the finalized ICP, the Market Intelligence report, and the Sourcing prefill banner. Candidate search results are kept.')) return;
+
   intakeMessages = [];
-  localStorage.setItem('tt_intake_messages', '[]');
+  ['tt_intake_messages', 'tt_icp', 'tt_market_intel', 'tt_mi_role_title', 'tt_mi_level', 'tt_mi_location']
+    .forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
   renderIntakeChat();
-  hideStatus('intake-chat-status');
+  renderICPSummary();
+
+  // Market Intelligence
+  ['mi-role-title', 'mi-level', 'mi-location'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const miWrap = document.getElementById('mi-report-wrap');
+  if (miWrap) miWrap.innerHTML = '';
+  if (typeof hideStatus === 'function') hideStatus('mi-status');
+  renderMIIcpBanner();
+
+  // Sourcing: banner, the role the prefill added to the Boolean Builder, and the JD Analyzer
+  renderSourcingHandoffBanner();
+  try {
+    const roles = getCustomRoles();
+    if (roles.some(r => r.key === 'custom_prefill')) {
+      saveCustomRoles(roles.filter(r => r.key !== 'custom_prefill'));
+      populateRoles();
+    }
+  } catch (e) {}
+  if (typeof lastJdAnalysis !== 'undefined') lastJdAnalysis = null;
+  if (typeof clearJD === 'function') clearJD();
+
+  showStatus('intake-chat-status', 'success', '✓ Cleared. Describe the next role to start a new intake.');
 }
 
 // ══════════════════════════════════════════════
