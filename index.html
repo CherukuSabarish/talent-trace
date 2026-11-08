@@ -1176,8 +1176,14 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
     </div>
     <div class="status" id="intake-chat-status" style="margin-top:10px;"></div>
     <div style="display:flex;gap:8px;margin-top:12px;">
-      <input id="intake-chat-input" placeholder="Describe the role, or answer Trace's last question..." style="margin-bottom:0;" onkeydown="if(event.key==='Enter'){event.preventDefault();sendIntakeMessage();}">
-      <button class="btn btn-primary" onclick="sendIntakeMessage()" id="intake-send-btn" style="white-space:nowrap;">
+      <!-- A textarea, not a one-line input: pasting a full job description into an
+           input silently flattens every line break, so the JD arrived as one wall of
+           text. Enter still sends; Shift+Enter adds a new line. -->
+      <textarea id="intake-chat-input" class="form-area" rows="2" placeholder="Describe the role, paste a JD, or answer Trace's last question... (Shift+Enter for a new line)"
+        style="margin-bottom:0;min-height:44px;max-height:260px;resize:vertical;"
+        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,260)+'px';"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendIntakeMessage();}"></textarea>
+      <button class="btn btn-primary" onclick="sendIntakeMessage()" id="intake-send-btn" style="white-space:nowrap;align-self:flex-end;">
         <span id="intake-send-text">Send</span>
         <div class="spinner" id="intake-send-spinner"></div>
       </button>
@@ -4018,7 +4024,7 @@ Analyze this Job Description and return ONLY a JSON object (no markdown, no expl
 }
 
 JD:
-${jd.substring(0, 2000)}`;
+${jd.substring(0, 6000)}`;
 
     const r1 = await fetch('/api/anthropic-chat', {
       method: 'POST',
@@ -4078,7 +4084,7 @@ Return ONLY a JSON array (no markdown):
   {"type": "Technical", "question": "..."}
 ]
 
-JD: ${jd.substring(0, 1500)}`;
+JD: ${jd.substring(0, 6000)}`;
 
     const r2 = await fetch('/api/anthropic-chat', {
       method: 'POST',
@@ -4153,7 +4159,7 @@ Return ONLY a JSON object (no markdown):
   ]
 }
 
-JD: ${jd.substring(0, 1200)}`;
+JD: ${jd.substring(0, 6000)}`;
 
     const r3 = await fetch('/api/anthropic-chat', {
       method: 'POST',
@@ -4637,6 +4643,7 @@ async function sendIntakeMessage() {
 
   intakeMessages.push({ role: 'user', content: text, ts: Date.now() });
   input.value = '';
+  input.style.height = '';
   intakeTyping = true;
   renderIntakeChat();
   localStorage.setItem('tt_intake_messages', JSON.stringify(intakeMessages));
