@@ -555,6 +555,8 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 .mi-comp-table tr:last-child td{border-bottom:none;}
 .mi-comp-level{font-weight:700;color:var(--text);}
 .mi-comp-total{font-weight:700;color:var(--accent2);}
+.mi-comp-note{margin:12px 0 0;padding:10px 12px 10px 28px;border-radius:7px;background:var(--surface2);
+  font-size:11.5px;line-height:1.6;color:var(--muted);}
 .mi-demand-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-weight:700;font-size:12.5px;}
 .mi-demand-badge.hot{background:rgba(224,62,62,0.1);color:#c73a3a;}
 .mi-demand-badge.competitive{background:rgba(223,171,1,0.12);color:#95720a;}
@@ -4830,7 +4832,7 @@ Return ONLY a JSON object (no markdown, no explanation) with this exact shape:
   "location": "location as given, or your assumption",
   "currency": "3-letter currency code most appropriate for the location (e.g. USD, INR, GBP)",
   "compLevels": [
-    {"level": "e.g. Entry/Junior", "totalComp": "e.g. 12-16L", "base": "...", "bonus": "...", "equity": "..."}
+    {"level": "e.g. Entry/Junior", "totalComp": "e.g. 12-16L", "topOfMarket": "e.g. 20L+", "base": "...", "bonus": "...", "equity": "..."}
   ],
   "demandSignal": "one of exactly: Hot, Competitive, Balanced, Oversupplied",
   "demandNotes": "1-2 sentences explaining the demand signal",
@@ -4841,7 +4843,12 @@ Return ONLY a JSON object (no markdown, no explanation) with this exact shape:
   "dataSources": ["4-6 real-world sources a recruiter should cross-reference, e.g. Levels.fyi, Glassdoor, Blind, LinkedIn Salary Insights, public H-1B/LCA wage disclosures, industry compensation surveys"]
 }
 
-Include 4-6 rows in compLevels spanning a realistic ladder for this role (e.g. entry through staff/principal or manager-equivalent), and 3-5 comparableCompanies Akamai actually competes with for this kind of talent in this market.`;
+Include 4-6 rows in compLevels spanning a realistic ladder for this role (e.g. entry through staff/principal or manager-equivalent), and 3-5 comparableCompanies Akamai actually competes with for this kind of talent in this market.
+
+Compensation guidance:
+- totalComp must reflect what product/tech companies of Akamai's tier (and the comparableCompanies you list) are actually offering right now in this location, not a market-wide average dragged down by IT-services firms, startups or stale survey data. When unsure, lean to the upper half of your estimate rather than the lower.
+- If demandSignal is Hot or Competitive, build the scarcity premium for niche skills into totalComp.
+- topOfMarket is what the best-paying competitors offer a strong candidate at that level (offers, not averages).`;
 
   const btn = document.getElementById('mi-generate-btn');
   const sp = document.getElementById('mi-generate-spinner');
@@ -4876,11 +4883,11 @@ function renderMarketIntelReport(report) {
 
   const demandKey = (report.demandSignal || '').toLowerCase().replace(/[^a-z]/g, '');
   const demandMeta = {
-    hot: { icon: '🔥', cls: 'hot' },
-    competitive: { icon: '⚡', cls: 'competitive' },
-    balanced: { icon: '⚖️', cls: 'balanced' },
-    oversupplied: { icon: '📉', cls: 'oversupplied' }
-  }[demandKey] || { icon: '📊', cls: 'balanced' };
+    hot: { icon: '🔥', cls: 'hot', meaning: 'Hot: few qualified candidates and many companies hiring them. Niche skill set, so expect competing offers and pay above typical ranges.' },
+    competitive: { icon: '⚡', cls: 'competitive', meaning: 'Competitive: demand is ahead of supply. Good candidates usually have more than one option.' },
+    balanced: { icon: '⚖️', cls: 'balanced', meaning: 'Balanced: supply and demand are roughly even. Typical ranges should hold.' },
+    oversupplied: { icon: '📉', cls: 'oversupplied', meaning: 'Oversupplied: more candidates than openings. Easier to hire at or below typical ranges.' }
+  }[demandKey] || { icon: '📊', cls: 'balanced', meaning: '' };
 
   wrap.innerHTML = `
     <div class="card" style="margin-bottom:16px;">
@@ -4891,20 +4898,28 @@ function renderMarketIntelReport(report) {
       </div>
       <div style="overflow-x:auto;">
         <table class="mi-comp-table">
-          <thead><tr><th>Level</th><th>Total Comp</th><th>Base</th><th>Bonus</th><th>Equity</th></tr></thead>
+          <thead><tr><th>Level</th><th>Total Comp</th><th>Top of Market</th><th>Base</th><th>Bonus</th><th>Equity</th></tr></thead>
           <tbody>
             ${(report.compLevels || []).map(l => `
               <tr>
                 <td class="mi-comp-level">${esc(l.level || '-')}</td>
                 <td class="mi-comp-total">${esc(l.totalComp || '-')}${report.currency ? ' ' + esc(report.currency) : ''}</td>
+                <td>${esc(l.topOfMarket || '-')}</td>
                 <td>${esc(l.base || '-')}</td>
                 <td>${esc(l.bonus || '-')}</td>
                 <td>${esc(l.equity || '-')}</td>
               </tr>
-            `).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--muted);">No level breakdown returned.</td></tr>`}
+            `).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--muted);">No level breakdown returned.</td></tr>`}
           </tbody>
         </table>
       </div>
+      <!-- Fixed text, not AI output: these numbers get read as benchmarks, so the
+           page itself has to say what they are and what they must not be used for. -->
+      <ul class="mi-comp-note">
+        <li>These ranges are AI estimates based on public salary trends, not live or verified offer data.</li>
+        <li>They are typical ranges. Candidates with niche skills, or roles marked Hot or Competitive, are often offered well above them.</li>
+        <li>Use them as a starting point for sourcing conversations, not to benchmark or adjust current employees' pay. Confirm with Levels.fyi, AmbitionBox, Glassdoor, recent offers and the comp team.</li>
+      </ul>
     </div>
 
     <div class="card" style="margin-bottom:16px;">
@@ -4913,6 +4928,7 @@ function renderMarketIntelReport(report) {
         <div class="card-title" style="color:var(--ai);">Demand Signal</div>
       </div>
       <span class="mi-demand-badge ${demandMeta.cls}">${demandMeta.icon} ${esc(report.demandSignal || 'Unclear')}</span>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:8px;">${esc(demandMeta.meaning || '')}</div>
       ${report.demandNotes ? `<div style="margin-top:10px;font-size:12.5px;color:var(--text);line-height:1.6;">${esc(report.demandNotes)}</div>` : ''}
     </div>
 
