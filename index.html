@@ -555,6 +555,8 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
 .mi-comp-table tr:last-child td{border-bottom:none;}
 .mi-comp-level{font-weight:700;color:var(--text);}
 .mi-comp-total{font-weight:700;color:var(--accent2);}
+.mi-comp-note{margin:12px 0 0;padding:10px 12px 10px 28px;border-radius:7px;background:var(--surface2);
+  font-size:11.5px;line-height:1.6;color:var(--muted);}
 .mi-demand-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-weight:700;font-size:12.5px;}
 .mi-demand-badge.hot{background:rgba(224,62,62,0.1);color:#c73a3a;}
 .mi-demand-badge.competitive{background:rgba(223,171,1,0.12);color:#95720a;}
@@ -1176,8 +1178,14 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
     </div>
     <div class="status" id="intake-chat-status" style="margin-top:10px;"></div>
     <div style="display:flex;gap:8px;margin-top:12px;">
-      <input id="intake-chat-input" placeholder="Describe the role, or answer Trace's last question..." style="margin-bottom:0;" onkeydown="if(event.key==='Enter'){event.preventDefault();sendIntakeMessage();}">
-      <button class="btn btn-primary" onclick="sendIntakeMessage()" id="intake-send-btn" style="white-space:nowrap;">
+      <!-- A textarea, not a one-line input: pasting a full job description into an
+           input silently flattens every line break, so the JD arrived as one wall of
+           text. Enter still sends; Shift+Enter adds a new line. -->
+      <textarea id="intake-chat-input" class="form-area" rows="2" placeholder="Describe the role, paste a JD, or answer Trace's last question... (Shift+Enter for a new line)"
+        style="margin-bottom:0;min-height:44px;max-height:260px;resize:vertical;"
+        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,260)+'px';"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendIntakeMessage();}"></textarea>
+      <button class="btn btn-primary" onclick="sendIntakeMessage()" id="intake-send-btn" style="white-space:nowrap;align-self:flex-end;">
         <span id="intake-send-text">Send</span>
         <div class="spinner" id="intake-send-spinner"></div>
       </button>
@@ -2521,6 +2529,25 @@ function errText(err) {
   try { return JSON.stringify(err); } catch (e) { return String(err); }
 }
 
+// Reads a response from one of our /api functions as JSON. When something goes wrong
+// upstream (a Vercel timeout, a crash, a missing function) the body is an HTML or plain
+// text error page, and a bare res.json() turns that into a cryptic "Unexpected token"
+// message. This turns it into plain English instead, based on the HTTP status.
+async function readJsonResponse(res, what) {
+  const raw = await res.text();
+  try { return raw ? JSON.parse(raw) : {}; } catch (e) {
+    throw new Error(friendlyHttpError(res.status, what));
+  }
+}
+
+function friendlyHttpError(status, what) {
+  if (status === 404) return what + ' is not available right now (not found). The app may need to be redeployed.';
+  if (status === 504 || status === 408) return what + ' took too long and timed out. Please try again.';
+  if (status === 429) return what + ' is getting too many requests right now. Please wait a minute and try again.';
+  if (status >= 500) return what + ' hit a server error (HTTP ' + status + '). Please try again in a moment.';
+  return what + ' sent back an unexpected response (HTTP ' + status + '). Please try again.';
+}
+
 function loadTalentDataSettings() {
   const webhook   = localStorage.getItem('tt_cd_webhook');
   const role      = localStorage.getItem('tt_cd_role');
@@ -2588,7 +2615,7 @@ async function searchTalentData() {
         // highlighted on results client-side in renderTalentDataResults() instead.
       })
     });
-    const data = await res.json();
+    const data = await readJsonResponse(res, 'TalentData search');
     if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
 
     if (data.profiles && data.profiles[0]) console.log('TalentData raw profile sample:', data.profiles[0]);
@@ -2788,7 +2815,11 @@ async function exportTalentDataToSheet() {
   try {
     const res = await fetch(webhookUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      // text/plain, not application/json: a JSON content type makes the browser send a
+      // CORS "preflight" check first, which Apps Script web apps can't answer, so the
+      // export was blocked before it ever reached the sheet. The body is still JSON,
+      // and the script reads it the same way via JSON.parse(e.postData.contents).
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       // mustHaves/niceHaves/companies/notes are extra context for a future Apps
       // Script version - today's v5 sheet only has columns for the fields it always
       // had, so it'll just ignore these until the sheet script is updated to use them.
@@ -2908,17 +2939,24 @@ async function searchGitHub(page) {
   showStatus('gh-search-status', 'info', isMore ? '⏳ Loading more results...' : '⏳ Searching GitHub...');
 
   try {
-    const res = await fetch('/api/github-search', {
+    const runSearch = () => fetch('/api/github-search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ language, location, minFollowers, minRepos, limit, sortBy, sortOrder, page: isMore ? page : 1 })
     });
-    // A 404 here returns Vercel's HTML "page not found", not JSON - parse defensively
-    // so the user sees a real message instead of "Unexpected token ... not valid JSON".
-    let data = {};
-    try { data = await res.json(); } catch (e) {
-      if (res.status === 404) throw new Error('/api/github-search not found - the app needs to be redeployed to Vercel so the new function exists.');
-      throw new Error('Server returned a non-JSON response (HTTP ' + res.status + ').');
+    let res = await runSearch();
+    let data = await readJsonResponse(res, 'GitHub search');
+    // GitHub allows only ~30 searches a minute, shared with the email finder. When the
+    // server reports a short wait, count it down and retry once on our own rather than
+    // making the recruiter guess when to click again.
+    if (res.status === 429 && data.retryAfter && data.retryAfter <= 65) {
+      for (let s = data.retryAfter; s > 0; s--) {
+        showStatus('gh-search-status', 'info', `⏳ GitHub's search limit was reached. Retrying automatically in ${s}s...`);
+        await sleep(1000);
+      }
+      showStatus('gh-search-status', 'info', '⏳ Searching GitHub...');
+      res = await runSearch();
+      data = await readJsonResponse(res, 'GitHub search');
     }
     if (!res.ok) throw new Error(errText(data.error) || ('HTTP ' + res.status));
 
@@ -2941,6 +2979,7 @@ async function searchGitHub(page) {
     if (data.excludedByNot) bits.push(`${data.excludedByNot} excluded by NOT`);
     bits.push(`${newOnes.length} new`, `${ghResults.length} total`);
     if (data.bioAware) bits.push('bios checked too');
+    if (data.rateLimitedQueries) bits.push(`${data.rateLimitedQueries} keyword variant${data.rateLimitedQueries > 1 ? 's' : ''} skipped by GitHub's rate limit, try again in a minute for more`);
     showStatus('gh-search-status', 'success',
       '✓ ' + bits.join(' · ') + (data.interpreted ? `  -  read as: ${data.interpreted}` : ''));
   } catch(err) {
@@ -3003,7 +3042,11 @@ async function exportGitHubToSheet() {
   try {
     const res = await fetch(webhookUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      // text/plain, not application/json: a JSON content type makes the browser send a
+      // CORS "preflight" check first, which Apps Script web apps can't answer, so the
+      // export was blocked before it ever reached the sheet. The body is still JSON,
+      // and the script reads it the same way via JSON.parse(e.postData.contents).
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ profiles: ghResults.map(githubProfileForSheet), role: roleName, expRange })
     });
     const result = await res.json();
@@ -3983,7 +4026,7 @@ Analyze this Job Description and return ONLY a JSON object (no markdown, no expl
 }
 
 JD:
-${jd.substring(0, 2000)}`;
+${jd.substring(0, 6000)}`;
 
     const r1 = await fetch('/api/anthropic-chat', {
       method: 'POST',
@@ -3993,7 +4036,7 @@ ${jd.substring(0, 2000)}`;
         messages: [{ role: 'user', content: booleanPrompt }]
       })
     });
-    const d1 = await r1.json();
+    const d1 = await readJsonResponse(r1, 'The AI assistant');
     console.log('API Response 1:', JSON.stringify(d1).substring(0, 300));
 
     // Check for API errors
@@ -4043,7 +4086,7 @@ Return ONLY a JSON array (no markdown):
   {"type": "Technical", "question": "..."}
 ]
 
-JD: ${jd.substring(0, 1500)}`;
+JD: ${jd.substring(0, 6000)}`;
 
     const r2 = await fetch('/api/anthropic-chat', {
       method: 'POST',
@@ -4053,7 +4096,7 @@ JD: ${jd.substring(0, 1500)}`;
         messages: [{ role: 'user', content: iqPrompt }]
       })
     });
-    const d2 = await r2.json();
+    const d2 = await readJsonResponse(r2, 'The AI assistant');
     console.log('API Response 2:', JSON.stringify(d2).substring(0, 200));
     if (d2.error) throw new Error('API Error (Q): ' + d2.error);
     const raw2 = d2.text || '[]';
@@ -4118,7 +4161,7 @@ Return ONLY a JSON object (no markdown):
   ]
 }
 
-JD: ${jd.substring(0, 1200)}`;
+JD: ${jd.substring(0, 6000)}`;
 
     const r3 = await fetch('/api/anthropic-chat', {
       method: 'POST',
@@ -4128,7 +4171,7 @@ JD: ${jd.substring(0, 1200)}`;
         messages: [{ role: 'user', content: profilePrompt }]
       })
     });
-    const d3 = await r3.json();
+    const d3 = await readJsonResponse(r3, 'The AI assistant');
     console.log('API Response 3:', JSON.stringify(d3).substring(0, 200));
     if (d3.error) throw new Error('API Error (Profile): ' + d3.error);
     const raw3 = d3.text || '{}';
@@ -4468,7 +4511,7 @@ async function callClaudeChat(messages, systemPrompt) {
       messages: cleanMessages
     })
   });
-  const data = await res.json();
+  const data = await readJsonResponse(res, 'The AI assistant');
   if (data.error) throw new Error('API Error: ' + data.error);
   if (!data.text) throw new Error('Empty response from API. Please try again.');
   return data.text;
@@ -4602,6 +4645,7 @@ async function sendIntakeMessage() {
 
   intakeMessages.push({ role: 'user', content: text, ts: Date.now() });
   input.value = '';
+  input.style.height = '';
   intakeTyping = true;
   renderIntakeChat();
   localStorage.setItem('tt_intake_messages', JSON.stringify(intakeMessages));
@@ -4788,7 +4832,7 @@ Return ONLY a JSON object (no markdown, no explanation) with this exact shape:
   "location": "location as given, or your assumption",
   "currency": "3-letter currency code most appropriate for the location (e.g. USD, INR, GBP)",
   "compLevels": [
-    {"level": "e.g. Entry/Junior", "totalComp": "e.g. 12-16L", "base": "...", "bonus": "...", "equity": "..."}
+    {"level": "e.g. Entry/Junior", "totalComp": "e.g. 12-16L", "topOfMarket": "e.g. 20L+", "base": "...", "bonus": "...", "equity": "..."}
   ],
   "demandSignal": "one of exactly: Hot, Competitive, Balanced, Oversupplied",
   "demandNotes": "1-2 sentences explaining the demand signal",
@@ -4799,7 +4843,12 @@ Return ONLY a JSON object (no markdown, no explanation) with this exact shape:
   "dataSources": ["4-6 real-world sources a recruiter should cross-reference, e.g. Levels.fyi, Glassdoor, Blind, LinkedIn Salary Insights, public H-1B/LCA wage disclosures, industry compensation surveys"]
 }
 
-Include 4-6 rows in compLevels spanning a realistic ladder for this role (e.g. entry through staff/principal or manager-equivalent), and 3-5 comparableCompanies Akamai actually competes with for this kind of talent in this market.`;
+Include 4-6 rows in compLevels spanning a realistic ladder for this role (e.g. entry through staff/principal or manager-equivalent), and 3-5 comparableCompanies Akamai actually competes with for this kind of talent in this market.
+
+Compensation guidance:
+- totalComp must reflect what product/tech companies of Akamai's tier (and the comparableCompanies you list) are actually offering right now in this location, not a market-wide average dragged down by IT-services firms, startups or stale survey data. When unsure, lean to the upper half of your estimate rather than the lower.
+- If demandSignal is Hot or Competitive, build the scarcity premium for niche skills into totalComp.
+- topOfMarket is what the best-paying competitors offer a strong candidate at that level (offers, not averages).`;
 
   const btn = document.getElementById('mi-generate-btn');
   const sp = document.getElementById('mi-generate-spinner');
@@ -4834,11 +4883,11 @@ function renderMarketIntelReport(report) {
 
   const demandKey = (report.demandSignal || '').toLowerCase().replace(/[^a-z]/g, '');
   const demandMeta = {
-    hot: { icon: '🔥', cls: 'hot' },
-    competitive: { icon: '⚡', cls: 'competitive' },
-    balanced: { icon: '⚖️', cls: 'balanced' },
-    oversupplied: { icon: '📉', cls: 'oversupplied' }
-  }[demandKey] || { icon: '📊', cls: 'balanced' };
+    hot: { icon: '🔥', cls: 'hot', meaning: 'Hot: few qualified candidates and many companies hiring them. Niche skill set, so expect competing offers and pay above typical ranges.' },
+    competitive: { icon: '⚡', cls: 'competitive', meaning: 'Competitive: demand is ahead of supply. Good candidates usually have more than one option.' },
+    balanced: { icon: '⚖️', cls: 'balanced', meaning: 'Balanced: supply and demand are roughly even. Typical ranges should hold.' },
+    oversupplied: { icon: '📉', cls: 'oversupplied', meaning: 'Oversupplied: more candidates than openings. Easier to hire at or below typical ranges.' }
+  }[demandKey] || { icon: '📊', cls: 'balanced', meaning: '' };
 
   wrap.innerHTML = `
     <div class="card" style="margin-bottom:16px;">
@@ -4849,20 +4898,28 @@ function renderMarketIntelReport(report) {
       </div>
       <div style="overflow-x:auto;">
         <table class="mi-comp-table">
-          <thead><tr><th>Level</th><th>Total Comp</th><th>Base</th><th>Bonus</th><th>Equity</th></tr></thead>
+          <thead><tr><th>Level</th><th>Total Comp</th><th>Top of Market</th><th>Base</th><th>Bonus</th><th>Equity</th></tr></thead>
           <tbody>
             ${(report.compLevels || []).map(l => `
               <tr>
                 <td class="mi-comp-level">${esc(l.level || '-')}</td>
                 <td class="mi-comp-total">${esc(l.totalComp || '-')}${report.currency ? ' ' + esc(report.currency) : ''}</td>
+                <td>${esc(l.topOfMarket || '-')}</td>
                 <td>${esc(l.base || '-')}</td>
                 <td>${esc(l.bonus || '-')}</td>
                 <td>${esc(l.equity || '-')}</td>
               </tr>
-            `).join('') || `<tr><td colspan="5" style="text-align:center;color:var(--muted);">No level breakdown returned.</td></tr>`}
+            `).join('') || `<tr><td colspan="6" style="text-align:center;color:var(--muted);">No level breakdown returned.</td></tr>`}
           </tbody>
         </table>
       </div>
+      <!-- Fixed text, not AI output: these numbers get read as benchmarks, so the
+           page itself has to say what they are and what they must not be used for. -->
+      <ul class="mi-comp-note">
+        <li>These ranges are AI estimates based on public salary trends, not live or verified offer data.</li>
+        <li>They are typical ranges. Candidates with niche skills, or roles marked Hot or Competitive, are often offered well above them.</li>
+        <li>Use them as a starting point for sourcing conversations, not to benchmark or adjust current employees' pay. Confirm with Levels.fyi, AmbitionBox, Glassdoor, recent offers and the comp team.</li>
+      </ul>
     </div>
 
     <div class="card" style="margin-bottom:16px;">
@@ -4871,6 +4928,7 @@ function renderMarketIntelReport(report) {
         <div class="card-title" style="color:var(--ai);">Demand Signal</div>
       </div>
       <span class="mi-demand-badge ${demandMeta.cls}">${demandMeta.icon} ${esc(report.demandSignal || 'Unclear')}</span>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:8px;">${esc(demandMeta.meaning || '')}</div>
       ${report.demandNotes ? `<div style="margin-top:10px;font-size:12.5px;color:var(--text);line-height:1.6;">${esc(report.demandNotes)}</div>` : ''}
     </div>
 
