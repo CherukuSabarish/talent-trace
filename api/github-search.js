@@ -15,6 +15,38 @@
 const GITHUB_API = 'https://api.github.com';
 const MAX_RESULTS = 30; // per-request cap — each result costs one extra enrich call
 const MAX_OR_GROUPS = 5; // each OR branch is its own GitHub search (30 searches/min limit)
+const ENRICH_CONCURRENCY = 8; // /users/{login} calls in flight at once
+
+// GitHub signals a rate limit with 403 or 429. The primary limit (30 searches/min)
+// sets x-ratelimit-remaining: 0 and x-ratelimit-reset; the secondary "abuse" limit
+// sets retry-after. Returns how many seconds to wait, or null if this isn't a rate limit.
+function rateLimitWaitSeconds(r, body) {
+  if (r.status !== 403 && r.status !== 429) return null;
+  const retryAfter = parseInt(r.headers.get('retry-after'), 10);
+  if (!isNaN(retryAfter)) return Math.max(retryAfter, 1);
+  if (r.headers.get('x-ratelimit-remaining') === '0') {
+    const reset = parseInt(r.headers.get('x-ratelimit-reset'), 10);
+    if (!isNaN(reset)) return Math.max(reset - Math.floor(Date.now() / 1000), 1);
+    return 60;
+  }
+  if (body && typeof body.message === 'string' && /rate limit/i.test(body.message)) return 60;
+  return null;
+}
+
+// Runs fn over items with at most `limit` running at once. Firing dozens of
+// /users/{login} calls in parallel is what trips GitHub's secondary rate limit.
+async function mapWithConcurrency(items, limit, fn) {
+  const out = new Array(items.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const i = next++;
+      out[i] = await fn(items[i]);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return out;
+}
 
 // ══════════════════════════════════════════════════════════════════════════
 // BOOLEAN KEYWORD PARSER
@@ -265,11 +297,23 @@ export default async function handler(req, res) {
         sortQuery + '&per_page=' + safeLimit + '&page=' + safePage;
       const r = await fetch(searchUrl, { headers: ghHeaders });
       const d = await r.json().catch(() => ({}));
-      return { ok: r.ok, status: r.status, data: d };
+      return { ok: r.ok, status: r.status, data: d, waitSeconds: rateLimitWaitSeconds(r, d) };
     }));
 
     const good = runs.filter(r => r.ok);
+    const rateLimitedRuns = runs.filter(r => !r.ok && r.waitSeconds != null);
     if (!good.length) {
+      // Every query hit GitHub's search rate limit: say so plainly and tell the
+      // browser how long to wait, so it can retry on its own instead of failing.
+      if (rateLimitedRuns.length) {
+        const retryAfter = Math.min(Math.max(...rateLimitedRuns.map(r => r.waitSeconds)), 120);
+        res.status(429).json({
+          error: 'GitHub\'s search limit (about 30 searches a minute) is used up. It resets in about ' +
+            retryAfter + ' seconds.',
+          retryAfter
+        });
+        return;
+      }
       const first = runs[0] || { status: 500, data: {} };
       // GitHub 422s on bad qualifiers with a message + errors[]; 403 on rate limit.
       const detail = Array.isArray(first.data.errors) && first.data.errors.length
@@ -307,9 +351,9 @@ export default async function handler(req, res) {
     const totalCount = good.reduce((sum, r) => sum + (r.data.total_count || 0), 0);
     const anyFullPage = good.some(r => (r.data.items || []).length === safeLimit);
 
-    // Enrich each hit with the full user profile (parallel; individual failures
+    // Enrich each hit with the full user profile (a few at a time; individual failures
     // degrade to the bare search result instead of failing the whole request).
-    const enrichedProfiles = await Promise.all(items.map(async (item) => {
+    const enrichedProfiles = await mapWithConcurrency(items, ENRICH_CONCURRENCY, async (item) => {
       let u = {};
       try {
         const uRes = await fetch(GITHUB_API + '/users/' + encodeURIComponent(item.login), { headers: ghHeaders });
@@ -330,7 +374,7 @@ export default async function handler(req, res) {
         joinedAt: u.created_at || null,
         hireable: u.hireable === true
       };
-    }));
+    });
 
     // Re-sort using the real enriched numbers — this is what actually fixes the
     // ordering once results from more than one query are merged (see comment
@@ -382,6 +426,9 @@ export default async function handler(req, res) {
       // tell the recruiter their keywords were checked against more than just
       // GitHub's own (login/email-only) index.
       bioAware: !!bioFallbackQuery,
+      // How many of this search's GitHub queries were skipped by the rate limit, so the
+      // UI can say the results may be incomplete rather than look like "that's everyone".
+      rateLimitedQueries: rateLimitedRuns.length,
       sortBy: sortField,
       sortOrder: sortDir,
       // Echo back how the boolean expression was understood, so the UI can show the
