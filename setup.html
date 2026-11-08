@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TalentTrace 2.0 Setup</title>
+<style>
+  :root { --navy: #0b2f5b; --blue: #0b6e99; --orange: #ff9900; --ink: #1b2430; --muted: #5d6876;
+          --line: #e2e7ee; --bg: #f6f8fb; --card: #ffffff; --ok: #17663a; --okbg: #e7f6ec; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.6 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color: var(--ink); background: var(--bg); }
+  header { background: var(--navy); color: #fff; padding: 28px 16px; }
+  header .in, main { max-width: 820px; margin: 0 auto; }
+  header h1 { margin: 0 0 6px; font-size: 24px; }
+  header p { margin: 0; opacity: .85; }
+  header a { color: #ffd38a; }
+  main { padding: 24px 16px 60px; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; margin-bottom: 18px; }
+  h2 { margin: 0 0 4px; font-size: 19px; display: flex; gap: 10px; align-items: center; }
+  h2 .n { background: var(--orange); color: var(--ink); width: 28px; height: 28px; border-radius: 50%; display: inline-flex;
+          align-items: center; justify-content: center; font-size: 15px; flex: none; }
+  .sub { color: var(--muted); margin: 0 0 12px; }
+  ol { padding-left: 22px; margin: 8px 0; }
+  li { margin: 6px 0; }
+  code, kbd { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; background: #eef2f7; padding: 1px 6px; border-radius: 5px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; font: 600 14px/1 inherit; padding: 10px 14px; border-radius: 8px;
+         border: 1px solid var(--orange); background: var(--orange); color: var(--ink); text-decoration: none; cursor: pointer; margin: 4px 8px 4px 0; }
+  .btn.ghost { background: #fff; border-color: #ccd5df; }
+  .note { background: #fff8eb; border: 1px solid #ffe0a8; border-radius: 8px; padding: 10px 12px; margin: 12px 0 0; font-size: 14px; }
+  .ok { color: var(--ok); background: var(--okbg); padding: 3px 8px; border-radius: 6px; font-size: 13px; display: none; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; margin-top: 8px; }
+  td, th { text-align: left; border-bottom: 1px solid var(--line); padding: 7px 6px; vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }
+  @media (max-width: 520px) { section { padding: 16px; } header h1 { font-size: 20px; } }
+</style>
+</head>
+<body>
+<header><div class="in">
+  <h1>📊 TalentTrace 2.0: send candidates to Google Sheets</h1>
+  <p>One-time setup on a fresh Google Sheet, about 10 minutes. After this, Google X-ray results (LinkedIn, Stack Overflow, GitHub) and the app's own GitHub and TalentData results all go to the same Sheet. <a href="/">Back to Talent Trace</a></p>
+</div></header>
+<main>
+
+<section>
+  <h2><span class="n">1</span> Put the TalentTrace 2.0 script in a new Google Sheet</h2>
+  <p class="sub">This is the small program inside your Sheet that receives candidates and writes them as rows.</p>
+  <ol>
+    <li>Make a new blank Google Sheet (go to <a href="https://sheets.new" target="_blank">sheets.new</a>) and give it a name, for example <b>TalentTrace 2.0</b>.</li>
+    <li>In the Sheet's top menu click <b>Extensions</b> → <b>Apps Script</b>. A new tab opens with a file called <code>Code.gs</code>.</li>
+    <li>Click this button to copy the script: <button class="btn" id="copy-script">📋 Copy the script</button> <span class="ok" id="copied">Copied ✓</span></li>
+    <li>In <code>Code.gs</code>, select everything that's there (<kbd>Ctrl</kbd>+<kbd>A</kbd>, or <kbd>⌘</kbd>+<kbd>A</kbd> on Mac), delete it, and paste (<kbd>Ctrl</kbd>+<kbd>V</kbd>).</li>
+    <li>Click the 💾 <b>Save</b> icon.</li>
+  </ol>
+  <p style="margin-bottom:4px;"><b>Then publish it:</b></p>
+  <ol>
+    <li>Click the blue <b>Deploy</b> button (top right) → <b>New deployment</b>.</li>
+    <li>Click the ⚙️ gear next to "Select type" and choose <b>Web app</b>.</li>
+    <li>Set <b>Execute as</b>: <b>Me</b>, and <b>Who has access</b>: <b>Anyone</b>.</li>
+    <li>Click <b>Deploy</b>, then <b>Authorize access</b> and allow it with your Google account. If you see "Google hasn't verified this app", click <b>Advanced</b> → <b>Go to … (unsafe)</b>. It's your own script, so this is expected.</li>
+    <li>Copy the <b>Web app URL</b>. It starts with <code>https://script.google.com/</code> and ends in <code>/exec</code>.</li>
+  </ol>
+  <p class="sub">If you change the script later: Deploy → Manage deployments → ✏️ → Version: New version → Deploy. That keeps the same URL.</p>
+  <p>Check it worked: paste the URL in a new browser tab. You should see a short line of text that includes <code>"app":"TalentTrace 2.0 Sheet"</code>.</p>
+  <div class="note">Use a Google account that allows sharing with <b>Anyone</b>. Some company Google accounts only allow "Anyone in the company", and then the app and extension can't reach the Sheet. A personal Gmail account always works.</div>
+  <p style="margin-top:12px;"><a class="btn ghost" href="/apps-script/Code.gs" target="_blank">View the script file</a></p>
+</section>
+
+<section>
+  <h2><span class="n">2</span> Save the new Sheet URL in Talent Trace</h2>
+  <ol>
+    <li>Open <a href="/">Talent Trace</a> → <b>Sourcing</b> → <b>GitHub Search</b> (or <b>TalentData</b>).</li>
+    <li>Scroll down to <b>Send to Google Sheet</b>, delete the old URL in <b>Google Sheet Apps Script URL</b>, paste the new one, and click <b>Save</b>. Do the same on the other tab (TalentData or GitHub Search), so both send to the new Sheet.</li>
+  </ol>
+  <p class="sub" style="margin:0;">You only do this once. The Chrome extension picks up the same URL from the app automatically.</p>
+</section>
+
+<section>
+  <h2><span class="n">3</span> Install the TalentTrace 2.0 Chrome extension</h2>
+  <p class="sub">It adds a "Send to Google Sheet" box to Google results pages.</p>
+  <ol>
+    <li><a class="btn" href="/downloads/talentrace-2.0-extension.zip" download>⬇ Download the extension</a></li>
+    <li>If you still have the old <b>TalentTrace — X-Ray Exporter</b> (v1.6) extension, remove it first: go to <code>chrome://extensions</code> and click <b>Remove</b> on it.</li>
+    <li>Open your Downloads folder and unzip <code>talentrace-2.0-extension.zip</code> (on Windows: right-click → <b>Extract All</b>; on Mac: double-click it). You get a folder called <code>talentrace-2.0-extension</code>. Keep this folder; Chrome loads the extension from it, so don't delete it.</li>
+    <li>In Chrome, type <code>chrome://extensions</code> in the address bar and press Enter.</li>
+    <li>Turn on <b>Developer mode</b> (the switch in the top-right corner).</li>
+    <li>Click <b>Load unpacked</b> and choose the <code>talentrace-2.0-extension</code> folder.</li>
+    <li>Click the 🧩 puzzle icon in Chrome's toolbar and the 📌 pin next to <b>TalentTrace 2.0</b>, so its icon stays visible.</li>
+    <li>Open or refresh the <a href="/">Talent Trace</a> tab once. Under the Boolean Builder buttons you should see <b>✓ Extension connected</b>.</li>
+    <li>Optional check: click the TalentTrace 2.0 icon in the toolbar, then <b>Test connection</b>. It should say <b>Connected</b> with your Sheet's name.</li>
+  </ol>
+  <div class="note">Chrome may show a message about "developer mode extensions" when it starts. That's normal for extensions you load yourself; click the X to close it.</div>
+</section>
+
+<section>
+  <h2><span class="n">4</span> Use it</h2>
+  <p><b>Google X-ray (LinkedIn, Stack Overflow, GitHub)</b></p>
+  <ol>
+    <li>In the <b>Boolean Builder</b>, pick a role, click <b>⚡ Generate Query</b>, then click <b>🔍 Google X-Ray</b>, <b>StackOverflow</b> or <b>GitHub</b>.</li>
+    <li>On the Google page, a <b>📊 TalentTrace 2.0</b> box appears in the bottom-right corner. It has already collected the profiles on that page.</li>
+    <li>Want more? Click Google's <b>Next</b> page (2, 3, …). Each page is added to the same list.</li>
+    <li>Check the <b>Role tag</b> (it becomes the Sheet tab name; it's filled in from the role you picked), then click <b>Send … to Google Sheet</b>.</li>
+  </ol>
+  <p><b>GitHub Search and TalentData in the app</b></p>
+  <ol>
+    <li>Search as usual. In GitHub Search's Repos mode, pull a repo's contributors into Candidates.</li>
+    <li>At the bottom, set the <b>Role tag</b> and click <b>📊 Export All to Google Sheet</b>.</li>
+  </ol>
+  <p>Each role gets its own tab in the Sheet, and the <b>Dashboard</b> tab counts candidates by role, status and source. The <b>Search Log</b> tab lists every export. Use the <b>Status</b> dropdown (New, Contacted, Shortlisted, Rejected) and the <b>Recruiter Notes</b> column to track people. Exporting the same people again doesn't create duplicates: they're skipped and counted as "already there".</p>
+</section>
+
+<section>
+  <h2><span class="n">?</span> If something doesn't work</h2>
+  <table>
+    <tr><th style="width:42%">You see</th><th>Do this</th></tr>
+    <tr><td>"asked for a sign-in" or "not shared with Anyone"</td><td>Deploy again and set <b>Who has access</b> to <b>Anyone</b> (step 1).</td></tr>
+    <tr><td>"older Sheet script"</td><td>The URL points at the old Sheet. Use the new Sheet's URL from step 1.</td></tr>
+    <tr><td>No TalentTrace 2.0 box on Google</td><td>Refresh the Google page. Check the extension is switched on in <code>chrome://extensions</code>. The box only shows when the page has LinkedIn, Stack Overflow or GitHub profiles, or when the search came from Talent Trace.</td></tr>
+    <tr><td>"No Google Sheet URL yet"</td><td>Click the TalentTrace 2.0 icon in the toolbar, paste the <code>/exec</code> URL, and click <b>Save</b>.</td></tr>
+    <tr><td>Some names or titles are blank</td><td>Google only shows part of each profile. The profile link is always saved, so you can open it from the Sheet.</td></tr>
+  </table>
+  <p class="sub" style="margin-top:12px;">Want to share the Sheet with your team without them changing profile data? In the Sheet, open the <b>TalentTrace 2.0</b> menu → <b>Protect sheets</b>. Status and Recruiter Notes stay editable.</p>
+</section>
+
+</main>
+<script>
+document.getElementById('copy-script').addEventListener('click', async function () {
+  const btn = this;
+  try {
+    const res = await fetch('/apps-script/Code.gs', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    await navigator.clipboard.writeText(await res.text());
+    document.getElementById('copied').style.display = 'inline';
+  } catch (e) {
+    btn.textContent = 'Could not copy. Use "View the script file" below';
+  }
+});
+</script>
+</body>
+</html>
