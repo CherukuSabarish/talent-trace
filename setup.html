@@ -55,13 +55,13 @@
   <ol>
     <li>Click the blue <b>Deploy</b> button (top right) → <b>New deployment</b>.</li>
     <li>Click the ⚙️ gear next to "Select type" and choose <b>Web app</b>.</li>
-    <li>Set <b>Execute as</b>: <b>Me</b>, and <b>Who has access</b>: <b>Anyone</b>.</li>
+    <li>Set <b>Execute as</b>: <b>Me</b>. For <b>Who has access</b>, pick <b>Anyone within Akamai</b> if you're on your Akamai Google account (on a personal Gmail account, pick <b>Anyone</b>).</li>
     <li>Click <b>Deploy</b>, then <b>Authorize access</b> and allow it with your Google account. If you see "Google hasn't verified this app", click <b>Advanced</b> → <b>Go to … (unsafe)</b>. It's your own script, so this is expected.</li>
     <li>Copy the <b>Web app URL</b>. It starts with <code>https://script.google.com/</code> and ends in <code>/exec</code>.</li>
   </ol>
   <p class="sub">If you change the script later: Deploy → Manage deployments → ✏️ → Version: New version → Deploy. That keeps the same URL.</p>
-  <p>Check it worked: paste the URL in a new browser tab. You should see a short line of text that includes <code>"app":"TalentTrace 2.0 Sheet"</code>.</p>
-  <div class="note">Use a Google account that allows sharing with <b>Anyone</b>. Some company Google accounts only allow "Anyone in the company", and then the app and extension can't reach the Sheet. A personal Gmail account always works.</div>
+  <p>Check it worked: paste the URL in a new tab, in the Chrome window where you're signed in to that Google account. You should see a short line of text that includes <code>"app":"TalentTrace 2.0 Sheet"</code>.</p>
+  <div class="note"><b>Akamai Google account?</b> Then all exports, including the app's own <b>Export All</b> buttons, go through the TalentTrace 2.0 Chrome extension (step 3), because it can use your Akamai sign-in and a web page can't. Use Talent Trace in the Chrome window where you're signed in to your Akamai Google account.</div>
   <p style="margin-top:12px;"><a class="btn ghost" href="/apps-script/Code.gs" target="_blank">View the script file</a></p>
 </section>
 
@@ -112,7 +112,8 @@
   <h2><span class="n">?</span> If something doesn't work</h2>
   <table>
     <tr><th style="width:42%">You see</th><th>Do this</th></tr>
-    <tr><td>"asked for a sign-in" or "not shared with Anyone"</td><td>Deploy again and set <b>Who has access</b> to <b>Anyone</b> (step 1).</td></tr>
+    <tr><td>"asked for a sign-in"</td><td>Make sure this Chrome window is signed in to the Google account that owns the Sheet (your Akamai account), and that the deployment's <b>Who has access</b> is <b>Anyone within Akamai</b> (Deploy → Manage deployments → ✏️).</td></tr>
+    <tr><td>"needs the TalentTrace 2.0 Chrome extension"</td><td>The Sheet is on a company account. Install the extension (step 3) and reload the Talent Trace page.</td></tr>
     <tr><td>"older Sheet script"</td><td>The URL points at the old Sheet. Use the new Sheet's URL from step 1.</td></tr>
     <tr><td>No TalentTrace 2.0 box on Google</td><td>Refresh the Google page. Check the extension is switched on in <code>chrome://extensions</code>. The box only shows when the page has LinkedIn, Stack Overflow or GitHub profiles, or when the search came from Talent Trace.</td></tr>
     <tr><td>"No Google Sheet URL yet"</td><td>Click the TalentTrace 2.0 icon in the toolbar, paste the <code>/exec</code> URL, and click <b>Save</b>.</td></tr>

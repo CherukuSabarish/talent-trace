@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "TalentTrace 2.0",
   "short_name": "TalentTrace 2.0",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Send to Google Sheet: collects LinkedIn, Stack Overflow and GitHub profiles from Google X-ray result pages and sends them to your Talent Trace Google Sheet.",
   "icons": {
     "16": "icons/icon16.png",

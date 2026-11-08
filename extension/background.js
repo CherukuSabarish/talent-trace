@@ -11,6 +11,8 @@ const DEFAULTS = {
   autoCollect: true     // add each results page to the list as you open it
 };
 const MAX_CONTEXTS = 60;
+const SIGN_IN_MSG = 'Google asked for a sign-in. In this Chrome window, sign in to the Google account that owns the Sheet ' +
+  '(e.g. your Akamai account), and check the script is deployed with "Who has access: Anyone within Akamai" (or "Anyone").';
 
 // One list per Google search string: { [query]: { items: { [key]: profile }, pages: [n], updatedAt } }
 async function getBaskets() {
@@ -96,7 +98,10 @@ async function postToSheet(webhook, payload) {
       // with JSON.parse(e.postData.contents).
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload),
-      redirect: 'follow'
+      redirect: 'follow',
+      // Sends your Google sign-in along, so a script shared only with
+      // "Anyone within <your company>" (e.g. an Akamai Google account) works.
+      credentials: 'include'
     });
   } catch (e) {
     throw new Error('Could not reach your Google Sheet script. Check your internet connection and the Sheet URL.');
@@ -105,7 +110,7 @@ async function postToSheet(webhook, payload) {
   let data;
   try { data = JSON.parse(text); } catch (e) {
     if (/<html|<!doctype/i.test(text)) {
-      throw new Error('Google asked for a sign-in instead of saving. Redeploy the Apps Script with "Who has access: Anyone".');
+      throw new Error(SIGN_IN_MSG);
     }
     throw new Error('The Sheet script sent back something unexpected (HTTP ' + res.status + ').');
   }
@@ -179,6 +184,13 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
         await setBaskets(baskets);
         return { ok: true, state: await state(msg.query) };
       }
+      case 'tt-app-export': {
+        // The Talent Trace app's own "Export All" buttons send through here, so
+        // they also use your Google sign-in (the app page itself can't).
+        const url = String(msg.url || '').trim();
+        if (!isValidWebhook(url)) throw new Error('That does not look like an Apps Script web app URL (it should end in /exec).');
+        return { ok: true, result: await postToSheet(url, msg.payload || {}) };
+      }
       case 'tt-send':
         return { ok: true, result: await send(msg.query, msg.role, msg.expRange) };
       case 'tt-list': {
@@ -199,13 +211,13 @@ chrome.runtime.onMessage.addListener((msg, sender, reply) => {
         const url = (msg.url || (await getSettings()).webhook || '').trim();
         if (!isValidWebhook(url)) throw new Error('That does not look like an Apps Script web app URL (it should start with https://script.google.com/ and end in /exec).');
         let res;
-        try { res = await fetch(url, { redirect: 'follow' }); }
+        try { res = await fetch(url, { redirect: 'follow', credentials: 'include' }); }
         catch (e) { throw new Error('Could not reach that URL.'); }
         const text = await res.text();
         let data;
         try { data = JSON.parse(text); } catch (e) {
           if (/doGet/.test(text)) throw new Error('Connected, but this is an older Sheet script. Paste in the TalentTrace 2.0 script and deploy a new version.');
-          throw new Error('Reached Google, but the script is not shared with "Anyone" (it asked for a sign-in).');
+          throw new Error(SIGN_IN_MSG);
         }
         if (data.app !== 'TalentTrace 2.0 Sheet') {
           throw new Error('Connected, but this is an older Sheet script. Paste in the TalentTrace 2.0 script and deploy a new version.');

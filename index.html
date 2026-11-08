@@ -2835,6 +2835,52 @@ function renderTalentDataResults() {
   wrap.innerHTML = '<div class="profile-cards">' + cards.slice().reverse().join('') + '</div>';
 }
 
+// Sends an export to the Google Sheet's Apps Script web app and returns its JSON
+// reply ({status, added, skipped, role} or {status:'error', message}).
+//
+// When the TalentTrace 2.0 Chrome extension is installed, the export goes through
+// it (extension/app-bridge.js → background.js). The extension can send your Google
+// sign-in along, which a web page can't - and that's required when the Sheet's
+// script is shared only with "Anyone within Akamai" (URLs with /a/macros/akamai.com/).
+// Without the extension it falls back to a direct call, which only works for
+// scripts shared with "Anyone".
+function sheetViaExtension(url, payload) {
+  return new Promise((resolve, reject) => {
+    const id = 'exp-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+    const timer = setTimeout(() => { window.removeEventListener('message', onMsg); reject(new Error('The Google Sheet took too long to answer. Check the Sheet - the rows may still have arrived.')); }, 120000);
+    function onMsg(ev) {
+      const d = ev.data;
+      if (ev.source !== window || !d || d.source !== 'talent-trace-extension' || d.type !== 'export-result' || d.id !== id) return;
+      clearTimeout(timer);
+      window.removeEventListener('message', onMsg);
+      if (d.ok) resolve(d.result); else reject(new Error(d.error || 'The extension could not send to the Sheet.'));
+    }
+    window.addEventListener('message', onMsg);
+    ttTellExtension('export', { id, url, payload });
+  });
+}
+
+async function sendToSheet(url, payload) {
+  if (document.documentElement.getAttribute('data-tt-extension')) return sheetViaExtension(url, payload);
+  if (/\/a\/macros\//.test(url)) {
+    throw new Error('This Sheet is on a company Google account, so exports need the TalentTrace 2.0 Chrome extension (it uses your sign-in). Install it from the Setup guide, then reload this page.');
+  }
+  let res;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      // text/plain, not application/json: a JSON content type makes the browser send a
+      // CORS "preflight" check first, which Apps Script web apps can't answer.
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+  } catch (e) {
+    throw new Error('Could not reach the Google Sheet script. Check the URL is deployed with "Who has access: Anyone", or install the TalentTrace 2.0 extension.');
+  }
+  try { return await res.json(); }
+  catch (e) { throw new Error('The Google Sheet script asked for a sign-in. Install the TalentTrace 2.0 extension (Setup guide) so exports use your Google sign-in.'); }
+}
+
 async function exportTalentDataToSheet() {
   const webhookUrl = document.getElementById('cd-webhook').value.trim() || localStorage.getItem('tt_cd_webhook');
   const roleName   = document.getElementById('cd-role').value.trim() || 'General';
@@ -2856,19 +2902,9 @@ async function exportTalentDataToSheet() {
   showStatus('cd-export-status', 'info', `⏳ Sending ${cdResults.length} profiles to "${roleName}" tab...`);
 
   try {
-    const res = await fetch(webhookUrl, {
-      method: 'POST',
-      // text/plain, not application/json: a JSON content type makes the browser send a
-      // CORS "preflight" check first, which Apps Script web apps can't answer, so the
-      // export was blocked before it ever reached the sheet. The body is still JSON,
-      // and the script reads it the same way via JSON.parse(e.postData.contents).
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      // mustHaves/niceHaves/companies/notes are extra context for a future Apps
-      // Script version - today's v5 sheet only has columns for the fields it always
-      // had, so it'll just ignore these until the sheet script is updated to use them.
-      body: JSON.stringify({ profiles: cdResults, role: roleName, expRange, mustHaves, niceHaves, companies, notes })
-    });
-    const result = await res.json();
+    // mustHaves/niceHaves/companies/notes land in their own columns with the
+    // TalentTrace 2.0 Sheet script (apps-script/Code.gs).
+    const result = await sendToSheet(webhookUrl, { profiles: cdResults, role: roleName, expRange, mustHaves, niceHaves, companies, notes });
     if (result.status === 'ok') {
       showStatus('cd-export-status', 'success',
         `✓ ${result.added} added to "${result.role}" · ${result.skipped} duplicates skipped`);
@@ -2876,7 +2912,7 @@ async function exportTalentDataToSheet() {
       showStatus('cd-export-status', 'error', '⚠ ' + (result.message || 'Unknown error'));
     }
   } catch(err) {
-    showStatus('cd-export-status', 'error', '⚠ Could not reach Apps Script. Check the URL is deployed as "Anyone can access".');
+    showStatus('cd-export-status', 'error', '⚠ ' + (err.message || 'Could not reach the Google Sheet script.'));
   } finally {
     btn.disabled = false; txt.textContent = '📊 Export All to Google Sheet'; sp.classList.remove('on');
   }
@@ -3096,16 +3132,7 @@ async function exportGitHubToSheet() {
   showStatus('gh-export-status', 'info', `⏳ Sending ${ghResults.length} profiles to "${roleName}" tab...`);
 
   try {
-    const res = await fetch(webhookUrl, {
-      method: 'POST',
-      // text/plain, not application/json: a JSON content type makes the browser send a
-      // CORS "preflight" check first, which Apps Script web apps can't answer, so the
-      // export was blocked before it ever reached the sheet. The body is still JSON,
-      // and the script reads it the same way via JSON.parse(e.postData.contents).
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ profiles: ghResults.map(githubProfileForSheet), role: roleName, expRange })
-    });
-    const result = await res.json();
+    const result = await sendToSheet(webhookUrl, { profiles: ghResults.map(githubProfileForSheet), role: roleName, expRange });
     if (result.status === 'ok') {
       showStatus('gh-export-status', 'success',
         `✓ ${result.added} added to "${result.role}" · ${result.skipped} duplicates skipped`);
@@ -3113,7 +3140,7 @@ async function exportGitHubToSheet() {
       showStatus('gh-export-status', 'error', '⚠ ' + (result.message || 'Unknown error'));
     }
   } catch(err) {
-    showStatus('gh-export-status', 'error', '⚠ Could not reach Apps Script. Check the URL is deployed as "Anyone can access".');
+    showStatus('gh-export-status', 'error', '⚠ ' + (err.message || 'Could not reach the Google Sheet script.'));
   } finally {
     btn.disabled = false; txt.textContent = '📊 Export All to Google Sheet'; sp.classList.remove('on');
   }
