@@ -1295,6 +1295,13 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
     <div class="page-desc">Build a sourcing query once and get search strings for LinkedIn, Google X-Ray, StackOverflow and GitHub at the same time - tuned for tech, sales, veteran and campus hiring in India.</div>
   </div>
 
+  <div class="card" style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:220px;font-size:12.5px;line-height:1.6;color:var(--text);">
+      <b>Have a job description?</b> Paste it into JD Analyzer and Trace picks out the market job titles and key skills, then fills this builder for you in one click.
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="switchSourcingSubTab('jd')" style="white-space:nowrap;">📄 Start from a JD</button>
+  </div>
+
   <div class="grid-2">
     <!-- Role Config -->
     <div class="card">
@@ -1576,6 +1583,16 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
 
     <!-- Boolean Strings -->
     <div id="jdtab-boolean">
+      <div class="ai-result-box" id="res-keyinfo-wrap">
+        <div class="ai-section-title" style="color:var(--accent2);">🎯 Market Job Titles &amp; Key Skills</div>
+        <div id="res-keyinfo" style="font-size:12.5px;line-height:1.8;"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+          <span style="font-size:11px;color:var(--muted);align-self:center;">Use these in:</span>
+          <button class="btn btn-ghost btn-sm" onclick="prefillFromJDAnalysis('builder')">🔡 Boolean Builder</button>
+          <button class="btn btn-ghost btn-sm" onclick="prefillFromJDAnalysis('crustdata')">🗂 TalentData Search</button>
+          <button class="btn btn-ghost btn-sm" onclick="prefillFromJDAnalysis('github')">🐙 GitHub Search</button>
+        </div>
+      </div>
       <div class="ai-result-box green" id="res-boolean-wrap">
         <div class="ai-section-title" style="color:var(--accent);">⚡ Boolean String</div>
         <div id="res-boolean" style="font-family:var(--mono);font-size:11px;color:var(--accent);line-height:1.7;word-break:break-all;"></div>
@@ -4053,6 +4070,8 @@ ${jd.substring(0, 6000)}`;
     const jsonMatch1 = clean1.match(/\{[\s\S]*\}/);
     if (!jsonMatch1) throw new Error('Could not parse AI response. Raw: ' + clean1.substring(0, 100));
     const parsed = JSON.parse(jsonMatch1[0]);
+    lastJdAnalysis = parsed;
+    renderJdKeyInfo(parsed);
 
     // Populate boolean results
     document.getElementById('res-boolean').textContent = parsed.booleanString || '-';
@@ -4683,6 +4702,7 @@ async function finalizeICP() {
 
 {
   "roleTitle": "role title",
+  "alternateTitles": ["3-5 other job titles candidates for this role commonly hold in the market"],
   "seniority": "e.g. Mid-level, Senior, Staff",
   "mustHaveSkills": ["3-6 must-have skills/technologies"],
   "niceToHaveSkills": ["2-4 nice-to-have skills"],
@@ -5004,27 +5024,210 @@ function renderSourcingHandoffBanner() {
         ${icp ? `<b>${esc(icp.roleTitle || 'Role')}</b>${icp.seniority ? ' · ' + esc(icp.seniority) : ''}${icp.location ? ' · ' + esc(icp.location) : ''}${icp.experienceRange ? ' · ' + esc(icp.experienceRange) : ''}<br>Must-haves: ${esc((icp.mustHaveSkills || []).join(', ')) || '—'}` : ''}
         ${intel ? `<br>Demand: ${esc(intel.demandSignal || '—')}${(intel.compLevels || [])[0] ? ' · ' + esc(intel.compLevels[0].level) + ' ~' + esc(intel.compLevels[0].totalComp || '') + (intel.currency ? ' ' + esc(intel.currency) : '') : ''}` : ''}
       </div>
-      ${icp ? `<button class="btn btn-primary btn-sm" onclick="prefillSourcingFromICP()">↓ Prefill TalentData Search</button>` : ''}
+      ${icp ? `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button class="btn btn-primary btn-sm" onclick="prefillAllFromICP()">↓ Prefill all 4 tools</button>
+        <span style="font-size:11px;color:var(--muted);">or just one:</span>
+        <button class="btn btn-ghost btn-sm" onclick="prefillOneFromICP('builder')">🔡 Boolean Builder</button>
+        <button class="btn btn-ghost btn-sm" onclick="prefillOneFromICP('jd')">📄 JD Analyzer</button>
+        <button class="btn btn-ghost btn-sm" onclick="prefillOneFromICP('crustdata')">🗂 TalentData</button>
+        <button class="btn btn-ghost btn-sm" onclick="prefillOneFromICP('github')">🐙 GitHub</button>
+      </div>` : ''}
     </div>
   `;
 }
 
-// Copies the finalized ICP's role/must-haves/experience into TalentData's search
-// fields - the one Sourcing tool whose fields are plain free text and map cleanly.
-// Boolean Builder's role picker is a curated dropdown (not free text) and GitHub
-// Search's fields don't map onto an ICP the same way, so those still need a
-// manual look - this covers the most common next step.
-function prefillSourcingFromICP() {
-  let icp = null;
-  try { icp = JSON.parse(localStorage.getItem('tt_icp') || 'null'); } catch (e) {}
-  if (!icp) return;
-  switchSourcingSubTab('crustdata');
+// ══════════════════════════════════════════════
+// PREFILL - carry a role from Intake (finalized ICP) or JD Analyzer into the
+// Sourcing tools, so the recruiter doesn't retype titles, skills and experience
+// into each one. Both sources are first turned into the same small "profile"
+// shape, and each tool has one prefill function that reads it.
+// ══════════════════════════════════════════════
+let lastJdAnalysis = null;
+
+function profileFromICP(icp) {
+  if (!icp) return null;
+  const titles = [icp.roleTitle, ...(icp.alternateTitles || [])].filter(Boolean);
+  return {
+    source: 'Intake',
+    roleTitle: icp.roleTitle || '',
+    titles: [...new Set(titles)],
+    mustSkills: icp.mustHaveSkills || [],
+    niceSkills: icp.niceToHaveSkills || [],
+    expRange: icp.experienceRange || '',
+    location: icp.location || ''
+  };
+}
+
+function profileFromJD(parsed) {
+  if (!parsed) return null;
+  const titles = [parsed.jobTitle, ...(parsed.titles || [])].filter(Boolean);
+  return {
+    source: 'JD Analyzer',
+    roleTitle: parsed.jobTitle || (parsed.titles || [])[0] || '',
+    titles: [...new Set(titles)],
+    mustSkills: parsed.mustSkills || [],
+    niceSkills: parsed.niceSkills || [],
+    expRange: parsed.expRange || '',
+    location: ''
+  };
+}
+
+// "5-8 years" -> {min:5,max:8}; "5+ years" -> {min:5,max:null}
+function parseExpRange(str) {
+  const nums = String(str || '').match(/\d+/g) || [];
+  return { min: nums[0] ? parseInt(nums[0], 10) : null, max: nums[1] ? parseInt(nums[1], 10) : null };
+}
+
+// ICP locations are often prose ("Remote with shift work requirements",
+// "Bangalore (hybrid)"). Search fields want a plain city, so keep the first
+// place name and drop remote/hybrid wording entirely.
+function searchableLocation(loc) {
+  const first = String(loc || '').split(/[,/·(;]| or | and /i)[0].trim();
+  if (!first || /remote|hybrid|anywhere|flexible|onsite|on-site|wfh/i.test(first)) return '';
+  return first;
+}
+
+// GitHub can only filter users by programming language, so pull the first real
+// language out of the skills. Only one: the Languages box ANDs everything.
+const GH_LANGUAGES = {
+  python: 'Python', java: 'Java', go: 'Go', golang: 'Go', javascript: 'JavaScript', typescript: 'TypeScript',
+  'c++': 'C++', 'c#': 'C#', c: 'C', rust: 'Rust', ruby: 'Ruby', kotlin: 'Kotlin', scala: 'Scala',
+  swift: 'Swift', php: 'PHP', shell: 'Shell', bash: 'Shell', powershell: 'PowerShell', r: 'R', dart: 'Dart'
+};
+function firstGitHubLanguage(skills) {
+  for (const skill of skills) {
+    for (const word of String(skill).toLowerCase().split(/[\s,/()]+/)) {
+      if (GH_LANGUAGES[word]) return GH_LANGUAGES[word];
+    }
+  }
+  return '';
+}
+
+const quoteOr = (arr) => arr.filter(Boolean).map(t => '"' + String(t).replace(/"/g, '').trim() + '"').join(' OR ');
+
+function prefillBooleanBuilder(p) {
+  const skills = p.mustSkills.length ? p.mustSkills : p.niceSkills;
+  if (!p.titles.length || !skills.length) return false;
+  // The builder works from saved roles, so save this one as a custom role that is
+  // replaced on every prefill rather than piling up a new entry each time.
+  const key = 'custom_prefill';
+  const roles = getCustomRoles().filter(r => r.key !== key);
+  roles.unshift({ key, category: 'tech', label: `${p.roleTitle || 'Role'} (from ${p.source})`,
+    titles: quoteOr(p.titles), skills: quoteOr(skills) });
+  saveCustomRoles(roles);
+  document.getElementById('category').value = 'custom';
+  populateRoles();
+  document.getElementById('role').value = key;
+  // Only overwrite location/experience when the source actually has them, so a
+  // JD with no city doesn't wipe one the recruiter already typed.
+  const exp = parseExpRange(p.expRange);
+  const loc = searchableLocation(p.location);
+  if (loc) document.getElementById('location').value = loc;
+  if (exp.min != null) {
+    document.getElementById('minExp').value = exp.min;
+    document.getElementById('maxExp').value = exp.max ?? '';
+  }
+  generate();
+  showStatus('builder-status', 'success', `✓ Filled from ${p.source} and generated. Tweak anything above and click Generate Query again.`);
+  return true;
+}
+
+function prefillTalentData(p) {
   const set = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
-  set('cd-role', icp.roleTitle || '');
-  set('cd-must', (icp.mustHaveSkills || []).join(', '));
-  set('cd-nice', (icp.niceToHaveSkills || []).join(', '));
-  set('cd-exp', icp.experienceRange || '');
-  showStatus('cd-search-status', 'info', '✓ Prefilled from your finalized ICP - review and search when ready.');
+  set('cd-title', p.roleTitle);
+  set('cd-location', searchableLocation(p.location));
+  set('cd-must', p.mustSkills.join(', '));
+  set('cd-nice', p.niceSkills.join(', '));
+  set('cd-role', p.roleTitle);
+  set('cd-exp', p.expRange);
+  showStatus('cd-search-status', 'info', `✓ Filled from ${p.source} - review and search when ready.`);
+  return true;
+}
+
+function prefillGitHub(p) {
+  switchGithubMode('user');
+  const lang = firstGitHubLanguage([...p.mustSkills, ...p.niceSkills]);
+  const loc = searchableLocation(p.location);
+  if (lang) document.getElementById('gh-language').value = lang;
+  if (loc) document.getElementById('gh-location').value = loc;
+  showStatus('gh-search-status', 'info', lang || loc
+    ? `✓ Filled from ${p.source}${lang ? '' : ' (no programming language in the skills, so add one or a location before searching)'} - review and search when ready.`
+    : `No programming language or city in the ${p.source} details, so add one above before searching.`);
+  return true;
+}
+
+// JD Analyzer takes free text, so write the ICP out as a short JD. Skipped when
+// the box already has text: a real pasted JD is better input than this summary.
+function prefillJDAnalyzer(icp, overwrite) {
+  const box = document.getElementById('jd-input');
+  if (!box || (box.value.trim() && !overwrite)) return false;
+  box.value = [
+    `Role: ${icp.roleTitle || ''}${icp.seniority ? ' (' + icp.seniority + ')' : ''}`,
+    icp.location && `Location: ${icp.location}`,
+    icp.experienceRange && `Experience: ${icp.experienceRange}`,
+    (icp.mustHaveSkills || []).length && `Must-have skills: ${icp.mustHaveSkills.join(', ')}`,
+    (icp.niceToHaveSkills || []).length && `Nice-to-have skills: ${icp.niceToHaveSkills.join(', ')}`,
+    icp.teamContext && `Team: ${icp.teamContext}`,
+    icp.dealBreakers && `Deal-breakers: ${icp.dealBreakers}`,
+    icp.summary && `\n${icp.summary}`
+  ].filter(Boolean).join('\n');
+  return true;
+}
+
+function loadICP() {
+  try { return JSON.parse(localStorage.getItem('tt_icp') || 'null'); } catch (e) { return null; }
+}
+
+function prefillOneFromICP(tool) {
+  const icp = loadICP();
+  if (!icp) return;
+  const p = profileFromICP(icp);
+  switchSourcingSubTab(tool);
+  if (tool === 'builder' && !prefillBooleanBuilder(p)) {
+    showStatus('builder-status', 'error', '⚠ The Intake summary has no role title or skills to build from.');
+  }
+  if (tool === 'jd') prefillJDAnalyzer(icp, true);
+  if (tool === 'crustdata') prefillTalentData(p);
+  if (tool === 'github') prefillGitHub(p);
+}
+
+function prefillAllFromICP() {
+  const icp = loadICP();
+  if (!icp) return;
+  const p = profileFromICP(icp);
+  prefillJDAnalyzer(icp, false);
+  prefillTalentData(p);
+  prefillGitHub(p);
+  switchSourcingSubTab('builder');
+  if (!prefillBooleanBuilder(p)) {
+    showStatus('builder-status', 'error', '⚠ The Intake summary has no role title or skills to build from.');
+  } else {
+    showStatus('builder-status', 'success', '✓ All 4 tools are filled from Intake. The query below is ready, and JD Analyzer, TalentData and GitHub are filled too - switch tabs to review.');
+  }
+}
+
+function prefillFromJDAnalysis(tool) {
+  const p = profileFromJD(lastJdAnalysis);
+  if (!p) return;
+  switchSourcingSubTab(tool);
+  if (tool === 'builder' && !prefillBooleanBuilder(p)) {
+    showStatus('builder-status', 'error', '⚠ The analysis returned no titles or skills to build from.');
+  }
+  if (tool === 'crustdata') prefillTalentData(p);
+  if (tool === 'github') prefillGitHub(p);
+}
+
+function renderJdKeyInfo(parsed) {
+  const el = document.getElementById('res-keyinfo');
+  if (!el) return;
+  const chips = (arr) => (arr || []).filter(Boolean).map(t =>
+    `<span style="display:inline-block;padding:2px 9px;margin:2px 4px 2px 0;border-radius:12px;background:var(--surface2);border:1px solid var(--border);font-size:11.5px;">${esc(t)}</span>`
+  ).join('') || '<span style="color:var(--muted);">-</span>';
+  el.innerHTML = `
+    <div><b>Job titles in the market:</b> ${chips([parsed.jobTitle, ...(parsed.titles || [])].filter((t, i, a) => t && a.indexOf(t) === i))}</div>
+    <div><b>Must-have skills:</b> ${chips(parsed.mustSkills)}</div>
+    <div><b>Good-to-have skills:</b> ${chips(parsed.niceSkills)}</div>
+    ${parsed.expRange ? `<div><b>Experience:</b> ${esc(parsed.expRange)}</div>` : ''}`;
 }
 
 loadIntakeSettings();
