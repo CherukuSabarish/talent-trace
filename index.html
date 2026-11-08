@@ -1503,6 +1503,7 @@ textarea.form-area:focus{border-color:var(--accent);background:var(--surface);}
     <button class="btn btn-ghost" style="border-color:rgba(217,115,13,0.3);color:var(--ai);" onclick="openModal()">＋ Add Custom Role</button>
     <button class="btn btn-danger" onclick="clearBooleanBuilder()">🗑 Clear</button>
   </div>
+  <div style="font-size:10.5px;color:var(--muted);margin:-4px 0 10px;">📊 Google X-Ray, StackOverflow and GitHub open Google results. With the Talent Trace Chrome extension, those results go straight to your Google Sheet, tagged with the role you picked here. <span id="tt-ext-state"><a href="/setup.html" target="_blank" style="color:var(--accent2);">Get the extension</a></span></div>
   <div class="status" id="builder-status"></div>
 
   <!-- Outputs -->
@@ -1733,7 +1734,7 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
     <input id="cd-target-companies" placeholder='e.g. Google, Flipkart, Razorpay'>
     <label>📝 Other Things That Are Important</label>
     <textarea class="form-area" id="cd-notes" placeholder="Anything else worth remembering for this search - team context, must-avoid companies, visa constraints, notice period, etc."></textarea>
-    <div style="font-size:10px;color:var(--muted);margin-top:-10px;">Saved in this browser for next time · sent along on export, but your Sheet needs a "Notes" column (Apps Script v5 doesn't have one yet) for it to actually land anywhere</div>
+    <div style="font-size:10px;color:var(--muted);margin-top:-10px;">Saved in this browser for next time · sent along on export and saved in the "Search Notes" column (needs the v6 Sheet script, see Setup guide)</div>
   </div>
 
   <div class="btn-row">
@@ -1762,7 +1763,7 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
       <div class="card-title" style="color:var(--warn);">Send to Google Sheet</div>
       <span style="margin-left:auto;font-size:10px;color:var(--muted);">Same Apps Script webhook as the extension</span>
     </div>
-    <div class="section-hint">Export everything currently in Candidates to a tab in your tracking sheet, tagged with a role and experience range.</div>
+    <div class="section-hint">Export everything currently in Candidates to a tab in your tracking sheet, tagged with a role and experience range. First time? <a href="/setup.html" target="_blank" style="color:var(--accent2);">Set up the Sheet script and Chrome extension</a></div>
     <label>Google Sheet Apps Script URL</label>
     <div style="display:flex;gap:8px;margin-bottom:14px;">
       <input id="cd-webhook" placeholder="Paste Apps Script Web App URL..." style="margin-bottom:0;">
@@ -1904,7 +1905,7 @@ Example: We are looking for a Senior DevOps Engineer with 5+ years experience in
       <div class="card-title" style="color:var(--warn);">Send to Google Sheet</div>
       <span style="margin-left:auto;font-size:10px;color:var(--muted);">Same Apps Script webhook as the extension</span>
     </div>
-    <div class="section-hint">Export everything currently in Candidates to a tab in your tracking sheet, tagged with a role and experience range.</div>
+    <div class="section-hint">Export everything currently in Candidates to a tab in your tracking sheet, tagged with a role and experience range. First time? <a href="/setup.html" target="_blank" style="color:var(--accent2);">Set up the Sheet script and Chrome extension</a></div>
     <label>Google Sheet Apps Script URL</label>
     <div style="display:flex;gap:8px;margin-bottom:14px;">
       <input id="gh-webhook" placeholder="Paste Apps Script Web App URL..." style="margin-bottom:0;">
@@ -2592,6 +2593,7 @@ function saveTalentDataWebhook() {
   const url = document.getElementById('cd-webhook').value.trim();
   if (!url) { showStatus('cd-export-status', 'error', '⚠ Please enter your Apps Script Web App URL.'); return; }
   localStorage.setItem('tt_cd_webhook', url);
+  ttTellExtension('webhook', { url });
   showStatus('cd-export-status', 'success', '✓ Webhook URL saved.');
 }
 
@@ -2833,6 +2835,52 @@ function renderTalentDataResults() {
   wrap.innerHTML = '<div class="profile-cards">' + cards.slice().reverse().join('') + '</div>';
 }
 
+// Sends an export to the Google Sheet's Apps Script web app and returns its JSON
+// reply ({status, added, skipped, role} or {status:'error', message}).
+//
+// When the TalentTrace 2.0 Chrome extension is installed, the export goes through
+// it (extension/app-bridge.js → background.js). The extension can send your Google
+// sign-in along, which a web page can't - and that's required when the Sheet's
+// script is shared only with "Anyone within Akamai" (URLs with /a/macros/akamai.com/).
+// Without the extension it falls back to a direct call, which only works for
+// scripts shared with "Anyone".
+function sheetViaExtension(url, payload) {
+  return new Promise((resolve, reject) => {
+    const id = 'exp-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+    const timer = setTimeout(() => { window.removeEventListener('message', onMsg); reject(new Error('The Google Sheet took too long to answer. Check the Sheet - the rows may still have arrived.')); }, 120000);
+    function onMsg(ev) {
+      const d = ev.data;
+      if (ev.source !== window || !d || d.source !== 'talent-trace-extension' || d.type !== 'export-result' || d.id !== id) return;
+      clearTimeout(timer);
+      window.removeEventListener('message', onMsg);
+      if (d.ok) resolve(d.result); else reject(new Error(d.error || 'The extension could not send to the Sheet.'));
+    }
+    window.addEventListener('message', onMsg);
+    ttTellExtension('export', { id, url, payload });
+  });
+}
+
+async function sendToSheet(url, payload) {
+  if (document.documentElement.getAttribute('data-tt-extension')) return sheetViaExtension(url, payload);
+  if (/\/a\/macros\//.test(url)) {
+    throw new Error('This Sheet is on a company Google account, so exports need the TalentTrace 2.0 Chrome extension (it uses your sign-in). Install it from the Setup guide, then reload this page.');
+  }
+  let res;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      // text/plain, not application/json: a JSON content type makes the browser send a
+      // CORS "preflight" check first, which Apps Script web apps can't answer.
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+  } catch (e) {
+    throw new Error('Could not reach the Google Sheet script. Check the URL is deployed with "Who has access: Anyone", or install the TalentTrace 2.0 extension.');
+  }
+  try { return await res.json(); }
+  catch (e) { throw new Error('The Google Sheet script asked for a sign-in. Install the TalentTrace 2.0 extension (Setup guide) so exports use your Google sign-in.'); }
+}
+
 async function exportTalentDataToSheet() {
   const webhookUrl = document.getElementById('cd-webhook').value.trim() || localStorage.getItem('tt_cd_webhook');
   const roleName   = document.getElementById('cd-role').value.trim() || 'General';
@@ -2854,19 +2902,9 @@ async function exportTalentDataToSheet() {
   showStatus('cd-export-status', 'info', `⏳ Sending ${cdResults.length} profiles to "${roleName}" tab...`);
 
   try {
-    const res = await fetch(webhookUrl, {
-      method: 'POST',
-      // text/plain, not application/json: a JSON content type makes the browser send a
-      // CORS "preflight" check first, which Apps Script web apps can't answer, so the
-      // export was blocked before it ever reached the sheet. The body is still JSON,
-      // and the script reads it the same way via JSON.parse(e.postData.contents).
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      // mustHaves/niceHaves/companies/notes are extra context for a future Apps
-      // Script version - today's v5 sheet only has columns for the fields it always
-      // had, so it'll just ignore these until the sheet script is updated to use them.
-      body: JSON.stringify({ profiles: cdResults, role: roleName, expRange, mustHaves, niceHaves, companies, notes })
-    });
-    const result = await res.json();
+    // mustHaves/niceHaves/companies/notes land in their own columns with the
+    // TalentTrace 2.0 Sheet script (apps-script/Code.gs).
+    const result = await sendToSheet(webhookUrl, { profiles: cdResults, role: roleName, expRange, mustHaves, niceHaves, companies, notes });
     if (result.status === 'ok') {
       showStatus('cd-export-status', 'success',
         `✓ ${result.added} added to "${result.role}" · ${result.skipped} duplicates skipped`);
@@ -2874,13 +2912,20 @@ async function exportTalentDataToSheet() {
       showStatus('cd-export-status', 'error', '⚠ ' + (result.message || 'Unknown error'));
     }
   } catch(err) {
-    showStatus('cd-export-status', 'error', '⚠ Could not reach Apps Script. Check the URL is deployed as "Anyone can access".');
+    showStatus('cd-export-status', 'error', '⚠ ' + (err.message || 'Could not reach the Google Sheet script.'));
   } finally {
     btn.disabled = false; txt.textContent = '📊 Export All to Google Sheet'; sp.classList.remove('on');
   }
 }
 
 loadTalentDataSettings();
+
+// The Chrome extension marks the page when it's installed (see extension/app-bridge.js).
+setTimeout(() => {
+  const v = document.documentElement.getAttribute('data-tt-extension');
+  const el = document.getElementById('tt-ext-state');
+  if (v && el) el.innerHTML = '<span style="color:var(--success, #17663a);">✓ Extension connected (v' + esc(v) + ')</span> · <a href="/setup.html" target="_blank" style="color:var(--accent2);">Setup guide</a>';
+}, 1500);
 
 // ══════════════════════════════════════════════
 // GITHUB SEARCH - direct candidate search on GitHub
@@ -3036,11 +3081,14 @@ function saveGitHubWebhook() {
   const url = document.getElementById('gh-webhook').value.trim();
   if (!url) { showStatus('gh-export-status', 'error', '⚠ Please enter your Apps Script Web App URL.'); return; }
   localStorage.setItem('tt_gh_webhook', url);
+  ttTellExtension('webhook', { url });
   showStatus('gh-export-status', 'success', '✓ Webhook URL saved.');
 }
 
-// Maps a GitHub result into the flat profile shape the Apps Script sheet already
-// expects (same keys the TalentData tab exports), so no sheet changes are needed.
+// Maps a GitHub result into the flat profile shape the Apps Script sheet expects
+// (same keys the TalentData tab exports). sourceRepo/contributions/searchString
+// get their own columns with Apps Script v6 (apps-script/Code.gs); older
+// versions just ignore them.
 function githubProfileForSheet(p) {
   const emails = [];
   if (p.email) emails.push(p.email);
@@ -3048,7 +3096,7 @@ function githubProfileForSheet(p) {
     if (!emails.some(x => x.toLowerCase() === e.email.toLowerCase())) emails.push(e.email);
   });
   return {
-    source: 'GitHub',
+    source: p.sourceRepo ? 'GitHub (repo contributor)' : 'GitHub',
     name: p.name || p.login,
     jobTitle: '',                                   // GitHub has no job-title field
     company: (p.company || '').replace(/^@/, ''),
@@ -3059,6 +3107,9 @@ function githubProfileForSheet(p) {
     githubLogin: p.login,
     followers: p.followers,
     publicRepos: p.publicRepos,
+    sourceRepo: p.sourceRepo || '',
+    contributions: p.contributions ?? '',
+    searchString: p.sourceRepo ? 'Contributors of ' + p.sourceRepo : '',
     scrapedAt: new Date().toISOString()
   };
 }
@@ -3081,16 +3132,7 @@ async function exportGitHubToSheet() {
   showStatus('gh-export-status', 'info', `⏳ Sending ${ghResults.length} profiles to "${roleName}" tab...`);
 
   try {
-    const res = await fetch(webhookUrl, {
-      method: 'POST',
-      // text/plain, not application/json: a JSON content type makes the browser send a
-      // CORS "preflight" check first, which Apps Script web apps can't answer, so the
-      // export was blocked before it ever reached the sheet. The body is still JSON,
-      // and the script reads it the same way via JSON.parse(e.postData.contents).
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ profiles: ghResults.map(githubProfileForSheet), role: roleName, expRange })
-    });
-    const result = await res.json();
+    const result = await sendToSheet(webhookUrl, { profiles: ghResults.map(githubProfileForSheet), role: roleName, expRange });
     if (result.status === 'ok') {
       showStatus('gh-export-status', 'success',
         `✓ ${result.added} added to "${result.role}" · ${result.skipped} duplicates skipped`);
@@ -3098,7 +3140,7 @@ async function exportGitHubToSheet() {
       showStatus('gh-export-status', 'error', '⚠ ' + (result.message || 'Unknown error'));
     }
   } catch(err) {
-    showStatus('gh-export-status', 'error', '⚠ Could not reach Apps Script. Check the URL is deployed as "Anyone can access".');
+    showStatus('gh-export-status', 'error', '⚠ ' + (err.message || 'Could not reach the Google Sheet script.'));
   } finally {
     btn.disabled = false; txt.textContent = '📊 Export All to Google Sheet'; sp.classList.remove('on');
   }
@@ -3828,15 +3870,35 @@ function openLinkedIn() {
   window.open('https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(kw), '_blank');
 }
 
+// Tells the Talent Trace Chrome extension (if it's installed) about things it can
+// use on the Google results page: the Sheet webhook, and which role/experience a
+// just-opened X-ray search belongs to, so its rows land in the right Sheet tab.
+// Harmless no-op when the extension isn't installed.
+function ttTellExtension(type, data) {
+  try { window.postMessage(Object.assign({ source: 'talent-trace-app', type }, data || {}), location.origin); } catch (e) {}
+}
+
+function builderXrayContext(query, platform) {
+  const sel = document.getElementById('role');
+  const opt = sel && sel.selectedIndex > 0 ? sel.options[sel.selectedIndex] : null;
+  const role = opt ? opt.text.replace(/^[^A-Za-z0-9]+/, '').trim() : '';
+  const min = document.getElementById('minExp').value.trim();
+  const max = document.getElementById('maxExp').value.trim();
+  const expRange = min && max ? `${min}-${max} years` : min ? `${min}+ years` : max ? `up to ${max} years` : '';
+  ttTellExtension('xray-open', { query, platform, role, expRange });
+}
+
 function openGoogle() {
   const xray = document.getElementById('xray').value;
   if (!xray) { showStatus('builder-status','warn','⚠ Generate a query first.'); return; }
+  builderXrayContext(xray, 'LinkedIn');
   window.open('https://www.google.com/search?q=' + encodeURIComponent(xray), '_blank');
 }
 
 function openStackOverflow() {
   const q = document.getElementById('so-query').value;
   if (!q) { showStatus('builder-status','warn','⚠ Generate a query first.'); return; }
+  builderXrayContext(q, 'Stack Overflow');
   window.open('https://www.google.com/search?q=' + encodeURIComponent(q), '_blank');
 }
 
@@ -3844,6 +3906,7 @@ function openGitHub() {
   const q = document.getElementById('gh-query').value;
   if (!q) { showStatus('builder-status','warn','⚠ Generate a query first.'); return; }
   // Open via Google so Chrome Extension can scrape profiles and export to Sheets
+  builderXrayContext(q, 'GitHub');
   window.open('https://www.google.com/search?q=' + encodeURIComponent(q), '_blank');
 }
 
