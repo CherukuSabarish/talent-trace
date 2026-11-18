@@ -3832,32 +3832,110 @@ function generate() {
 
   document.getElementById('output').value = q;
   document.getElementById('xray').value = `site:linkedin.com/in ${q}`;
-  document.getElementById('so-query').value = `site:stackoverflow.com/users ${buildSOQuery(rd, mandatory)}`;
-  document.getElementById('gh-query').value = buildGHQuery(rd, mandatory, document.getElementById('location').value);
+  const builderLoc = document.getElementById('location').value;
+  document.getElementById('so-query').value = buildSOXray(rd.titles, rd.skills, mandatory, builderLoc);
+  document.getElementById('gh-query').value = buildGHXray(rd.titles, rd.skills, mandatory, builderLoc);
 
   showStatus('builder-status','success','✓ Query generated - copy it above or open a source directly.');
 }
 
-function buildSOQuery(rd, mandatory) {
-  // Extract first 2-3 skill terms from role skills for SO (keep it tight)
-  const skillMatch = rd.skills.match(/"([^"]+)"/g) || [];
-  const topSkills = skillMatch.slice(0, 3).join(' OR ');
-  const mandatoryMatch = mandatory ? mandatory.match(/"([^"]+)"/g) || [] : [];
-  const mandTerms = mandatoryMatch.slice(0, 2).join(' ');
-  return [topSkills, mandTerms].filter(Boolean).join(' ');
+// ── GitHub / Stack Overflow X-ray strings ──
+// Profiles on these sites are short bios ("AppSec engineer · SAST/DAST ·
+// Bengaluru"), so long JD phrases in quotes ("Vulnerability management
+// lifecycle") match nothing. These helpers boil skills and titles down to the
+// short keywords people actually write, and keep the AND list short.
+const XRAY_FILLER = /\b(implementation|implementations|implementing|lifecycle|life cycle|tooling|tools|experience|experienced|knowledge|understanding|expertise|proficiency|proficient|hands[- ]on|strong|solid|deep|good|excellent|working|familiarity|familiar|exposure|ability|skills?|practices?|principles?|concepts?|fundamentals|frameworks?|scanning|automation|integration|programming|languages?|years?|plus|etc|with|using|of|in|the|for|to|on|across|including|such as)\b/gi;
+const XRAY_STOP = new Set(['security','development','software','engineering','cloud','design','testing','systems','system','data','communication','management','analysis','process','processes','team','leadership','with','of','in','the','and','or','for','using','to','a','an','on','across']);
+// Extra words profiles in a field commonly use, added when the role is in that field.
+const XRAY_RELATED = [
+  { test: /secur|sast|dast|vapt|pentest|penetration|appsec|vulnerab|ssdlc|soc\b|siem/i, add: ['AppSec', 'DevSecOps'] },
+  { test: /devops|ci\/cd|terraform|kubernetes|sre\b|site reliability/i, add: ['DevOps', 'Kubernetes'] },
+  { test: /machine learning|\bml\b|deep learning|llm|nlp|pytorch|tensorflow/i, add: ['Machine Learning', 'PyTorch'] },
+  { test: /data engineer|spark|airflow|etl|databricks|snowflake/i, add: ['Spark', 'Airflow'] },
+];
+
+function xrayTerms(text) {
+  // Accepts a boolean list ("A" OR "B") or plain phrases; returns raw phrases.
+  return String(text || '').split(/\s+OR\s+|\s+AND\s+|"\s*,|\n/i)
+    .map(s => s.replace(/"/g, ' ').replace(/\s+/g, ' ').trim()).filter(Boolean);
 }
 
-function buildGHQuery(rd, mandatory, loc) {
-  // Target individual GitHub profile pages
-  // -inurl excludes org pages, repo pages, gist pages, follower list pages
-  const skillMatch = rd.skills.match(/"([^"]+)"/g) || [];
-  const topSkills = skillMatch.slice(0, 3).map(s => s).join(' OR ');
-  const mandatoryMatch = mandatory ? mandatory.match(/"([^"]+)"/g) || [] : [];
-  const mandTerms = mandatoryMatch.slice(0, 2).join(' OR ');
-  const combined = [topSkills, mandTerms].filter(Boolean).join(' OR ');
-  const indiaLoc = '"India" OR "Bangalore" OR "Mumbai" OR "Delhi" OR "Hyderabad" OR "Pune" OR "Chennai"';
-  // "block or report user" = unique text on every GitHub individual profile page only
-  return `site:github.com "block or report user" (${combined || topSkills}) (${indiaLoc})`;
+function xrayKeywords(phrases, max) {
+  const out = [], seen = new Set();
+  const push = (k) => {
+    k = k.replace(/^[-–:.\s]+|[-–:.\s]+$/g, '').trim();
+    const key = k.toLowerCase();
+    if (key === 'go') k = 'Golang';
+    if (!k || k.length < 2 || seen.has(k.toLowerCase()) || XRAY_STOP.has(key)) return;
+    seen.add(k.toLowerCase()); out.push(k);
+  };
+  for (const raw of phrases) {
+    // "Security tooling (SAST, DAST, SCA)" -> ["Security tooling", "SAST", "DAST", "SCA"]
+    for (let frag of String(raw).split(/[(),\/;|&]| and | or /i)) {
+      frag = frag.replace(XRAY_FILLER, ' ').replace(/\s+/g, ' ').trim();
+      if (!frag) continue;
+      const words = frag.split(' ');
+      if (words.length <= 2 && frag.length <= 24) { push(frag); continue; }
+      // Long phrase: keep only acronym-like words (SSDLC, IaC, AWS, OWASP).
+      words.filter(w => /[A-Z].*[A-Z0-9+#]|^[A-Z]{2,}/.test(w)).forEach(push);
+    }
+  }
+  return out.slice(0, max);
+}
+
+function xrayTitles(titlesText, max) {
+  const seen = new Set(), out = [];
+  for (let t of xrayTerms(titlesText)) {
+    t = t.replace(/[()]/g, ' ').replace(/\b(senior|sr\.?|junior|jr\.?|lead|principal|staff|associate|head of|chief|i{1,3}|iv|[0-9]+)\b/gi, ' ')
+         .replace(/\s+/g, ' ').trim();
+    const words = t.split(' ');
+    if (!t || words.length > 3) continue;
+    const key = t.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key); out.push(t);
+  }
+  return out.slice(0, max);
+}
+
+function xrayOr(terms) {
+  return terms.map(t => /\s/.test(t) ? `"${t}"` : t).join(' OR ');
+}
+
+function xrayLocation(loc) {
+  const l = String(loc || '').toLowerCase().trim();
+  const alias = { bangalore: 'Bengaluru', bengaluru: 'Bangalore', gurgaon: 'Gurugram', gurugram: 'Gurgaon', bombay: 'Mumbai', mumbai: 'Bombay', madras: 'Chennai', chennai: 'Madras' };
+  const city = searchableLocation(loc);
+  if (!city || l.includes('india')) return '(India OR Bangalore OR Bengaluru OR Hyderabad OR Pune OR Chennai)';
+  const other = alias[city.toLowerCase()];
+  const fmt = (c) => /\s/.test(c) ? `"${c}"` : c;
+  return '(' + [city, other].filter(Boolean).map(fmt).join(' OR ') + ')';
+}
+
+// One keyword list for both sites: role words + short skills + field words.
+function xrayKeywordGroup(titlesText, skillsText, mandatoryText) {
+  const titles = xrayTitles(titlesText, 2);
+  const skills = xrayKeywords([...xrayTerms(mandatoryText), ...xrayTerms(skillsText)], 5);
+  const all = [titlesText, skillsText, mandatoryText].join(' ');
+  const related = XRAY_RELATED.filter(r => r.test.test(all)).flatMap(r => r.add);
+  const seen = new Set(), terms = [];
+  for (const t of [...skills, ...related, ...titles]) {
+    const k = t.toLowerCase();
+    if (!seen.has(k)) { seen.add(k); terms.push(t); }
+  }
+  return terms.slice(0, 8);
+}
+
+function buildSOXray(titlesText, skillsText, mandatoryText, loc) {
+  const terms = xrayKeywordGroup(titlesText, skillsText, mandatoryText);
+  // stackoverflow.com/users/<id>/<name> pages are the profiles.
+  return `site:stackoverflow.com/users (${xrayOr(terms)}) ${xrayLocation(loc)}`;
+}
+
+function buildGHXray(titlesText, skillsText, mandatoryText, loc) {
+  const terms = xrayKeywordGroup(titlesText, skillsText, mandatoryText);
+  // "followers" + "following" only appear together on personal profile pages,
+  // which keeps out repos, code files and organisation pages.
+  return `site:github.com "followers" "following" (${xrayOr(terms)}) ${xrayLocation(loc)}`;
 }
 
 function openLinkedIn() {
@@ -4144,9 +4222,7 @@ Analyze this Job Description and return ONLY a JSON object (no markdown, no expl
   "niceSkills": ["top", "3-4", "good-to-have", "skills"],
   "expRange": "e.g. 3-7 years",
   "booleanString": "full LinkedIn boolean search string using titles AND skills",
-  "xrayLinkedIn": "site:linkedin.com/in boolean string",
-  "xraySO": "site:stackoverflow.com/users boolean string with top tech skills only",
-  "xrayGitHub": "GitHub people search URL string - use this exact format: site:github.com/in OR just use GitHub people search: the string should target user profile pages NOT repos. Use format: site:github.com (\"followers\" OR \"repositories\") AND (skill1 OR skill2) - keep it short, max 3 skills"
+  "xrayLinkedIn": "site:linkedin.com/in boolean string"
 }
 
 JD:
@@ -4183,21 +4259,12 @@ ${jd.substring(0, 6000)}`;
     // Populate boolean results
     document.getElementById('res-boolean').textContent = parsed.booleanString || '-';
     document.getElementById('res-xray').textContent    = parsed.xrayLinkedIn  || '-';
-    document.getElementById('res-so').textContent      = parsed.xraySO        || '-';
-
-    // GitHub X-Ray - target INDIVIDUAL profile pages only
-    // Key insight: individual profile URLs = github.com/username (no sub-path)
-    // Exclude: /orgs/ /repos/ /followers /gists /blob /tree /commit
-    const ghSkillsArr = (parsed.mustSkills || []).slice(0, 3).filter(s => s && s.trim());
-    const ghSkillsStr = ghSkillsArr.length > 0
-      ? ghSkillsArr.map(s => '"' + s.trim() + '"').join(' OR ')
-      : (parsed.titles || []).slice(0,2).map(s => '"' + s.trim() + '"').join(' OR ');
-    // "block or report user" text appears ONLY on individual GitHub profile pages
-    const ghTitlesStr = (parsed.titles || []).slice(0,2).map(s => '"' + s.trim() + '"').join(' OR ');
-    const ghRoleStr = ghTitlesStr || ghSkillsStr;
-    const ghQuery = 'site:github.com "block or report user" (' + ghRoleStr + ') (' + ghSkillsStr + ') ("India" OR "Bangalore" OR "Mumbai" OR "Hyderabad" OR "Pune" OR "Chennai" OR "Delhi")';
-    console.log('GitHub query:', ghQuery);
-    document.getElementById('res-gh').textContent = ghQuery;
+    // Stack Overflow / GitHub: built from short keywords, not long JD phrases
+    // (see buildSOXray / buildGHXray), so the searches actually return profiles.
+    const jdTitles = quoteOr(parsed.titles || []);
+    const jdSkills = quoteOr([...(parsed.mustSkills || []), ...(parsed.niceSkills || [])]);
+    document.getElementById('res-so').textContent = buildSOXray(jdTitles, jdSkills, '', '');
+    document.getElementById('res-gh').textContent = buildGHXray(jdTitles, jdSkills, '', '');
 
     // Step 2: Interview Questions
     document.getElementById('jd-loading-msg').textContent = 'Generating interview questions...';
